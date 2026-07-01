@@ -1,136 +1,162 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <title>連續點擊小遊戲</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      background: #222;
-      color: #fff;
-    }
+<meta charset="UTF-8">
+<title>連續點擊小遊戲</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-    .top-bar {
-      margin-top: 20px;
-      display: flex;
-      gap: 40px;
-      font-size: 1.2rem;
-    }
+<style>
+  body {
+    font-family: sans-serif;
+    background: #222;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    user-select: none;
+  }
 
-    .click-area {
-      margin-top: 40px;
-      width: 300px;
-      height: 300px;
-      background: #444;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.1s, transform 0.1s;
-    }
+  .top-bar {
+    margin-top: 20px;
+    font-size: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-    .click-area:active {
-      background: #666;
-      transform: scale(0.98);
-    }
+  .click-area {
+    margin-top: 30px;
+    width: 80vw;
+    height: 80vw;
+    max-width: 350px;
+    max-height: 350px;
+    background: #444;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: background 0.1s, transform 0.1s;
+  }
 
-    .bottom-bar {
-      margin-top: 40px;
-    }
+  .click-area:active {
+    background: #666;
+    transform: scale(0.97);
+  }
 
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      background: #ff9800;
-      color: #222;
-    }
+  .bottom-bar {
+    margin-top: 30px;
+  }
 
-    button:disabled {
-      background: #777;
-      cursor: not-allowed;
-    }
-  </style>
+  button {
+    padding: 14px 28px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: #ff9800;
+    color: #222;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    background: #777;
+    cursor: not-allowed;
+  }
+
+  .result {
+    margin-top: 20px;
+    font-size: 1.4rem;
+    color: #ffeb3b;
+  }
+</style>
 </head>
 <body>
-  <div class="top-bar">
-    <div>倒數時間：<span id="time">10</span> 秒</div>
-    <div>連點次數：<span id="count">0</span></div>
-  </div>
 
-  <div class="click-area" id="clickArea">
-    點我！
-  </div>
+<div class="top-bar">
+  <div>倒數時間：<span id="time">10</span> 秒</div>
+  <div>連點次數：<span id="count">0</span></div>
+  <div>每秒點擊數（CPS）：<span id="cps">0</span></div>
+</div>
 
-  <div class="bottom-bar">
-    <button id="startBtn">開始 / 繼續</button>
-  </div>
+<div class="click-area" id="clickArea">點我！</div>
 
-  <script>
-    const timeEl = document.getElementById('time');
-    const countEl = document.getElementById('count');
-    const clickArea = document.getElementById('clickArea');
-    const startBtn = document.getElementById('startBtn');
+<div class="bottom-bar">
+  <button id="startBtn">開始 / 繼續</button>
+</div>
 
-    let totalTime = 10;      // 總秒數
-    let remainingTime = totalTime;
-    let count = 0;
-    let timer = null;
-    let isRunning = false;
+<div class="result" id="result"></div>
 
-    function updateUI() {
-      timeEl.textContent = remainingTime;
-      countEl.textContent = count;
+<script>
+  const timeEl = document.getElementById("time");
+  const countEl = document.getElementById("count");
+  const cpsEl = document.getElementById("cps");
+  const clickArea = document.getElementById("clickArea");
+  const startBtn = document.getElementById("startBtn");
+  const resultEl = document.getElementById("result");
+
+  let totalTime = 10;
+  let remainingTime = totalTime;
+  let count = 0;
+  let timer = null;
+  let isRunning = false;
+
+  function updateUI() {
+    timeEl.textContent = remainingTime;
+    countEl.textContent = count;
+    cpsEl.textContent = (count / (totalTime - remainingTime)).toFixed(1);
+  }
+
+  function getComment(cps) {
+    if (cps >= 10) return "⚡ 手速爆炸！你是閃電俠";
+    if (cps >= 6) return "🔥 手速很快！不錯喔";
+    if (cps >= 3) return "🙂 手速普通，再加油";
+    return "🐌 手速偏慢，多練練吧";
+  }
+
+  function startGame() {
+    if (isRunning) return;
+
+    if (remainingTime <= 0) {
+      remainingTime = totalTime;
+      count = 0;
+      resultEl.textContent = "";
     }
 
-    function startGame() {
-      if (isRunning) return;
-      if (remainingTime <= 0) {
-        // 如果時間已經用完，重新開始
-        remainingTime = totalTime;
-        count = 0;
-      }
+    isRunning = true;
+    startBtn.disabled = true;
+    clickArea.textContent = "狂點！";
 
-      isRunning = true;
-      startBtn.disabled = true;
-
-      timer = setInterval(() => {
-        remainingTime--;
-        updateUI();
-
-        if (remainingTime <= 0) {
-          clearInterval(timer);
-          isRunning = false;
-          startBtn.disabled = false;
-          clickArea.textContent = '時間到！';
-        }
-      }, 1000);
-
-      clickArea.textContent = '狂點！';
-    }
-
-    function handleClickArea() {
-      if (!isRunning) return;
-      count++;
+    timer = setInterval(() => {
+      remainingTime--;
       updateUI();
-    }
 
-    startBtn.addEventListener('click', startGame);
-    clickArea.addEventListener('click', handleClickArea);
+      if (remainingTime <= 0) {
+        clearInterval(timer);
+        isRunning = false;
+        startBtn.disabled = false;
+        clickArea.textContent = "時間到！";
 
-    // 初始 UI
+        const cpsFinal = (count / totalTime).toFixed(1);
+        resultEl.textContent = `你的 CPS：${cpsFinal}　→　${getComment(cpsFinal)}`;
+      }
+    }, 1000);
+  }
+
+  function handleClickArea() {
+    if (!isRunning) return;
+    count++;
     updateUI();
-  </script>
+  }
+
+  startBtn.addEventListener("click", startGame);
+  clickArea.addEventListener("click", handleClickArea);
+  clickArea.addEventListener("touchstart", handleClickArea);
+
+  updateUI();
+</script>
+
 </body>
 </html>
