@@ -3,270 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極簡方塊躲避戰</title>
+    <title>我的 JS 小遊戲時光屋</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        /* 基礎變數設定，方便你以後改顏色 */
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --primary-color: #4a90e2;
+            --hover-transform: translateY(-5px);
         }
 
         body {
-            background-color: #f5f5f5;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
-            color: #333;
         }
 
-        #ui-container {
+        /* 頂部標題區 */
+        header {
             text-align: center;
-            margin-bottom: 20px;
-            width: 400px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 40px 20px;
         }
 
-        .score-box {
-            font-size: 1.2rem;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-
-        #game-container {
-            position: relative;
-            width: 400px;
-            height: 500px;
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            overflow: hidden;
-            cursor: none;
-        }
-
-        #player {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #333;
-            border-radius: 2px;
-            bottom: 30px;
-            left: 190px;
-            transition: transform 0.1s ease;
-        }
-
-        .obstacle {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #bbbbbb;
-            border-radius: 2px;
-        }
-
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 400;
-            margin-bottom: 10px;
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #2c3e50;
             letter-spacing: 2px;
         }
 
-        p {
+        header p {
+            margin: 10px 0 0 0;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        /* 遊戲方塊網格容器 */
+        .game-grid {
+            display: grid;
+            /* 自動填滿，每個方塊最小 280px，最大均分 */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            width: 90%;
+            padding: 20px 0 60px 0;
+        }
+
+        /* 單個遊戲方塊連結 */
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* 滑鼠懸停特效 */
+        .game-card:hover {
+            transform: var(--hover-transform);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+
+        /* 遊戲縮圖預留區 */
+        .game-image {
+            height: 160px;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 給不同方塊一點隨機的亮色主題（可自由修改或換成圖片） */
+        .card-1 .game-image { background-color: #ff7675; }
+        .card-2 .game-image { background-color: #74b9ff; }
+        .card-3 .game-image { background-color: #55efc4; }
+        .card-4 .game-image { background-color: #ffeaa7; }
+        .card-5 .game-image { background-color: #a29bfe; }
+        .card-6 .game-image { background-color: #fab1a0; }
+
+        /* 遊戲文字介紹區 */
+        .game-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .game-title {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+            color: #2d3436;
+            font-weight: bold;
+        }
+
+        .game-desc {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #636e72;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        /* 進入遊戲的小標籤 */
+        .game-action {
+            margin-top: 15px;
             font-size: 0.9rem;
-            color: #888;
-            margin-bottom: 25px;
-        }
-
-        button {
-            padding: 10px 24px;
-            background-color: #333;
-            color: #fff;
-            border: none;
-            border-radius: 2px;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #555;
-        }
-
-        .hide {
-            opacity: 0;
-            pointer-events: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-align: right;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-container">
-        <div class="score-box">SCORE: <span id="score">0</span></div>
-        <div class="score-box">BEST: <span id="best-score">0</span></div>
-    </div>
+    <header>
+        <h1>JS 遊戲大廳</h1>
+        <p>點選下方方塊，開啟你的遊戲冒險！</p>
+    </header>
 
-    <div id="game-container">
-        <div id="player"></div>
-        
-        <div id="overlay">
-            <h1 id="title">MINIMAL DODGE</h1>
-            <p id="subtitle">左右移動滑鼠以躲避下落的方塊</p>
-            <button id="start-btn">START</button>
-        </div>
-    </div>
+    <main class="game-grid">
 
-    <script>
-        const container = document.getElementById('game-container');
-        const player = document.getElementById('player');
-        const scoreDisplay = document.getElementById('score');
-        const bestScoreDisplay = document.getElementById('best-score');
-        const overlay = document.getElementById('overlay');
-        const startBtn = document.getElementById('start-btn');
-        const title = document.getElementById('title');
-        const subtitle = document.getElementById('subtitle');
+        <a href="clickit.html" class="game-card card-1">
+            <div class="game-image">👆</div>
+            <div class="game-info">
+                <div class="game-title">單人連擊練習</div>
+                <div class="game-desc">加強你的遊戲指力！</div>
+                <div class="game-action">開始遊戲 →</div>
+            </div>
+        </a>
 
-        let gameActive = false;
-        let score = 0;
-        let bestScore = 0;
-        let obstacles = [];
-        let spawnInterval;
-        let gameLoopId;
-        let playerX = 190;
-        let obstacleSpeed = 4;
-        let spawnRate = 400; // 毫秒
+        <a href="#" class="game-card card-2">
+            <div class="game-image">🧱</div>
+            <div class="game-info">
+                <div class="game-title">俄羅斯方塊</div>
+                <div class="game-desc">經典消除遊戲，挑戰你的反應與空間堆疊邏輯，看看你能拿幾分。</div>
+                <div class="game-action">開始遊戲 →</div>
+            </div>
+        </a>
 
-        // 監聽滑鼠移動
-        container.addEventListener('mousemove', (e) => {
-            if (!gameActive) return;
-            const rect = container.getBoundingClientRect();
-            // 計算滑鼠在遊戲區域內的相對 X 座標，並讓方塊中心對準滑鼠
-            playerX = e.clientX - rect.left - 10;
-            
-            // 邊界限制
-            if (playerX < 0) playerX = 0;
-            if (playerX > 380) playerX = 380;
-            
-            player.style.left = playerX + 'px';
-        });
+        <a href="#" class="game-card card-3">
+            <div class="game-image">❌</div>
+            <div class="game-info">
+                <div class="game-title">井字棋 (OOXX)</div>
+                <div class="game-desc">雙人對戰或與超強 AI 進行對決，先連成一線的人就贏了！</div>
+                <div class="game-action">開始遊戲 →</div>
+            </div>
+        </a>
 
-        // 開始遊戲
-        startBtn.addEventListener('click', startGame);
+        <a href="#" class="game-card card-4">
+            <div class="game-image">🔢</div>
+            <div class="game-info">
+                <div class="game-title">2048</div>
+                <div class="game-desc">滑動方塊合併相同數字，想辦法湊出傳說中的「2048」方塊。</div>
+                <div class="game-action">開始遊戲 →</div>
+            </div>
+        </a>
 
-        function startGame() {
-            // 初始化數據
-            score = 0;
-            obstacleSpeed = 4;
-            spawnRate = 400;
-            scoreDisplay.textContent = score;
-            
-            // 清除舊障礙物
-            obstacles.forEach(obs => obs.element.remove());
-            obstacles = [];
+        <a href="#" class="game-card card-5">
+            <div class="game-image">💣</div>
+            <div class="game-info">
+                <div class="game-title">經典踩地雷</div>
+                <div class="game-desc">考驗邏輯與運氣，點開所有安全方塊並插旗標記出所有地雷。</div>
+                <div class="game-action">開始遊戲 →</div>
+            </div>
+        </a>
 
-            // 隱藏選單
-            overlay.classList.add('hide');
-            gameActive = true;
+        <a href="#" class="game-card card-6">
+            <div class="game-image">❓</div>
+            <div class="game-info">
+                <div class="game-title">神秘新遊戲</div>
+                <div class="game-desc">新遊戲正在緊鑼密鼓開發中，敬請期待全新玩法上線！</div>
+                <div class="game-action">開始遊戲 →</div>
+            </div>
+        </a>
 
-            // 啟動生成與遊戲主循環
-            clearInterval(spawnInterval);
-            cancelAnimationFrame(gameLoopId);
-            
-            spawnObstacles();
-            gameLoop();
-        }
-
-        // 動態調整難度並生成障礙物
-        function spawnObstacles() {
-            spawnInterval = setInterval(() => {
-                if (!gameActive) return;
-
-                const obsElement = document.createElement('div');
-                obsElement.classList.add('obstacle');
-                
-                const x = Math.random() * 380;
-                obsElement.style.left = x + 'px';
-                obsElement.style.top = '0px';
-                container.appendChild(obsElement);
-
-                obstacles.push({
-                    element: obsElement,
-                    x: x,
-                    y: 0
-                });
-
-                // 隨著分數提高難度
-                if (score > 0 && score % 10 === 0 && obstacleSpeed < 10) {
-                    obstacleSpeed += 0.5;
-                }
-            }, spawnRate);
-        }
-
-        // 遊戲主循環 (處理移動與碰撞偵測)
-        function gameLoop() {
-            if (!gameActive) return;
-
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                let obs = obstacles[i];
-                obs.y += obstacleSpeed;
-                obs.element.style.top = obs.y + 'px';
-
-                // 碰撞偵測 (玩家固定在 bottom: 30px，即 y = 450 ~ 470)
-                if (obs.y >= 430 && obs.y <= 470) {
-                    if (obs.x + 20 > playerX && obs.x < playerX + 20) {
-                        gameOver();
-                        return;
-                    }
-                }
-
-                // 超出邊界，得分並移除
-                if (obs.y > 500) {
-                    obs.element.remove();
-                    obstacles.splice(i, 1);
-                    score++;
-                    scoreDisplay.textContent = score;
-                }
-            }
-
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
-
-        // 遊戲結束
-        function gameOver() {
-            gameActive = false;
-            clearInterval(spawnInterval);
-            cancelAnimationFrame(gameLoopId);
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestScoreDisplay.textContent = bestScore;
-            }
-
-            title.textContent = "GAME OVER";
-            subtitle.textContent = `最終得分：${score}`;
-            startBtn.textContent = "TRY AGAIN";
-            overlay.classList.remove('hide');
-        }
-    </script>
-</body>
+    </main>
+    </body>
 </html>
