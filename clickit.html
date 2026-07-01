@@ -152,8 +152,16 @@
   }
 
   startBtn.addEventListener("click", startGame);
-  clickArea.addEventListener("click", handleClickArea);
-  clickArea.addEventListener("touchstart", handleClickArea);
+  // 手機用 touchstart，電腦用 click
+  if ("ontouchstart" in window) {
+    clickArea.addEventListener("touchstart", (e) => {
+      e.preventDefault(); // 防止觸發 click
+      handleClickArea();
+    });
+  } else {
+    clickArea.addEventListener("click", handleClickArea);
+  }
+
 
   updateUI();
 </script>
