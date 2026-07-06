@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji 倉庫番：勇者救公主 (10關完整版)</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #111;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #ui-panel {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin: 5px 0;
+            color: #ffcc00;
+            font-size: 24px;
+        }
+
+        .info {
+            margin: 2px 0;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .highlight {
+            color: #55ff55;
+            font-weight: bold;
+        }
+
+        /* 遊戲舞台 */
+        #game-stage {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            border: 4px solid #444;
+            background-color: #222;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 地圖靜態底層 */
+        #map-layer {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            position: absolute;
+            z-index: 1;
+        }
+
+        /* 動態物件圖層 (勇者與箱子) */
+        #objects-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .tile {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background-color: #1a1a1a;
+            border: 1px solid #151515;
+            box-sizing: border-box;
+        }
+
+        .tile.wall {
+            background-color: #333;
+        }
+
+        /* 動態平滑滑動元件 */
+        .sprite {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            /* 0.2秒平滑平移 */
+            transition: left 0.2s linear, top 0.2s linear;
+        }
+
+        /* 結局畫面樣式 */
+        #ending-screen {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #ending-screen h2 {
+            color: #ff3366;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        #ending-screen p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ui-panel">
+        <h1>勇者與魔宮寶箱 🏰</h1>
+        <div class="info">關卡: <span id="current-level-val" class="highlight">1</span> / 10</div>
+        <div class="info">⌨️ 控制：【方向鍵】移動 | <span class="highlight">【 R 】鍵重置本關</span></div>
+    </div>
+
+    <div id="game-stage">
+        <div id="ending-screen">
+            <h2>❤️ 結局：執子之手 ❤️</h2>
+            <p>🤴 勇者克服了魔宮的 10 道機關...<br>
+                👸 終於在深淵中救出了被囚禁的公主！<br><br>
+                <span style="font-size: 50px;">👑 👨‍❤️‍👨 👑</span><br><br>
+                感謝遊玩！王國恢復了和平。
+            </p>
+        </div>
+        <div id="map-layer"></div>
+        <div id="objects-layer"></div>
+    </div>
+
+    <script>
+        // 元素定義
+        const E_FLOOR = " ", E_WALL = "🌲", E_TARGET = "🧙", E_BOX = "📜", E_BOX_TARGET = "💎", E_PLAYER = "🤴";
+        const T_FLOOR = 0, T_WALL = 1, T_TARGET = 2;
+
+        // 全域遊戲狀態
+        let currentLevel = 0;
+        let isMoving = false;
+        let activeKey = null;
+        let playerPos = { x: 0, y: 0 };
+        let boxes = []; // 存放目前關卡所有箱子的陣列 [{id: 0, x: 1, y: 2, onTarget: false}]
+
+        // 10 個由淺入深的 8x8 關卡設計 (1=牆, 0=空地, 2=魔法陣目標)
+        // P=玩家起點, B=箱子起點
+        const levels = [
+            // Level 1: 基礎教學
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 2, 1], 
+                    [1, 1, 0, 0, 0, 0, 0, 1], 
+                    [1, 1, 0, 1, 0, 1, 0, 1], 
+                    [1, 1, 0, 0, 0, 0, 0, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 2, y: 4 }, b: [{ x: 3, y: 2 }] },
+            // Level 2: 雙箱直線
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 0, 0, 0, 0, 0, 2, 1], 
+                    [1, 0, 1, 1, 0, 1, 1, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 0, 1, 0, 0, 1, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 2, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 2, y: 3 }, { x: 4, y: 3 }] },
+            // Level 3: 拐角練習
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 0, 0, 0, 1, 1, 1, 1], 
+                    [1, 0, 1, 0, 0, 0, 1, 1], 
+                    [1, 0, 0, 0, 0, 0, 1, 1], 
+                    [1, 1, 1, 0, 0, 2, 1, 1], 
+                    [1, 1, 1, 1, 1, 2, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 3, y: 2 }, { x: 4, y: 3 }] },
+            // Level 4: 狹窄通道
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 2, 0, 0, 0, 0, 2, 1], 
+                    [1, 1, 0, 1, 0, 1, 1, 1], 
+                    [1, 1, 0, 0, 0, 0, 0, 1], 
+                    [1, 1, 0, 1, 0, 1, 0, 1], 
+                    [1, 1, 0, 0, 0, 1, 0, 1], 
+                    [1, 1, 1, 0, 0, 0, 0, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 4, y: 1 }, b: [{ x: 2, y: 3 }, { x: 5, y: 3 }] },
+            // Level 5: 經典十字交叉
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 0, 0, 2, 1, 1, 1], 
+                    [1, 2, 0, 0, 0, 0, 1, 1], 
+                    [1, 0, 0, 1, 0, 0, 1, 1], 
+                    [1, 0, 0, 0, 0, 2, 1, 1], 
+                    [1, 1, 2, 0, 0, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 2, y: 2 }, b: [{ x: 3, y: 2 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 3, y: 4 }] },
+            // Level 6: 倒退死角
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 0, 0, 1, 0, 0, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 0, 1, 2, 2, 1, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 0, 0, 0, 1, 0, 0, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 2, y: 2 }, { x: 5, y: 4 }] },
+            // Level 7: 錯位排序
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 0, 2, 0, 2, 0, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 0, 1, 0, 1, 0, 1, 1], 
+                    [1, 0, 0, 0, 0, 0, 1, 1], 
+                    [1, 1, 0, 0, 0, 0, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 2 }, b: [{ x: 3, y: 2 }, { x: 3, y: 4 }] },
+            // Level 8: 迷宮推進
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 0, 0, 0, 1, 2, 2, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 0, 1, 1, 1, 0, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 1, 1], 
+                    [1, 1, 1, 0, 0, 0, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 4 }, b: [{ x: 2, y: 2 }, { x: 3, y: 4 }] },
+            // Level 9: 魔王前夜
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 2, 0, 0, 0, 0, 2, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 0, 0, 0, 0, 1, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 2, 0, 0, 0, 0, 2, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 3, y: 3 }, b: [{ x: 2, y: 2 }, { x: 4, y: 2 }, { x: 2, y: 4 }, { x: 4, y: 4 }] },
+            // Level 10: 終極試煉
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 2, 2, 2, 0, 0, 0, 1], 
+                    [1, 0, 0, 0, 0, 1, 0, 1], 
+                    [1, 0, 1, 0, 0, 1, 0, 1], 
+                    [1, 0, 0, 0, 0, 0, 0, 1], 
+                    [1, 1, 1, 1, 1, 0, 0, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1], 
+                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 6, y: 4 }, b: [{ x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 3 }] }
+        ];
+
+        const mapLayer = document.getElementById('map-layer');
+        const objectsLayer = document.getElementById('objects-layer');
+        const lvlVal = document.getElementById('current-level-val');
+
+        // 載入與初始化關卡
+        function loadLevel(levelIndex) {
+            if (levelIndex >= levels.length) {
+                document.getElementById('ending-screen').style.display = 'flex';
+                return;
+            }
+
+            currentLevel = levelIndex;
+            lvlVal.textContent = currentLevel + 1;
+            isMoving = false;
+
+            const lvlData = levels[currentLevel];
+
+            // 設定主角起點資料
+            playerPos = { ...lvlData.p };
+
+            // 設定箱子起點資料
+            boxes = lvlData.b.map((b, index) => ({
+                id: index,
+                x: b.x,
+                y: b.y,
+                onTarget: lvlData.map[b.y][b.x] === T_TARGET
+            }));
+
+            // 1. 繪製地圖底層
+            mapLayer.innerHTML = '';
+            for (let y = 0; y < lvlData.map.length; y++) {
+                for (let x = 0; x < lvlData.map[y].length; x++) {
+                    const tile = document.createElement('div');
+                    tile.classList.add('tile');
+                    if (lvlData.map[y][x] === T_WALL) {
+                        tile.textContent = E_WALL;
+                        tile.classList.add('wall');
+                    } else if (lvlData.map[y][x] === T_TARGET) {
+                        tile.textContent = E_TARGET;
+                    } else {
+                        tile.textContent = E_FLOOR;
+                    }
+                    mapLayer.appendChild(tile);
+                }
+            }
+
+            // 2. 建立動態 DOM 物件層 (清除舊的，重新建勇者和箱子)
+            objectsLayer.innerHTML = '';
+
+            // 建立勇者 DOM
+            const pEl = document.createElement('div');
+            pEl.id = 'player';
+            pEl.classList.add('sprite');
+            pEl.textContent = E_PLAYER;
+            objectsLayer.appendChild(pEl);
+
+            // 建立箱子 DOMs
+            boxes.forEach(box => {
+                const bEl = document.createElement('div');
+                bEl.id = `box-${box.id}`;
+                bEl.classList.add('sprite');
+                bEl.textContent = box.onTarget ? E_BOX_TARGET : E_BOX;
+                objectsLayer.appendChild(bEl);
+            });
+
+            // 刷新的即時位置 (無動畫定位)
+            updateVisuals(false);
+        }
+
+        // 更新所有動態物件的 CSS 像素位置
+        function updateVisuals(useAnimation = true) {
+            const pEl = document.getElementById('player');
+            if (!pEl) return;
+
+            const transitionStyle = useAnimation ? 'left 0.2s linear, top 0.2s linear' : 'none';
+
+            // 勇者渲染
+            pEl.style.transition = transitionStyle;
+            pEl.style.left = `${playerPos.x * 50}px`;
+            pEl.style.top = `${playerPos.y * 50}px`;
+
+            // 箱子群渲染
+            boxes.forEach(box => {
+                const bEl = document.getElementById(`box-${box.id}`);
+                if (bEl) {
+                    bEl.style.transition = transitionStyle;
+                    bEl.style.left = `${box.x * 50}px`;
+                    bEl.style.top = `${box.y * 50}px`;
+                    bEl.textContent = box.onTarget ? E_BOX_TARGET : E_BOX;
+                }
+            });
+        }
+
+        // 核心移動邏輯
+        function tryMove(dx, dy) {
+            if (isMoving) return;
+
+            const nextX = playerPos.x + dx;
+            const nextY = playerPos.y + dy;
+            const lvlMap = levels[currentLevel].map;
+
+            // 1. 撞牆攔截
+            if (lvlMap[nextY][nextX] === T_WALL) return;
+
+            // 2. 檢查前方是否有箱子
+            const hitBox = boxes.find(b => b.x === nextX && b.y === nextY);
+
+            if (!hitBox) {
+                // 前方沒箱子，直接走過去
+                executeMovement(nextX, nextY, null, 0, 0);
+            } else {
+                // 前方有箱子，計算箱子下一格
+                const boxNextX = nextX + dx;
+                const boxNextY = nextY + dy;
+
+                // 箱子前方是牆壁
+                if (lvlMap[boxNextY][boxNextX] === T_WALL) return;
+
+                // 箱子前方是另一個箱子
+                const boxBlocked = boxes.some(b => b.x === boxNextX && b.y === boxNextY);
+                if (boxBlocked) return;
+
+                // 通過檢查，推得動！
+                executeMovement(nextX, nextY, hitBox, boxNextX, boxNextY);
+            }
+        }
+
+        // 執行移動與過渡鎖定
+        function executeMovement(pNextX, pNextY, targetBox, bNextX, bNextY) {
+            isMoving = true;
+
+            // 更新勇者資料坐標
+            playerPos.x = pNextX;
+            playerPos.y = pNextY;
+
+            // 如果有推到箱子，同步更新箱子資料坐標
+            if (targetBox) {
+                targetBox.x = bNextX;
+                targetBox.y = bNextY;
+                // 判斷箱子新位置是不是魔法陣
+                targetBox.onTarget = (levels[currentLevel].map[bNextY][bNextX] === T_TARGET);
+            }
+
+            // 讓 CSS 處理 0.2 秒平滑滑動
+            updateVisuals(true);
+
+            // 移動完畢解鎖，並檢查勝負
+            setTimeout(() => {
+                isMoving = false;
+
+                // 檢查是否通關（每個箱子都在目標點上）
+                const isWin = boxes.every(b => b.onTarget);
+                if (isWin) {
+                    activeKey = null; // 清空連按狀態
+                    setTimeout(() => {
+                        loadLevel(currentLevel + 1); // 自動進入下一關
+                    }, 300);
+                } else {
+                    // 若未通關，且方向鍵還按著，繼續滑向下一格
+                    checkContinuousInput();
+                }
+            }, 200);
+        }
+
+        function checkContinuousInput() {
+            if (!activeKey) return;
+            if (activeKey === 'ArrowUp') tryMove(0, -1);
+            if (activeKey === 'ArrowDown') tryMove(0, 1);
+            if (activeKey === 'ArrowLeft') tryMove(-1, 0);
+            if (activeKey === 'ArrowRight') tryMove(1, 0);
+        }
+
+        // 監聽鍵盤
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+
+            // 重置功能
+            if (key === 'r') {
+                loadLevel(currentLevel);
+                return;
+            }
+
+            if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                activeKey = e.key;
+                checkContinuousInput();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === activeKey) {
+                activeKey = null;
+            }
+        });
+
+        // 遊戲初始啟動第一關
+        loadLevel(0);
+    </script>
+</body>
+
+</html>

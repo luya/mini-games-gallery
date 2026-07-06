@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NES 網頁動態觸控搖桿測試</title>
+    <script src="nesjoystick.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #222;
+            color: #fff;
+            font-family: monospace;
+            overflow: hidden;
+            position: relative;
+            touch-action: none; /* 禁用瀏覽器預設的手勢行為 */
+        }
+
+        /* 數據面板 */
+        #debug-panel {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #555;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none; /* 讓點擊穿透面板 */
+            z-index: 100;
+        }
+
+        #debug-panel h2 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #ff0;
+            text-align: center;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        /* 遊戲控制器操作區域分流 */
+        #touch-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* 左側動態搖桿感應區 */
+        #joystick-zone {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+        }
+
+        /* 動態搖桿視覺元件 (預設隱藏) */
+        #joystick-base {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: none;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        #joystick-stick {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 0, 0, 0.7);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 右側與中央按鈕區 */
+        #buttons-zone {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+        }
+
+        /* A/B 動作鍵 */
+        .action-btn {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: #a00;
+            border: 4px solid #300;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px #500;
+            transform: translateY(0);
+            transition: background 0.1s;
+        }
+
+        .action-btn:active, .action-btn.active {
+            background: #ff3333;
+            transform: translateY(4px);
+            box-shadow: 0 1px #500;
+        }
+
+        /* 經典紅白機 A B 鍵是斜對角的 */
+        #btn-b { right: 100px; bottom: 50px; }
+        #btn-a { right: 20px; bottom: 70px; }
+
+        /* Select / Start 功能鍵區 */
+        #system-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .sys-btn {
+            width: 65px;
+            height: 20px;
+            background: #555;
+            border-radius: 10px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #aaa;
+            position: relative;
+        }
+        
+        .sys-btn::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            font-size: 11px;
+            color: #fff;
+        }
+        #btn-select::before { content: 'SELECT'; }
+        #btn-start::before { content: 'START'; }
+
+        .sys-btn:active, .sys-btn.active {
+            background: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="debug-panel">
+        <h2>NES 搖桿測試數據</h2>
+        <div class="data-grid">
+            <div>搖桿狀態: <span id="val-joy-status" style="color: #ff5555;">放開</span></div>
+            <div>搖桿向量: <span id="val-joy-vector">X: 0.00, Y: 0.00</span></div>
+            <div>搖桿方向: <span id="val-joy-dir" style="color: #55ff55;">NONE</span></div>
+            <div>A 鍵狀態: <span id="val-btn-a">0</span></div>
+            <div>B 鍵狀態: <span id="val-btn-b">0</span></div>
+            <div>SELECT: <span id="val-btn-select">0</span></div>
+            <div>START: <span id="val-btn-start">0</span></div>
+        </div>
+    </div>
+
+    <div id="touch-container">
+        
+        <div id="joystick-zone"></div>
+        
+        <div id="joystick-base">
+            <div id="joystick-stick"></div>
+        </div>
+
+        <div id="buttons-zone">
+            <div class="action-btn" id="btn-b">B</div>
+            <div class="action-btn" id="btn-a">A</div>
+        </div>
+
+        <div id="system-buttons">
+            <div class="sys-btn" id="btn-select"></div>
+            <div class="sys-btn" id="btn-start"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // 狀態資料結構 (這可以直接代入你的遊戲迴圈 Loop 中)
+        const gamepadState = {
+            joystick: { active: false, x: 0, y: 0, dir: 'NONE' },
+            buttonA: 0,
+            buttonB: 0,
+            select: 0,
+            start: 0
+        };
+
+        // DOM 元素快取
+        const joyZone = document.getElementById('joystick-zone');
+        const joyBase = document.getElementById('joystick-base');
+        const joyStick = document.getElementById('joystick-stick');
+        
+        // 搖桿運算暫存變數
+        let joyTouchId = null;
+        let startX = 0;
+        let startY = 0;
+        const maxRadius = 50; // 搖桿移動的最大半徑(像素)
+
+        // ------------------ 1. 左側不固定位置搖桿邏輯 ------------------
+        
+        joyZone.addEventListener('touchstart', (e) => {
+            // 如果已經有搖桿在被操控，忽略其他左側觸控
+            if (joyTouchId !== null) return;
+
+            // 取得第一個觸發的觸控點
+            const touch = e.changedTouches[0];
+            joyTouchId = touch.identifier;
+
+            // 設定中心點為玩家點擊的位置
+            startX = touch.clientX;
+            startY = touch.clientY;
+
+            // 顯示搖桿外圈並定位
+            joyBase.style.left = `${startX}px`;
+            joyBase.style.top = `${startY}px`;
+            joyBase.style.display = 'block';
+
+            gamepadState.joystick.active = true;
+            updateUI();
+        });
+
+        joyZone.addEventListener('touchmove', (e) => {
+            if (joyTouchId === null) return;
+
+            // 找到對應原觸控 ID 的點
+            let touch = null;
+            for (let t of e.touches) {
+                if (t.identifier === joyTouchId) {
+                    touch = t;
+                    break;
+                }
+            }
+            if (!touch) return;
+
+            // 計算手指距離中心的位移
+            let deltaX = touch.clientX - startX;
+            let deltaY = touch.clientY - startY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            // 限制內圈不能超出最大半徑
+            if (distance > maxRadius) {
+                const angle = Math.atan2(deltaY, deltaX);
+                deltaX = Math.cos(angle) * maxRadius;
+                deltaY = Math.sin(angle) * maxRadius;
+            }
+
+            // 更新內圈的視覺位置 (CSS 偏移)
+            joyStick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+
+            // 正規化數值 (-1.0 到 1.0 之間)
+            gamepadState.joystick.x = parseFloat((deltaX / maxRadius).toFixed(2));
+            gamepadState.joystick.y = parseFloat((deltaY / maxRadius).toFixed(2));
+
+            // 判斷紅白機 4/8 方向十字鍵
+            gamepadState.joystick.dir = calculateDirection(gamepadState.joystick.x, gamepadState.joystick.y);
+            
+            updateUI();
+        });
+
+        // 結束觸控
+        const endJoystick = (e) => {
+            if (joyTouchId === null) return;
+            
+            // 檢查釋放的是否為搖桿的觸控點
+            for (let t of e.changedTouches) {
+                if (t.identifier === joyTouchId) {
+                    joyTouchId = null;
+                    joyBase.style.display = 'none';
+                    joyStick.style.transform = 'translate(-50%, -50%)'; // 歸位
+                    
+                    gamepadState.joystick.active = false;
+                    gamepadState.joystick.x = 0;
+                    gamepadState.joystick.y = 0;
+                    gamepadState.joystick.dir = 'NONE';
+                    
+                    updateUI();
+                    break;
+                }
+            }
+        };
+
+        joyZone.addEventListener('touchend', endJoystick);
+        joyZone.addEventListener('touchcancel', endJoystick);
+
+        // 依據 X, Y 向量推算十字鍵方向
+        function calculateDirection(x, y) {
+            const threshold = 0.3; // 靈敏度門檻
+            if (Math.abs(x) < threshold && Math.abs(y) < threshold) return 'NONE';
+
+            const angle = Math.atan2(y, x) * (180 / Math.PI); // 轉為角度 -180 ~ 180
+            
+            if (angle >= -22.5 && angle < 22.5) return 'RIGHT';
+            if (angle >= 22.5 && angle < 67.5) return 'DOWN_RIGHT';
+            if (angle >= 67.5 && angle < 112.5) return 'DOWN';
+            if (angle >= 112.5 && angle < 157.5) return 'DOWN_LEFT';
+            if (angle >= 157.5 || angle < -157.5) return 'LEFT';
+            if (angle >= -157.5 && angle < -112.5) return 'UP_LEFT';
+            if (angle >= -112.5 && angle < -67.5) return 'UP';
+            if (angle >= -67.5 && angle < -22.5) return 'UP_RIGHT';
+            
+            return 'NONE';
+        }
+
+        // ------------------ 2. 右側與中央常規按鈕邏輯 ------------------
+        // 使用多點觸控通用綁定，確保多鍵齊發不會衝突
+        
+        function bindButton(elementId, stateKey) {
+            const btn = document.getElementById(elementId);
+            
+            const press = (e) => {
+                e.preventDefault(); // 防止手機瀏覽器放大或模擬點擊
+                gamepadState[stateKey] = 1;
+                btn.classList.add('active');
+                triggerVibrate();
+                updateUI();
+            };
+            
+            const release = (e) => {
+                e.preventDefault();
+                gamepadState[stateKey] = 0;
+                btn.classList.remove('active');
+                updateUI();
+            };
+
+            btn.addEventListener('touchstart', press);
+            btn.addEventListener('touchend', release);
+            btn.addEventListener('touchcancel', release);
+        }
+
+        bindButton('btn-a', 'buttonA');
+        bindButton('btn-b', 'buttonB');
+        bindButton('btn-select', 'select');
+        bindButton('btn-start', 'start');
+
+        // 觸覺微震動回饋 (只在實機手機上有用)
+        function triggerVibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(12); 
+            }
+        }
+
+        // ------------------ 3. 數據面板 UI 更新 ------------------
+        const valJoyStatus = document.getElementById('val-joy-status');
+        const valJoyVector = document.getElementById('val-joy-vector');
+        const valJoyDir = document.getElementById('val-joy-dir');
+        const valBtnA = document.getElementById('val-btn-a');
+        const valBtnB = document.getElementById('val-btn-b');
+        const valBtnSel = document.getElementById('val-btn-select');
+        const valBtnSta = document.getElementById('val-btn-start');
+
+        function updateUI() {
+            if (gamepadState.joystick.active) {
+                valJoyStatus.textContent = "操控中";
+                valJoyStatus.style.color = "#55ff55";
+            } else {
+                valJoyStatus.textContent = "放開";
+                valJoyStatus.style.color = "#ff5555";
+            }
+
+            valJoyVector.textContent = `X: ${gamepadState.joystick.x.toFixed(2)}, Y: ${gamepadState.joystick.y.toFixed(2)}`;
+            valJoyDir.textContent = gamepadState.joystick.dir;
+
+            valBtnA.textContent = gamepadState.buttonA;
+            valBtnA.style.color = gamepadState.buttonA ? '#ff5555' : '#fff';
+            
+            valBtnB.textContent = gamepadState.buttonB;
+            valBtnB.style.color = gamepadState.buttonB ? '#ff5555' : '#fff';
+            
+            valBtnSel.textContent = gamepadState.select;
+            valBtnSel.style.color = gamepadState.select ? '#ff5555' : '#fff';
+            
+            valBtnSta.textContent = gamepadState.start;
+            valBtnSta.style.color = gamepadState.start ? '#ff5555' : '#fff';
+        }
+    </script>
+</body>
+</html>
