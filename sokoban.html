@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Emoji 倉庫番：勇者救公主 (10關完整版)</title>
     <style>
         body {
@@ -67,7 +67,7 @@
             width: 100%;
             height: 100%;
             z-index: 10;
-            pointer-events: none;
+            /* pointer-events: none; */
         }
 
         .tile {
@@ -125,20 +125,21 @@
             color: #fff;
         }
     </style>
+    <link rel="stylesheet" href="nesjoystick.css">
 </head>
 
 <body>
-
+    
     <div id="ui-panel">
-        <h1>勇者與魔宮寶箱 🏰</h1>
+        <h1>勇者救公主之瘋狂巫師 🏰</h1>
         <div class="info">關卡: <span id="current-level-val" class="highlight">1</span> / 10</div>
-        <div class="info">⌨️ 控制：【方向鍵】移動 | <span class="highlight">【 R 】鍵重置本關</span></div>
+        <div class="info">⌨️ 控制：方向鍵（↑↓←→）或是搖桿移動 | <span class="highlight"> R鍵或是select按鈕重置本關</span></div>
     </div>
 
     <div id="game-stage">
         <div id="ending-screen">
             <h2>❤️ 結局：執子之手 ❤️</h2>
-            <p>🤴 勇者克服了魔宮的 10 道機關...<br>
+            <p>🤴 勇者消滅了瘋狂巫師...<br>
                 👸 終於在深淵中救出了被囚禁的公主！<br><br>
                 <span style="font-size: 50px;">👑 👨‍❤️‍👨 👑</span><br><br>
                 感謝遊玩！王國恢復了和平。
@@ -147,7 +148,41 @@
         <div id="map-layer"></div>
         <div id="objects-layer"></div>
     </div>
+    
+    <div id="debug-panel">
+        <h2>NES 搖桿測試數據(適用觸控裝置)</h2>
+        <div class="data-grid">
+            <div>搖桿狀態: <span id="val-joy-status" style="color: #ff5555;">放開</span></div>
+            <div>搖桿向量: <span id="val-joy-vector">X: 0.00, Y: 0.00</span></div>
+            <div>搖桿方向: <span id="val-joy-dir" style="color: #55ff55;">NONE</span></div>
+            <div>A 鍵狀態: <span id="val-btn-a">0</span></div>
+            <div>B 鍵狀態: <span id="val-btn-b">0</span></div>
+            <div>SELECT: <span id="val-btn-select">0</span></div>
+            <div>START: <span id="val-btn-start">0</span></div>
+        </div>
+    </div>
+    <div id="touch-container">
+        
+        <div id="joystick-zone"></div>
+        
+        <div id="joystick-base">
+            <div id="joystick-stick"></div>
+        </div>
 
+        <div id="buttons-zone">
+            <div class="action-btn" id="btn-b">B</div>
+            <div class="action-btn" id="btn-a">A</div>
+        </div>
+
+        <div id="system-buttons">
+            <div class="sys-btn" id="btn-select"></div>
+            <div class="sys-btn" id="btn-start"></div>
+        </div>
+
+    </div>
+
+    <script src="ayakit.js"></script>
+    <script src="nesjoystick.js"></script>
     <script>
         // 元素定義
         const E_FLOOR = " ", E_WALL = "🌲", E_TARGET = "🧙", E_BOX = "📜", E_BOX_TARGET = "💎", E_PLAYER = "🤴";
@@ -450,8 +485,31 @@
             }
         });
 
+        function gameloop(){
+            if (gamepadState){
+                if (gamepadState.joystick.active){
+                    console.log(gamepadState.joystick.dir)
+                    if (gamepadState.joystick.dir=='RIGHT') {
+                        tryMove(1, 0)
+                    } else if (gamepadState.joystick.dir=='LEFT') {
+                        tryMove(-1, 0)
+                    } else if (gamepadState.joystick.dir=='UP') {
+                        tryMove(0, -1)
+                    } else if (gamepadState.joystick.dir=='DOWN') {
+                        tryMove(0, 1)
+                    }
+                }
+                if(gamepadState.select){
+                    loadLevel(currentLevel)
+                }
+            }
+
+            requestAnimationFrame(gameloop);
+        }
+
         // 遊戲初始啟動第一關
         loadLevel(0);
+        gameloop()
     </script>
 </body>
 

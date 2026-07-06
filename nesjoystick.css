@@ -1,0 +1,173 @@
+* {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body, html {
+    touch-action: none; /* 禁用瀏覽器預設的手勢行為 */
+}
+/* 遊戲控制器操作區域分流 */
+#touch-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 9999;
+}
+
+/* 左側動態搖桿感應區 */
+#joystick-zone {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 35%;
+    height: 100%;
+    z-index: 9999;
+}
+
+/* 動態搖桿視覺元件 (預設隱藏) */
+#joystick-base {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    display: none;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+#joystick-stick {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 0, 0, 0.7);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+}
+
+/* 右側與中央按鈕區 */
+#buttons-zone {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+}
+
+/* A/B 動作鍵 */
+.action-btn {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: #a00;
+    border: 4px solid #300;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px #500;
+    transform: translateY(0);
+    transition: background 0.1s;
+}
+
+.action-btn:active,
+.action-btn.active {
+    background: #ff3333;
+    transform: translateY(4px);
+    box-shadow: 0 1px #500;
+}
+
+/* 經典紅白機 A B 鍵是斜對角的 */
+#btn-b {
+    right: 100px;
+    bottom: 50px;
+}
+
+#btn-a {
+    right: 20px;
+    bottom: 70px;
+}
+
+/* Select / Start 功能鍵區 */
+#system-buttons {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+}
+
+.sys-btn {
+    width: 65px;
+    height: 20px;
+    background: #555;
+    border-radius: 10px;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #aaa;
+    position: relative;
+}
+
+.sys-btn::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    font-size: 11px;
+    color: #fff;
+}
+
+#btn-select::before {
+    content: 'SELECT';
+}
+
+#btn-start::before {
+    content: 'START';
+}
+
+.sys-btn:active,
+.sys-btn.active {
+    background: #888;
+}
+
+/* 數據面板 */
+#debug-panel {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #555;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    pointer-events: none; /* 讓點擊穿透面板 */
+    z-index: 100;
+}
+
+#debug-panel h2 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #ff0;
+    text-align: center;
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}     
