@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>黑暗奇幻文字冒險：遺忘之燈（擴充版）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #222 0, #050608 55%, #000 100%);
+            color: #e5e5e5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game {
+            width: 90%;
+            max-width: 720px;
+            border-radius: 12px;
+            background: rgba(10, 10, 16, 0.95);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #1a1a1f, #101018);
+        }
+
+        .title {
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #c9a86a;
+        }
+
+        .inventory {
+            font-size: 13px;
+            color: #aaa;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .inventory span {
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: rgba(30, 30, 40, 0.8);
+        }
+
+        .dialog {
+            padding: 18px 16px;
+            min-height: 180px;
+            line-height: 1.6;
+            font-size: 15px;
+            position: relative;
+        }
+
+        .location-name {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .dialog-text {
+            white-space: pre-line;
+        }
+
+        .skull {
+            position: absolute;
+            right: 12px;
+            bottom: 8px;
+            opacity: 0.3;
+            font-size: 22px;
+        }
+
+        .options {
+            border-top: 1px solid #333;
+            padding: 12px 16px 16px;
+            background: #0b0b10;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #14141c;
+            color: #e5e5e5;
+            font-size: 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn span {
+            max-width: 90%;
+        }
+
+        .option-btn:hover {
+            background: #1c1c26;
+            border-color: #c9a86a;
+            transform: translateY(-1px);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+            background: #101018;
+        }
+
+        .option-key {
+            font-size: 11px;
+            color: #777;
+        }
+
+        .footer {
+            padding: 8px 16px 10px;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #222;
+            background: #050509;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .restart-btn {
+            border: none;
+            background: transparent;
+            color: #999;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+
+        .restart-btn:hover {
+            border-color: #555;
+            color: #c9a86a;
+        }
+
+        @media (max-width: 480px) {
+            .dialog {
+                min-height: 160px;
+            }
+        }
+
+        #backBtn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8f7a66;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        #backBtn:hover {
+            transform: scale(1.15);
+            background: #a68b74;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="game">
+        <div class="header">
+            <div class="title">黑暗裂隙：遺忘之燈</div>
+        </div>
+        <div class="header">
+            <div class="inventory" id="inventory"></div>
+        </div>
+        <div class="dialog">
+            <div class="location-name" id="locationName"></div>
+            <div class="dialog-text" id="dialogText"></div>
+            <div class="skull">💀</div>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div class="footer">
+            <span id="statusText">選擇你的命運⋯</span>
+            <button class="restart-btn" id="restartBtn">重新開始 🔁</button>
+        </div>
+    </div>
+
+    <script>
+        // 10 個道具（包含 3 個關鍵道具與中途加入的夥伴標記）
+        const ITEMS = {
+            TORCH: "破舊火把 🔥",
+            DAGGER: "鏽蝕匕首 🗡️",
+            LANTERN: "守墓人提燈 🪔",
+            SKULL: "野獸顱骨 ☠️",
+            BADGE: "荊棘徽章 🛡️",
+            POISON: "鍊金術士的劇毒 🧪",
+            PAGES: "告解者殘頁 📜",
+            RING: "裂隙指環 💍",       // 關鍵道具 1
+            SWORD: "審判者大劍 🗡️",    // 關鍵道具 2
+            HOURGLASS: "倒流沙漏 ⏳"   // 關鍵道具 3
+        };
+
+        // 遊戲狀態
+        const state = {
+            location: "graveyard",
+            inventory: [],
+            flags: {
+                hasAlys: false,        // 夥伴：無名盲女艾莉絲
+                metShade: false,
+                hasKeyItem: false,
+                bargainedWithShade: false,
+                angeredShade: false,
+                sacrificedBlood: false
+            },
+            ended: false
+        };
+
+        // 20 個場景設定
+        const locations = {
+            // 1. 起點
+            graveyard: {
+                name: "1. 朽墓原野",
+                text: () => "夜色濃得像墨，破碎的墓碑在霧中歪斜。\n你在無名墓前醒來，指尖沾著冷硬的泥土。\n遠處的鐘聲在黑暗中迴盪——每一聲都像在為你倒數。",
+                options: () => {
+                    const opts = [
+                        { text: "前往墓園守衛室 🏚️", next: "guardhouse" },
+                        { text: "沿著小徑前往枯萎森林 🌲", next: "forest" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.TORCH)) {
+                        opts.push({
+                            text: "翻找無名墓，看看有沒有遺物 🕯️",
+                            next: "graveyard",
+                            action: () => { addItem(ITEMS.TORCH); setStatus("你找到一支幾乎熄滅的火把。它仍微微發熱。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 2. 守衛室
+            guardhouse: {
+                name: "2. 墓園守衛室",
+                text: () => "一間被棄置的半塌木屋，屋內充斥著腐爛與霉味。\n牆角有一群散發異味的盲眼飛蟲在蠕動。",
+                options: () => {
+                    const opts = [
+                        { text: "退回朽墓原野 ↩️", next: "graveyard" },
+                        { text: "朝遠方的破敗大教堂前進 ⛪", next: "cathedral" }
+                    ];
+                    if (state.inventory.includes(ITEMS.TORCH) && !state.inventory.includes(ITEMS.LANTERN)) {
+                        opts.push({
+                            text: "用火把驅趕飛蟲，搜查守衛遺物 🪔",
+                            next: "guardhouse",
+                            action: () => { addItem(ITEMS.LANTERN); setStatus("你成功驅散飛蟲，在暗格裡發現了「守墓人提燈」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 3. 大教堂
+            cathedral: {
+                name: "3. 破敗大教堂",
+                text: () => "教堂的彩繪玻璃早已碎裂。祭壇後方有一道被封死的石門，上面刻著：\n「唯有...者，得以穿越...。」\n上面的字跡過於古老，難以閱讀。",
+                options: () => {
+                    const opts = [
+                        { text: "返回墓園守衛室 ↩️", next: "guardhouse" },
+                        { text: "走向教堂旁的哀嚎廢村 🏘️", next: "village" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.DAGGER)) {
+                        opts.push({
+                            text: "在教堂祭壇下搜尋可用的武器 🔍",
+                            next: "cathedral",
+                            action: () => { addItem(ITEMS.DAGGER); setStatus("你在祈禱台下翻出了一把「鏽蝕匕首」。"); }
+                        });
+                    }
+                    if (state.inventory.includes(ITEMS.RING)) {
+                        opts.push({ text: "將裂隙指環貼近石門，開啟通道 💍", next: "rift" });
+                    }
+                    return opts;
+                }
+            },
+            // 4. 枯萎森林
+            forest: {
+                name: "4. 枯萎森林",
+                text: () => "樹木像被吊死的巨人。霧氣在腳踝間盤旋。\n一個影子在樹間滑動，露出空洞的眼窩：「你還記得我嗎？」",
+                options: () => {
+                    const opts = [
+                        { text: "退回朽墓原野 ↩️", next: "graveyard" },
+                        { text: "甩開影子，前往遺忘黑泉 💧", next: "spring" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.SKULL)) {
+                        opts.push({
+                            text: "撿起地上的古怪野獸碎骨 ☠️",
+                            next: "forest",
+                            action: () => { addItem(ITEMS.SKULL); setStatus("你撿起一具慘白的「野獸顱骨」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 5. 遺忘黑泉
+            spring: {
+                name: "5. 遺忘黑泉",
+                text: () => "漆黑不見底的泉水，倒映不出你的面容。那團黑影凝聚在你身前，向你伸出雙手。",
+                options: () => {
+                    const opts = [
+                        { text: "穿過泉水旁的小徑，前往哀嚎廢村 🏘️", next: "village" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.RING) && !state.flags.bargainedWithShade) {
+                        opts.push({
+                            text: "以記憶為代價，與黑影交易 💍",
+                            next: "spring",
+                            action: () => {
+                                addItem(ITEMS.RING);
+                                state.flags.bargainedWithShade = true;
+                                state.flags.hasKeyItem = true;
+                                setStatus("你失去了一部分記憶，換得關鍵道具「裂隙指環」。");
+                            }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 6. 哀嚎廢村 (夥伴加入)
+            village: {
+                name: "6. 哀嚎廢村",
+                text: () => {
+                    let base = "這裡死寂一片，屋舍皆化為廢墟。";
+                    if (!state.flags.hasAlys) {
+                        base += "\n在廢墟角落，你發現一名雙眼蒙著布的盲眼少女。她平靜地轉向你：「外來者，我能聽見你靈魂的顫抖。帶我走吧，我能為你聆聽黑暗的祕密。」";
+                    } else {
+                        base += "\n盲女艾莉絲靜靜地跟在你的身旁。";
+                    }
+                    return base;
+                },
+                options: () => {
+                    const opts = [
+                        { text: "前往嘆息之橋 🌉", next: "bridge" },
+                        { text: "折返回大教堂 ⛪", next: "cathedral" }
+                    ];
+                    if (!state.flags.hasAlys) {
+                        opts.push({
+                            text: "邀請盲女艾莉絲加入旅程 👥",
+                            next: "village",
+                            action: () => { state.flags.hasAlys = true; setStatus("「無名盲女」艾莉絲加入了你的隊伍！"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 7. 嘆息之橋
+            bridge: {
+                name: "7. 嘆息之橋",
+                text: () => "一座橫跨深淵的斷橋。迷霧中隱約傳來巨大妖獸的呼吸聲，強行通過極其危險。",
+                options: () => {
+                    const opts = [
+                        { text: "退回哀嚎廢村 ↩️", next: "village" },
+                        { text: "強行衝過斷橋（極度危險） 🏃", next: "swamp" }
+                    ];
+                    if (state.flags.hasAlys) {
+                        opts.push({
+                            text: "讓艾莉絲聽聲辨位，引導你潛伏過去 🤫",
+                            next: "swamp",
+                            action: () => { setStatus("藉由艾莉絲敏銳的聽覺，你們完美避開了妖獸的注意，安全過橋。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 8. 浸血沼澤
+            swamp: {
+                name: "8. 浸血沼澤",
+                text: () => "地面全是散發血腥味的紅色泥濘。濃霧遮蔽了視線，方向難辨。",
+                options: () => {
+                    const opts = [
+                        { text: "盲目摸索前進，走向遠處的迷宮 🌲", next: "labyrinth" }
+                    ];
+                    if (state.inventory.includes(ITEMS.LANTERN)) {
+                        opts.push({
+                            text: "點燃守墓人提燈照亮沼澤隱藏道路 🪔",
+                            next: "labyrinth",
+                            action: () => { setStatus("提燈的光芒驅散了毒霧，你發現了一條通往荊棘迷宮的捷徑。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 9. 荊棘迷宮
+            labyrinth: {
+                name: "9. 荊棘迷宮",
+                text: () => "無數尖銳且帶刺的漆黑藤蔓交織成龐大的迷宮，稍有不慎就會被刺穿肉體。",
+                options: () => {
+                    const opts = [
+                        { text: "小心翼翼穿過迷宮，前往殉教者陵墓 🪦", next: "tomb" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.BADGE)) {
+                        opts.push({
+                            text: "忍痛伸手摘取迷宮中心的黑色花朵 🛡️",
+                            next: "labyrinth",
+                            action: () => { addItem(ITEMS.BADGE); setStatus("你的手被刺得鮮血淋漓，但獲得了「荊棘徽章」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 10. 殉教者陵墓
+            tomb: {
+                name: "10. 殉教者陵墓",
+                text: () => "地下的古老陵墓。中央有一具石棺，其上插著一把散發凜冽寒光的巨劍，劍柄被荊棘鎖死。",
+                options: () => {
+                    const opts = [
+                        { text: "離開陵墓，走向裂隙祭壇 ⛓️", next: "altar" }
+                    ];
+                    if (state.inventory.includes(ITEMS.DAGGER) && !state.inventory.includes(ITEMS.SWORD)) {
+                        opts.push({
+                            text: "用匕首斬斷荊棘，強行拔出巨劍 🗡️",
+                            next: "tomb",
+                            action: () => { addItem(ITEMS.SWORD); setStatus("匕首應聲斷裂，但你成功拔出了關鍵道具「審判者大劍」！"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 11. 裂隙祭壇
+            altar: {
+                name: "11. 裂隙祭壇",
+                text: () => "由碎骨與黑石砌成的祭壇。中央的凹槽彷彿在渴求著某些供物。上方天空裂開一道微光。",
+                options: () => {
+                    const opts = [
+                        { text: "繞過祭壇，前往怨靈礦坑 ⛏️", next: "mine" }
+                    ];
+                    if (state.inventory.includes(ITEMS.SKULL)) {
+                        opts.push({
+                            text: "將野獸顱骨作為供品獻祭 🚫",
+                            next: "altar",
+                            action: () => { endGame("seal"); } // 觸發結局：封印者
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 12. 怨靈礦坑
+            mine: {
+                name: "12. 怨靈礦坑",
+                text: () => "漆黑的廢棄礦道，四周傳來無數死難者的哀慟與怨靈哭聲。",
+                options: () => {
+                    const opts = [
+                        { text: "頂著怨靈的干擾，深入地底鍊金坊 🧪", next: "workshop" }
+                    ];
+                    if (state.flags.hasAlys) {
+                        opts.push({
+                            text: "讓艾莉絲吟唱安魂曲，引導怨靈退散 🎵",
+                            next: "workshop",
+                            action: () => { setStatus("艾莉絲輕聲哼唱，怨靈們漸漸平息，讓開了一條安全的道路。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 13. 地底鍊金坊
+            workshop: {
+                name: "13. 地底鍊金坊",
+                text: () => "佈滿灰塵與打破藥瓶的古代實驗室。桌上有一瓶泛著詭異紫光的劇毒液體。",
+                options: () => {
+                    const opts = [
+                        { text: "前往瘋狂圖書室 📚", next: "library" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.POISON)) {
+                        opts.push({
+                            text: "將這瓶未知的劇毒毒藥收起 🧪",
+                            next: "workshop",
+                            action: () => { addItem(ITEMS.POISON); setStatus("你獲得了「鍊金術士的劇毒」。這絕不是可以用來療傷的東西。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 14. 瘋狂圖書室
+            library: {
+                name: "14. 瘋狂圖書室",
+                text: () => "無數禁忌書籍在此腐爛，翻開它們彷彿能聽見瘋狂的低語。",
+                options: () => {
+                    const opts = [
+                        { text: "離開圖書室，走向虛無迴廊 🌌", next: "corridor" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.PAGES)) {
+                        opts.push({
+                            text: "頂著精神污染，強行閱讀殘存的文獻 📜",
+                            next: "library",
+                            action: () => { addItem(ITEMS.PAGES); setStatus("你強忍頭痛，撕下了記載禁忌禁術的「告解者殘頁」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 15. 虛無迴廊
+            corridor: {
+                name: "15. 虛無迴廊",
+                text: () => "這裡的空間嚴重扭曲，重力倒錯，若無關鍵信物指引，將永遠迷失在迴廊深處。",
+                options: () => {
+                    const opts = [];
+                    if (state.inventory.includes(ITEMS.RING)) {
+                        opts.push({
+                            text: "利用裂隙指環產生的共鳴穩定空間，前往裂隙之門 🚪",
+                            next: "rift"
+                        });
+                    } else {
+                        opts.push({
+                            text: "在沒有指環的情況下盲目硬闖走廊 🚶",
+                            next: "corridor",
+                            action: () => { endGame("void"); } // 觸發結局：歸於虛無
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 16. 裂隙之門
+            rift: {
+                name: "16. 裂隙之門",
+                text: () => "大教堂石門後方的真正面貌：一片懸浮的黑暗。碎片般的記憶在周圍漂浮。前方可通往更核心的區域。",
+                options: () => {
+                    const opts = [
+                        { text: "踏入裂隙，讓自己徹底被黑暗吞沒 🌌", action: () => { endGame("door"); } }, // 觸發結局：裂隙之門
+                        { text: "穿過裂隙邊緣，探索時間停滯之穹 ⏳", next: "dome" },
+                        { text: "往更深處走去，挑戰倒錯王座 👑", next: "throne" }
+                    ];
+                    if (state.flags.hasAlys) {
+                        opts.push({ text: "轉向盲女，試圖探尋她的內心裂隙 👁️", next: "alysRift" });
+                    }
+                    return opts;
+                }
+            },
+            // 17. 時間停滯之穹
+            dome: {
+                name: "17. 時間停滯之穹",
+                text: () => "沙塵懸浮在半空中，時間在這裡失去了意義。中央的高台上放著一個神祕的沙漏。",
+                options: () => {
+                    const opts = [
+                        { text: "退回裂隙之門 ↩️", next: "rift" }
+                    ];
+                    if (state.inventory.includes(ITEMS.PAGES) && !state.inventory.includes(ITEMS.HOURGLASS)) {
+                        opts.push({
+                            text: "用殘頁上記載的咒語解開時空封印 ⏳",
+                            next: "dome",
+                            action: () => { addItem(ITEMS.HOURGLASS); setStatus("沙漏落在你手中，你獲得了逆轉因果的關鍵道具「倒流沙漏」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 18. 倒錯王座
+            throne: {
+                name: "18. 倒錯王座",
+                text: () => "巨大的王座顛倒懸掛在虛空中。黑影的本體坐在其上，俯瞰著你：「凡人，你想弒神，還是繼承這萬劫不復的黑夜？」",
+                options: () => {
+                    const opts = [
+                        { text: "向命運低頭，飲下毒藥結束這一切 🧪", action: () => { endGame("void"); } }
+                    ];
+                    if (state.inventory.includes(ITEMS.SWORD)) {
+                        opts.push({
+                            text: "高舉審判者大劍，向古老黑影本體揮出弒神之擊！ 🗡️",
+                            action: () => { endGame("godslayer"); } // 觸發結局：弒神之刃
+                        });
+                    }
+                    if (state.inventory.includes(ITEMS.HOURGLASS)) {
+                        opts.push({
+                            text: "前往世界的最深處——世界之垠 🪐",
+                            next: "worldEdge"
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 19. 盲女的內心裂隙
+            alysRift: {
+                name: "19. 盲女的內心裂隙",
+                text: () => "藉由指環，你進入了艾莉絲的靈魂。你看見了她曾受過的苦難與黑暗。她是這個世界詛咒的活祭品。你可以選擇用指環的力量拯救她，但代價是巨大的。",
+                options: () => {
+                    const opts = [
+                        { text: "退回裂隙之門 ↩️", next: "rift" },
+                        {
+                            text: "犧牲自己，用裂隙指環淨化艾莉絲的靈魂 💍",
+                            action: () => { endGame("salvation"); } // 觸發結局：盲女的救贖
+                        }
+                    ];
+                    return opts;
+                }
+            },
+            // 20. 世界之垠
+            worldEdge: {
+                name: "20. 世界之垠",
+                text: () => "時空在這裡崩解成純粹的虛無。不論怎麼選，世界都在步向終焉。此時你手中的沙漏瘋狂震動。",
+                options: () => {
+                    const opts = [];
+                    if (state.inventory.includes(ITEMS.HOURGLASS) && state.inventory.includes(ITEMS.PAGES)) {
+                        opts.push({
+                            text: "激活倒流沙漏，將整個世界因果完全逆轉 ⏳",
+                            action: () => { endGame("loop"); } // 觸發結局：時間無限循環
+                        });
+                    } else {
+                        opts.push({
+                            text: "眼睜睜看著虛無將你吞噬 🪐",
+                            action: () => { endGame("void"); }
+                        });
+                    }
+                    return opts;
+                }
+            }
+        };
+
+        // 6 種結局設定
+        const endings = {
+            door: {
+                title: "結局一：裂隙之門 (常規結局)",
+                text: "你接受了黑暗的召喚，踏入了無盡虛空。\n從此，你成為了新一代的裂隙之門，肉體消逝，靈魂永遠徘徊在虛實的邊緣。\n你將永世孤獨，直到下一個迷途者的到來⋯⋯"
+            },
+            seal: {
+                title: "結局二：封印者 (常規結局)",
+                text: "你將野獸顱骨獻祭給祭壇，強行切斷了世界與外部裂隙的連結。\n天空的裂痕癒合了，世界重獲光明。\n但你明白，裂隙並未消失，它被永久鎖在你的內心。每當黑夜降臨，你便會聽見體內傳來瘋狂的低語。"
+            },
+            godslayer: {
+                title: "結局三：弒神之刃 (戰鬥結局)",
+                text: "你揮舞著沉重的審判者大劍，帶著無上決意斬斷了王座上的神祕黑影！\n黑夜在不甘的慘叫聲中褪去。然而，失去了古老神明的壓制，混亂的法則開始失控。\n為了維持世界運轉，你被迫坐上了那冰冷的倒錯王座，成為新的、孤獨的監管者。"
+            },
+            salvation: {
+                title: "結局四：盲女的救贖 (同伴結局)",
+                text: "你選擇了燃燒自己的存在，將裂隙指環的所有力量注入艾莉絲的體內。\n黑暗的詛咒從她身上剝離，她的雙眼重見光明。她流著淚逃離了這片破碎之地，活了下去。\n而你，自願代替她下沉，成為沉入深淵底部的石塊，永遠沉睡。"
+            },
+            loop: {
+                title: "結局五：時間無限循環 (隱藏真結局)",
+                text: "在世界毀滅的終點，你激活了倒流沙漏，並詠唱殘頁上的禁忌神術。\n整片星空開始瘋狂倒轉，時間的洪流將你猛烈扯回⋯⋯\n\n當你再度睜開眼時，四周是熟悉的冷硬泥土。你回到了起點的無名墓前。\n耳邊隱約響起地下的低語：「你不是第一次來這裡了⋯⋯」"
+            },
+            void: {
+                title: "結局六：歸於虛無 (壞結局)",
+                text: "你沒能揭開這片土地的謎題。在毒藥的侵蝕或是虛無的侵吞下，你的身體與靈魂被格式化為純粹的黑暗粒子。\n世界上徹底抹消了你存在過的痕跡。沒有人記得你來過，連黑影也嫌棄地吹散了你的灰燼。"
+            }
+        };
+
+        // UI 渲染與核心邏輯
+        const locationNameEl = document.getElementById("locationName");
+        const dialogTextEl = document.getElementById("dialogText");
+        const optionsEl = document.getElementById("options");
+        const inventoryEl = document.getElementById("inventory");
+        const statusTextEl = document.getElementById("statusText");
+        const restartBtn = document.getElementById("restartBtn");
+
+        function setDialog(text) {
+            dialogTextEl.textContent = text;
+        }
+
+        function setOptions(optionDefs) {
+            optionsEl.innerHTML = "";
+            optionDefs.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                const label = document.createElement("span");
+                label.textContent = opt.text;
+                const keyHint = document.createElement("span");
+                keyHint.className = "option-key";
+                keyHint.textContent = `選項 ${index + 1}`;
+                btn.appendChild(label);
+                btn.appendChild(keyHint);
+
+                btn.addEventListener("click", () => {
+                    if (opt.action) {
+                        opt.action();
+                    }
+                    if (opt.next) {
+                        state.location = opt.next;
+                        render();
+                    }
+                });
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function setStatus(text) {
+            statusTextEl.textContent = text;
+        }
+
+        function addItem(item) {
+            if (!state.inventory.includes(item)) {
+                state.inventory.push(item);
+            }
+            renderInventory();
+        }
+
+        function renderInventory() {
+            inventoryEl.innerHTML = "";
+            let currentInv = [...state.inventory];
+            if (state.flags.hasAlys) {
+                currentInv.unshift("夥伴：艾莉絲 👥");
+            }
+            if (currentInv.length === 0) {
+                inventoryEl.textContent = "道具：無";
+                return;
+            }
+            inventoryEl.textContent = "道具：";
+            if (state.flags.hasAlys) {
+                inventoryEl.textContent = "隊伍以及道具：";
+            }
+            currentInv.forEach((item) => {
+                const span = document.createElement("span");
+                span.textContent = item;
+                inventoryEl.appendChild(span);
+            });
+        }
+
+        function endGame(type) {
+            state.ended = true;
+            const ending = endings[type];
+            locationNameEl.textContent = ending.title;
+            setDialog(ending.text);
+            setOptions([
+                {
+                    text: "在黑暗中重新睜眼，回到起點 🔁",
+                    next: "graveyard",
+                    action: () => restartGame()
+                }
+            ]);
+            setStatus("故事已落下帷幕。");
+        }
+
+        function render() {
+            if (state.ended) return;
+            const loc = locations[state.location];
+            locationNameEl.textContent = loc.name;
+            setDialog(loc.text());
+            setOptions(loc.options());
+            renderInventory();
+        }
+
+        function restartGame() {
+            state.location = "graveyard";
+            state.inventory = [];
+            state.flags = {
+                hasAlys: false,
+                metShade: false,
+                hasKeyItem: false,
+                bargainedWithShade: false,
+                angeredShade: false,
+                sacrificedBlood: false
+            };
+            state.ended = false;
+            setStatus("選擇你的命運⋯");
+            render();
+        }
+
+        restartBtn.addEventListener("click", restartGame);
+
+        // 遊戲啟動
+        render();
+    </script>
+</body>
+
+</html>

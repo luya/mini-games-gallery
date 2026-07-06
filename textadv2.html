@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>黑色偵探懸疑：霓虹雨夜的落幕</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            /* 調整為深夜冷雨藍黑色調的漸層 */
+            background: radial-gradient(circle at top, #141d26 0%, #0b0f14 60%, #05070a 100%);
+            color: #d1d7de;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game {
+            width: 90%;
+            max-width: 720px;
+            border-radius: 8px;
+            /* 帶有一點雨夜藍與霧感的背景 */
+            background: rgba(15, 22, 30, 0.98);
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(218, 51, 74, 0.1);
+            /* 霓虹紅與雨夜藍的邊框線 */
+            border: 1px solid #1f2d3d;
+            border-top: 2px solid #da334a;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #1f2d3d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* 警局黑與冷色調 */
+            background: linear-gradient(to right, #0f1620, #16202c);
+        }
+
+        .title {
+            font-size: 17px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            /* 霓虹招牌般的微發光紅 */
+            color: #ff3b56;
+            text-shadow: 0 0 5px rgba(255, 59, 86, 0.4);
+        }
+
+        .inventory {
+            font-size: 13px;
+            color: #8fa0b3;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .inventory span {
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid #2c3e50;
+            /* 老舊案件卷宗的微黃色 */
+            background: rgba(36, 52, 71, 0.7);
+            color: #cbd5e1;
+        }
+
+        .dialog {
+            padding: 22px 20px;
+            min-height: 190px;
+            line-height: 1.7;
+            font-size: 15px;
+            position: relative;
+            background: #0b1017;
+        }
+
+        .location-name {
+            font-size: 13px;
+            font-weight: bold;
+            /* 打字機琥珀黃 */
+            color: #ffb74d;
+            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .dialog-text {
+            white-space: pre-line;
+            color: #e2e8f0;
+        }
+
+        .skull {
+            position: absolute;
+            right: 16px;
+            bottom: 12px;
+            opacity: 0.15;
+            font-size: 26px;
+        }
+
+        .options {
+            border-top: 1px solid #1f2d3d;
+            padding: 14px 16px 18px;
+            background: #080c12;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 4px;
+            border: 1px solid #253344;
+            /* 偵探風衣與老照片的深藍灰 */
+            background: #121a24;
+            color: #cbd5e1;
+            font-size: 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn span {
+            max-width: 88%;
+        }
+
+        /* 懸停效果：亮起雨夜的霓虹藍邊框與琥珀色字體 */
+        .option-btn:hover {
+            background: #182331;
+            border-color: #38bdf8;
+            color: #ffb74d;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+            transform: translateX(2px);
+        }
+
+        .option-btn:active {
+            transform: translateX(0);
+            background: #0f1620;
+        }
+
+        .option-key {
+            font-size: 11px;
+            color: #576f8a;
+            font-family: monospace;
+        }
+
+        .footer {
+            padding: 10px 16px 12px;
+            font-size: 11px;
+            color: #576f8a;
+            border-top: 1px solid #121a24;
+            background: #05070a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .restart-btn {
+            border: none;
+            background: transparent;
+            color: #718096;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .restart-btn:hover {
+            border-color: #4a5568;
+            color: #ff3b56;
+        }
+
+        @media (max-width: 480px) {
+            .dialog {
+                min-height: 170px;
+            }
+        }
+
+        #backBtn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            /* 返回按鈕改為復古警徽的銀藍灰色調 */
+            background: #334155;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        #backBtn:hover {
+            transform: scale(1.15);
+            background: #475569;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="game">
+        <div class="header">
+            <div class="title">黑色懸疑：霓虹雨夜的落幕</div>
+        </div>
+        <div class="header">
+            <div class="inventory" id="inventory"></div>
+        </div>
+
+        <div class="dialog">
+            <div class="location-name" id="locationName"></div>
+            <div class="dialog-text" id="dialogText"></div>
+            <div class="skull">🔍</div>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div class="footer">
+            <span id="statusText">尋找案件的真相⋯</span>
+            <button class="restart-btn" id="restartBtn">重新調查 🔁</button>
+        </div>
+    </div>
+
+    <script>
+        // 10 個道具（包含 3 個關鍵道具）
+        const ITEMS = {
+            FLASHLIGHT: "強力手電筒 🔦",
+            CROWBAR: "重型撬棍 🔨",
+            POWDER: "採指紋粉 🧪",
+            KEYRING: "管理員鑰匙圈 🔑",
+            WHISKEY: "陳年波本威士忌 🥃",
+            DOSSIER: "機密調查報告 📂",
+            COIN: "地下賭場紀念幣 🪙",
+            LETTER: "市長的簽名密信 📜",     // 關鍵道具 1
+            REVOLVER: "雕花金屬左輪 🔫",   // 關鍵道具 2
+            FILM: "備份微縮膠卷 🎞️"        // 關鍵道具 3
+        };
+
+        // 遊戲狀態
+        const state = {
+            location: "office",
+            inventory: [],
+            flags: {
+                hasRose: false,        // 夥伴：黑幫情婦蘿絲
+                reportedToPolice: false,
+                hasKeyItem: false,
+                searchedDesk: false,
+                bribedGuard: false,
+                attackedThug: false
+            },
+            ended: false
+        };
+
+        // 20 個場景設定
+        const locations = {
+            // 1. 起點
+            office: {
+                name: "1. 私人偵探事務所",
+                text: () => "窗外下著暴雨，霓虹燈光透過百葉窗投下血紅的陰影。\n你的桌上放著一杯沒喝完的咖啡。昨夜，名流富商之死震驚全城，而你收到了一封匿名恐嚇信，警告你別插手。",
+                options: () => {
+                    const opts = [
+                        { text: "前往案發現場：富豪豪宅 🏙️", next: "mansion" },
+                        { text: "前往常去的藍調酒吧打聽消息 🍸", next: "bar" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.FLASHLIGHT)) {
+                        opts.push({
+                            text: "翻找事務所抽屜，準備辦案工具 🔍",
+                            next: "office",
+                            action: () => { addItem(ITEMS.FLASHLIGHT); setStatus("你帶上了你的「強力手電筒」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 2. 富豪豪宅
+            mansion: {
+                name: "2. 富豪豪宅",
+                text: () => "命案現場已經被警方封鎖，但警戒線在風雨中搖晃。\n豪宅二樓的書房黑漆漆一片，大門被緊緊鎖上。",
+                options: () => {
+                    const opts = [
+                        { text: "返回偵探事務所 ↩️", next: "office" },
+                        { text: "繞到豪宅後方的陰暗後巷 🌆", next: "alley" }
+                    ];
+                    if (state.inventory.includes(ITEMS.FLASHLIGHT) && !state.inventory.includes(ITEMS.CROWBAR)) {
+                        opts.push({
+                            text: "用手電筒照亮門警室，搜查值班台 🔦",
+                            next: "mansion",
+                            action: () => { addItem(ITEMS.CROWBAR); setStatus("你在警衛室的值班台底下發現了一把「重型撬棍」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 3. 藍調酒吧
+            bar: {
+                name: "3. 藍調酒吧",
+                text: () => "薩克斯風的音樂低沉迴盪。菸霧繚繞中，調酒師正在擦拭酒杯。\n據說這裡是各路情報的集散地。",
+                options: () => {
+                    const opts = [
+                        { text: "返回偵探事務所 ↩️", next: "office" },
+                        { text: "前往繁華的市中心中央廣場 廣場", next: "square" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.WHISKEY)) {
+                        opts.push({
+                            text: "向調酒師買一瓶上好的酒，留作打點關係 🥃",
+                            next: "bar",
+                            action: () => { addItem(ITEMS.WHISKEY); setStatus("你將一瓶「陳年波本威士忌」放進風衣口袋。"); }
+                        });
+                    }
+                    if (state.inventory.includes(ITEMS.LETTER)) {
+                        opts.push({ text: "拿出密信詢問常客，開啟秘密通道 📜", next: "dock" });
+                    }
+                    return opts;
+                }
+            },
+            // 4. 豪宅後巷
+            alley: {
+                name: "4. 豪宅後巷",
+                text: () => "雨水從排水管沖刷而下。一個黑影在垃圾桶旁翻找著什麼，看到你便停下了動作，右手摸向懷裡。",
+                options: () => {
+                    const opts = [
+                        { text: "退回豪宅前門 ↩️", next: "mansion" },
+                        { text: "不理會黑影，迅速前往地下停車場 🚗", next: "parking" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.POWDER)) {
+                        opts.push({
+                            text: "搜查地上的廢棄公事包 🧪",
+                            next: "alley",
+                            action: () => { addItem(ITEMS.POWDER); setStatus("公事包裡有遺留的鑑識工具，你獲得「採指紋粉」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 5. 地下停車場
+            parking: {
+                name: "5. 地下停車場",
+                text: () => "一盞死氣沉沉的日光燈忽明忽暗。死者生前停放的防彈轎車還在這裡，後車廂有一絲縫隙。",
+                options: () => {
+                    const opts = [
+                        { text: "從另一側出口前往紅燈區廢墟 🏘️", next: "slum" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.LETTER) && !state.flags.searchedDesk) {
+                        opts.push({
+                            text: "撬開後車廂並仔細搜查 📜",
+                            next: "parking",
+                            action: () => {
+                                addItem(ITEMS.LETTER);
+                                state.flags.searchedDesk = true;
+                                setStatus("你找到了一封不可告人的重要證據：【市長的簽名密信】。");
+                            }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 6. 紅燈區廢墟 (夥伴加入)
+            slum: {
+                name: "6. 紅燈區廢墟",
+                text: () => {
+                    let base = "霓虹燈招牌半吊在半空中，雨水順著招牌滴落。";
+                    if (!state.flags.hasRose) {
+                        base += "\n一個身穿紅色絲綢風衣、高跟鞋踩在水坑裡的美豔女子正被兩名流氓圍堵。她是死者生前的地下情婦——蘿絲。她冷笑道：『偵探，帶我離開這，我知道這座城市最髒的祕密。』";
+                    } else {
+                        base += "\n黑幫情婦蘿絲緊跟在你身後，散發著致命的香水味。";
+                    }
+                    return base;
+                },
+                options: () => {
+                    const opts = [
+                        { text: "前往黑幫堂口：金帝國歌舞廳 💃", next: "club" },
+                        { text: "撤回中央廣場 🌆", next: "square" }
+                    ];
+                    if (!state.flags.hasRose) {
+                        opts.push({
+                            text: "出手解圍，邀請蘿絲同行 👥",
+                            next: "slum",
+                            action: () => { state.flags.hasRose = true; setStatus("「黑幫情婦」蘿絲加入了你的隊伍！"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 7. 金帝國歌舞廳
+            club: {
+                name: "7. 金帝國歌舞廳",
+                text: () => "重低音音響震耳欲聾，門口站著幾名滿身刺青、眼神狠戾的黑幫保鏢。強行進入恐遭圍毆。",
+                options: () => {
+                    const opts = [
+                        { text: "退回紅燈區廢墟 ↩️", next: "slum" },
+                        { text: "硬闖進去（極度危險） 🏃", next: "vip" }
+                    ];
+                    if (state.flags.hasRose) {
+                        opts.push({
+                            text: "讓蘿絲上前與保鏢調情，分散他們的注意力 🤫",
+                            next: "vip",
+                            action: () => { setStatus("保鏢們看到昔日大嫂驚喜萬分，蘿絲順利帶你從VIP通道溜了進去。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 8. VIP貴賓賭廳
+            vip: {
+                name: "8. VIP貴賓賭廳",
+                text: () => "綠色呢絨桌面上散落著籌碼，空氣裡滿是雪茄味。這裡聚集著城市裡隻手遮天的人物。",
+                options: () => {
+                    const opts = [
+                        { text: "穿過賭廳，前往後門的中央廣場 🌆", next: "square" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.COIN)) {
+                        opts.push({
+                            text: "在賭桌底下的夾層中翻找 🪙",
+                            next: "vip",
+                            action: () => { addItem(ITEMS.COIN); setStatus("你發現了一枚特殊的「地下賭場紀念幣」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 9. 中央廣場
+            square: {
+                name: "9. 中央廣場",
+                text: () => "巨大的市政廣告螢幕正播放著市長的競選演講，雨水打在光滑的大理石地面上。",
+                options: () => {
+                    const opts = [
+                        { text: "走向廣場對面的市立檔案館 🏛️", next: "archives" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.DOSSIER)) {
+                        opts.push({
+                            text: "調查長椅上被遺棄的公文袋 📂",
+                            next: "square",
+                            action: () => { addItem(ITEMS.DOSSIER); setStatus("你得到了「機密調查報告」，裡面夾著死者的部分日記。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 10. 市立檔案館
+            archives: {
+                name: "10. 市立檔案館",
+                text: () => "高聳的書架直達天花板。在機密保險櫃前，懸掛著一柄傳聞中黑幫教父當年使用的黃金手槍。",
+                options: () => {
+                    const opts = [
+                        { text: "前往港口碼頭倉庫 ⚓", next: "dock" }
+                    ];
+                    if (state.inventory.includes(ITEMS.CROWBAR) && !state.inventory.includes(ITEMS.REVOLVER)) {
+                        opts.push({
+                            text: "用重型撬棍破壞保險櫃機關 🔫",
+                            next: "archives",
+                            action: () => { addItem(ITEMS.REVOLVER); setStatus("撬棍變形了，但你成功拿到了致命武力：關鍵道具【雕花金屬左輪】！"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 11. 港口碼頭倉庫
+            dock: {
+                name: "11. 港口碼頭倉庫",
+                text: () => "海浪猛烈拍擊著岸堤。13號倉庫大門緊閉，門口吊著一盞昏暗的黃色防爆燈。",
+                options: () => {
+                    const opts = [
+                        { text: "繞到後方的廢棄地鐵隧道 🚇", next: "subway" }
+                    ];
+                    if (state.inventory.includes(ITEMS.WHISKEY)) {
+                        opts.push({
+                            text: "把波本威士忌送給看守的巡邏員作為賄賂 🥃",
+                            next: "dock",
+                            action: () => { endGame("seal"); } // 觸發結局：封印者
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 12. 廢棄地鐵隧道
+            subway: {
+                name: "12. 廢棄地鐵隧道",
+                text: () => "廢棄多年的軌道一片漆黑，深處隱約傳來不法之徒交易的談話聲與回音。",
+                options: () => {
+                    const opts = [
+                        { text: "潛伏前進，前往地底秘密沖印室 📸", next: "lab" }
+                    ];
+                    if (state.flags.hasRose) {
+                        opts.push({
+                            text: "讓蘿絲用她的黑幫暗號對暗號 🎵",
+                            next: "lab",
+                            action: () => { setStatus("蘿絲熟練地敲擊鐵軌發出暗號，潛伏的哨兵以為是自己人，放你們通過。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 13. 地底秘密沖印室
+            lab: {
+                name: "13. 地底秘密沖印室",
+                text: () => "紅色安全燈將狹小的空間照得詭異無比。桌上擺滿了各種化學藥劑與剛洗好的照片。",
+                options: () => {
+                    const opts = [
+                        { text: "通往總警局機密檔案室 🏢", next: "police" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.KEYRING)) {
+                        opts.push({
+                            text: "在晾乾的照片架底下搜查 🔑",
+                            next: "lab",
+                            action: () => { addItem(ITEMS.KEYRING); setStatus("你找到了一把「管理員鑰匙圈」。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 14. 總警局機密檔案室
+            police: {
+                name: "14. 總警局機密檔案室",
+                text: () => "深夜的警局檔案室空無一人。核心鐵櫃裡鎖著本案最關鍵的鐵證。",
+                options: () => {
+                    const opts = [
+                        { text: "離開警局，前往腐敗的市政廳大樓 🏛️", next: "cityhall" }
+                    ];
+                    if (!state.inventory.includes(ITEMS.FILM)) {
+                        opts.push({
+                            text: "冒著被捕風險，用指紋粉與鑰匙圈破解鐵櫃 📜",
+                            next: "police",
+                            action: () => { addItem(ITEMS.FILM); setStatus("你成功拿到記錄了高層勾結黑幫的關鍵道具【備份微縮膠卷】。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 15. 市政廳大樓
+            cityhall: {
+                name: "15. 市政廳大樓",
+                text: () => "古典宏偉的大樓此時宛如巨獸。若沒有足夠的證據或路線，隨時會被當作恐怖分子擊斃。",
+                options: () => {
+                    const opts = [];
+                    if (state.inventory.includes(ITEMS.LETTER)) {
+                        opts.push({
+                            text: "出示手上的【市長簽名密信】讓警衛放行，前往市長辦公室 🚪",
+                            next: "confrontation"
+                        });
+                    } else {
+                        opts.push({
+                            text: "在沒有任何信物的情況下強行搭電梯上樓 🚶",
+                            next: "cityhall",
+                            action: () => { endGame("void"); } // 觸發結局：歸於虛無
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 16. 市長辦公室頂樓
+            confrontation: {
+                name: "16. 市長辦公室頂樓",
+                text: () => "巨大的落地窗外是整座城市的夜景。這裡是一切罪惡的源頭，分歧的終點就在眼前。",
+                options: () => {
+                    const opts = [
+                        { text: "將所有證據燒毀，收下封口費離開這座城市 🌌", action: () => { endGame("door"); } }, // 觸發結局：裂隙之門（利益薰心）
+                        { text: "前往頂樓直升機停機坪，攔截準備潛逃的人 🚁", next: "helipad" },
+                        { text: "走向辦公室深處的暗門：地下金庫 👑", next: "vault" }
+                    ];
+                    if (state.flags.hasRose) {
+                        opts.push({ text: "轉向蘿絲，詢問她與這宗謀殺案的真正關係 👁️", next: "roseSecret" });
+                    }
+                    return opts;
+                }
+            },
+            // 17. 直升機停機坪
+            helipad: {
+                name: "17. 直升機停機坪",
+                text: () => "狂風暴雨中，直升機的螺旋槳瘋狂旋轉。黑幫高層正準備登機，四周的保鏢已經拔出了槍。",
+                options: () => {
+                    const opts = [
+                        { text: "退回辦公室 ↩️", next: "confrontation" }
+                    ];
+                    if (state.inventory.includes(ITEMS.FILM) && !state.inventory.includes(ITEMS.HOURGLASS)) {
+                        opts.push({
+                            text: "利用微縮膠卷作為談判籌碼，拖延時間 ⏳",
+                            next: "helipad",
+                            action: () => { setStatus("你成功用底片拖住了對方，但對方開出了更誘人的合作條件。"); }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 18. 地下金庫
+            vault: {
+                name: "18. 地下金庫",
+                text: () => "沉重的鈦合金大門敞開，市長親信正坐在錢堆上，手裡拿著槍：「偵探，你是要正義，還是要命？」",
+                options: () => {
+                    const opts = [
+                        { text: "向現實妥協，喝下對方倒的毒酒自我了斷 🧪", action: () => { endGame("void"); } }
+                    ];
+                    if (state.inventory.includes(ITEMS.REVOLVER)) {
+                        opts.push({
+                            text: "拔出【雕花金屬左輪】，在霓虹雨夜中扣下正義的扳機！ 🔫",
+                            action: () => { endGame("godslayer"); } // 觸發結局：弒神之刃（正義審判）
+                        });
+                    }
+                    if (state.inventory.includes(ITEMS.FILM)) {
+                        opts.push({
+                            text: "前往廣播塔，將真相公諸於世 🪐",
+                            next: "broadcasting"
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 19. 蘿絲的秘密救贖
+            roseSecret: {
+                name: "19. 蘿絲的秘密救贖",
+                text: () => "蘿絲看著你手上的密信，眼眶泛紅。原來她才是真正的復仇者，死去的富豪害死了她的家人。她想與這棟大樓同歸於盡。你可以選擇用你的指環/信物帶她逃走，或者成全她。",
+                options: () => {
+                    const opts = [
+                        { text: "退回市長辦公室 ↩️", next: "confrontation" },
+                        {
+                            text: "將逃亡的密信和資金交給蘿絲，替她頂罪 📜",
+                            action: () => { endGame("salvation"); } // 觸發結局：盲女的救贖（替罪羔羊）
+                        }
+                    ];
+                    return opts;
+                }
+            },
+            // 20. 中央廣播塔頂
+            broadcasting: {
+                name: "20. 中央廣播塔頂",
+                text: () => "暴風雨達到了頂點。廣播系統已經連線，只要按下按鈕，全城的市民都會知道高層的醜聞。但黑幫的大部隊已經包圍了這裡。",
+                options: () => {
+                    const opts = [];
+                    if (state.inventory.includes(ITEMS.FILM) && state.inventory.includes(ITEMS.DOSSIER)) {
+                        opts.push({
+                            text: "將微縮膠卷與報告插入播放機，全城同步直播真相！ 🎞️",
+                            action: () => { endGame("loop"); } // 觸發結局：時間無限循環（全城覺醒）
+                        });
+                    } else {
+                        opts.push({
+                            text: "信號彈打向天空，等待黑暗將你淹沒 🪐",
+                            action: () => { endGame("void"); }
+                        });
+                    }
+                    return opts;
+                }
+            }
+        };
+
+        // 6 種結局設定
+        const endings = {
+            door: {
+                title: "結局一：利益薰心 (常規結局)",
+                text: "你收下了厚重的封口費，燒毀了所有密信與底片。\n當晚，你搭上了離開這座城市的單程列車。霓虹依舊閃爍，但你明白，你的偵探靈魂已經死在了那個雨夜。\n餘生，你將在無盡的內疚中虛度⋯⋯"
+            },
+            seal: {
+                title: "結局二：同流合污 (常規結局)",
+                text: "你用那瓶波本威士忌和偽造的報告打點了碼頭黑幫，換取了地下賭場的股份。\n案件被當作普通的強盜殺人案結案，世界看似恢復了平靜。\n但每當雷雨交加，你都會看見死者那雙不瞑目的眼睛在黑暗中瞪著你。"
+            },
+            godslayer: {
+                title: "結局三：正義審判 (戰鬥結局)",
+                text: "伴隨著一聲震耳欲聾的槍響，【雕花金屬左輪】射出的子彈終結了幕後黑手的生命！\n市長垮台，黑幫覆滅。然而，舊的勢力倒下，新的權力真空引來了更殘酷的地下爭奪。\n為了守護這座城市脆弱的秩序，你不得不戴上教父的面具，走入那更深的夜色中。"
+            },
+            salvation: {
+                title: "結局四：替罪羔羊 (同伴結局)",
+                text: "你將最後的逃生機會與市長密信交給了蘿絲，讓她連夜遠走高飛。\n警笛聲大作，無數槍口對準了你。你點燃了最後一根菸，微笑著舉起雙手頂下了所有罪名。\n蘿絲自由了，而你將在暗無天日的聯邦監獄裡度過餘生。"
+            },
+            loop: {
+                title: "結局五：全城覺醒 (隱藏真結局)",
+                text: "廣播塔的巨型天線頂著雷電將【微縮膠卷】與調查報告直播到了全城每一個收音機與電視螢幕！\n真相引發了全城的大海嘯，憤怒的市民湧上街頭，舊腐敗體制瞬間土崩瓦解。\n\n當黎明的第一道曙光穿透黑雲照在你身上時，你抽著煙笑了：這座城市，終於迎來了真正的破曉。"
+            },
+            void: {
+                title: "結局六：沉入哈德遜河 (壞結局)",
+                text: "你沒能拼湊出完整的真相，也低估了對手的殘酷。\n在市政廳的走廊或金庫中，你被亂槍打穿。隨後，你的雙腳被灌入水泥，沉入了冰冷的哈德遜河底。\n明天報紙的角落只會多出一則新聞：『無名男屍浮現河面』。沒有人會記得你的名字。"
+            }
+        };
+
+        // UI 渲染與核心邏輯
+        const locationNameEl = document.getElementById("locationName");
+        const dialogTextEl = document.getElementById("dialogText");
+        const optionsEl = document.getElementById("options");
+        const inventoryEl = document.getElementById("inventory");
+        const statusTextEl = document.getElementById("statusText");
+        const restartBtn = document.getElementById("restartBtn");
+
+        function setDialog(text) {
+            dialogTextEl.textContent = text;
+        }
+
+        function setOptions(optionDefs) {
+            optionsEl.innerHTML = "";
+            optionDefs.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                const label = document.createElement("span");
+                label.textContent = opt.text;
+                const keyHint = document.createElement("span");
+                keyHint.className = "option-key";
+                keyHint.textContent = `線索 ${index + 1}`;
+                btn.appendChild(label);
+                btn.appendChild(keyHint);
+
+                btn.addEventListener("click", () => {
+                    if (opt.action) {
+                        opt.action();
+                    }
+                    if (opt.next) {
+                        state.location = opt.next;
+                        render();
+                    }
+                });
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function setStatus(text) {
+            statusTextEl.textContent = text;
+        }
+
+        function addItem(item) {
+            if (!state.inventory.includes(item)) {
+                state.inventory.push(item);
+            }
+            renderInventory();
+        }
+
+        function renderInventory() {
+            inventoryEl.innerHTML = "";
+            let currentInv = [...state.inventory];
+            if (state.flags.hasRose) {
+                currentInv.unshift("夥伴：蘿絲 👥");
+            }
+            if (currentInv.length === 0) {
+                inventoryEl.textContent = "線索道具：無";
+                return;
+            }
+            inventoryEl.textContent = "線索道具：";
+            if (state.flags.hasAlys) {
+                inventoryEl.textContent = "隊伍人員以及線索道具：";
+            }
+            currentInv.forEach((item) => {
+                const span = document.createElement("span");
+                span.textContent = item;
+                inventoryEl.appendChild(span);
+            });
+        }
+
+        function endGame(type) {
+            state.ended = true;
+            const ending = endings[type];
+            locationNameEl.textContent = ending.title;
+            setDialog(ending.text);
+            setOptions([
+                {
+                    text: "在雨夜的事務所中再度睜眼，重啟調查 🔁",
+                    next: "office",
+                    action: () => restartGame()
+                }
+            ]);
+            setStatus("案件調查已宣告落幕。");
+        }
+
+        function render() {
+            if (state.ended) return;
+            const loc = locations[state.location];
+            locationNameEl.textContent = loc.name;
+            setDialog(loc.text());
+            setOptions(loc.options());
+            renderInventory();
+        }
+
+        function restartGame() {
+            state.location = "office";
+            state.inventory = [];
+            state.flags = {
+                hasRose: false,
+                reportedToPolice: false,
+                hasKeyItem: false,
+                searchedDesk: false,
+                bribedGuard: false,
+                attackedThug: false
+            };
+            state.ended = false;
+            setStatus("尋找案件的真相⋯");
+            render();
+        }
+
+        restartBtn.addEventListener("click", restartGame);
+
+        // 遊戲啟動
+        render();
+    </script>
+</body>
+
+</html>
