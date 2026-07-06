@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>手機版踩地雷</title>
+    <style>
+        :root {
+            --cell-size: 40px;
+            --bg: #222;
+            --board-bg: #333;
+            --cell-bg: #444;
+            --cell-border: #666;
+            --cell-open-bg: #222;
+            --accent: #00c896;
+            --danger: #ff4b4b;
+            --text: #f5f5f5;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                sans-serif;
+            background: radial-gradient(circle at top, #444, #111);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .game-wrapper {
+            width: 100%;
+            max-width: 480px;
+            padding: 16px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        select,
+        button {
+            border-radius: 999px;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            background: #444;
+            color: var(--text);
+        }
+
+        button {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .status-label {
+            opacity: 0.8;
+        }
+
+        .status-value {
+            font-weight: 600;
+        }
+
+        .status-value.danger {
+            color: var(--danger);
+        }
+
+        .board {
+            background: var(--board-bg);
+            border-radius: 16px;
+            padding: 8px;
+            display: grid;
+            justify-content: center;
+            gap: 4px;
+            touch-action: manipulation;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border-radius: 8px;
+            background: var(--cell-bg);
+            border: 1px solid var(--cell-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            user-select: none;
+            position: relative;
+        }
+
+        .cell.open {
+            background: var(--cell-open-bg);
+            border-color: #555;
+        }
+
+        .cell.mine.open {
+            background: var(--danger);
+            color: #000;
+        }
+
+        .cell.flag::after {
+            content: "🚩";
+            font-size: 1.1rem;
+        }
+
+        .cell.mine.open::before {
+            content: "💣";
+            font-size: 1.1rem;
+        }
+
+        .cell-number-1 {
+            color: #4fc3f7;
+        }
+
+        .cell-number-2 {
+            color: #aed581;
+        }
+
+        .cell-number-3 {
+            color: #ffb74d;
+        }
+
+        .cell-number-4 {
+            color: #ba68c8;
+        }
+
+        .cell-number-5 {
+            color: #ef5350;
+        }
+
+        .cell-number-6 {
+            color: #26c6da;
+        }
+
+        .cell-number-7 {
+            color: #bdbdbd;
+        }
+
+        .cell-number-8 {
+            color: #8d6e63;
+        }
+
+        .message {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.95rem;
+            min-height: 1.2em;
+        }
+
+        #info {
+            font-size: 0.9rem;
+            color: #776e65;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        @media (max-width: 400px) {
+            :root {
+                --cell-size: 32px;
+            }
+        }
+
+        #backBtn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8f7a66;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            /* 動畫 */
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        #backBtn:hover {
+            transform: scale(1.15);
+            background: #a68b74;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="game-wrapper">
+        <div class="header">
+            <div class="title">踩地雷</div>
+            <div class="controls">
+                <select id="difficulty">
+                    <option value="8x10x10">簡單 8×10 (10雷)</option>
+                    <option value="10x12x20">普通 10×12 (20雷)</option>
+                    <option value="12x14x30">困難 12×14 (30雷)</option>
+                </select>
+                <button id="restartBtn">重新開始</button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div>
+                <span class="status-label">剩餘旗子：</span>
+                <span id="flagsLeft" class="status-value"></span>
+            </div>
+            <div>
+                <span class="status-label">狀態：</span>
+                <span id="gameStatus" class="status-value">點一下格子展開，長按插旗</span>
+            </div>
+        </div>
+        <div id="info">使用滑鼠左右鍵（踩踏/插旗）或在手機上觸碰跟長按。</div>
+        <div id="board" class="board"></div>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        const boardEl = document.getElementById("board");
+        const difficultyEl = document.getElementById("difficulty");
+        const restartBtn = document.getElementById("restartBtn");
+        const flagsLeftEl = document.getElementById("flagsLeft");
+        const gameStatusEl = document.getElementById("gameStatus");
+        const messageEl = document.getElementById("message");
+
+        let rows, cols, minesCount;
+        let board = [];
+        let gameOver = false;
+        let cellsOpened = 0;
+        let flagsLeft = 0;
+        let longPressTimer = null;
+        const LONG_PRESS_MS = 350;
+
+        function parseDifficulty(value) {
+            const [r, c, m] = value.split("x").map(Number);
+            return { rows: r, cols: c, mines: m };
+        }
+
+        function initGame() {
+            const diff = parseDifficulty(difficultyEl.value);
+            rows = diff.rows;
+            cols = diff.cols;
+            minesCount = diff.mines;
+            board = [];
+            gameOver = false;
+            cellsOpened = 0;
+            flagsLeft = minesCount;
+            flagsLeftEl.textContent = flagsLeft;
+            gameStatusEl.textContent = "遊戲中";
+            messageEl.textContent = "";
+
+            boardEl.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    row.push({
+                        row: r,
+                        col: c,
+                        mine: false,
+                        open: false,
+                        flag: false,
+                        number: 0,
+                        el: null
+                    });
+                }
+                board.push(row);
+            }
+
+            placeMines();
+            calculateNumbers();
+            renderBoard();
+        }
+
+        function placeMines() {
+            let placed = 0;
+            while (placed < minesCount) {
+                const r = Math.floor(Math.random() * rows);
+                const c = Math.floor(Math.random() * cols);
+                if (!board[r][c].mine) {
+                    board[r][c].mine = true;
+                    placed++;
+                }
+            }
+        }
+
+        function getNeighbors(r, c) {
+            const neighbors = [];
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = r + dr;
+                    const nc = c + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                        neighbors.push(board[nr][nc]);
+                    }
+                }
+            }
+            return neighbors;
+        }
+
+        function calculateNumbers() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = board[r][c];
+                    if (cell.mine) continue;
+                    const neighbors = getNeighbors(r, c);
+                    cell.number = neighbors.filter(n => n.mine).length;
+                }
+            }
+        }
+
+        function renderBoard() {
+            boardEl.innerHTML = "";
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = board[r][c];
+                    const cellEl = document.createElement("div");
+                    cellEl.className = "cell";
+                    cellEl.dataset.row = r;
+                    cellEl.dataset.col = c;
+
+                    attachCellEvents(cellEl);
+
+                    cell.el = cellEl;
+                    boardEl.appendChild(cellEl);
+                }
+            }
+        }
+
+        function attachCellEvents(cellEl) {
+            cellEl.addEventListener("touchstart", e => {
+                if (gameOver) return;
+                e.preventDefault();
+                const { row, col } = cellEl.dataset;
+                longPressTimer = setTimeout(() => {
+                    toggleFlag(+row, +col);
+                    longPressTimer = null;
+                }, LONG_PRESS_MS);
+            });
+
+            cellEl.addEventListener("touchend", e => {
+                if (gameOver) return;
+                e.preventDefault();
+                const { row, col } = cellEl.dataset;
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                    openCell(+row, +col);
+                }
+            });
+
+            cellEl.addEventListener("touchmove", () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+
+            // 也支援滑鼠（方便在電腦測試）
+            cellEl.addEventListener("click", () => {
+                if (gameOver) return;
+                const { row, col } = cellEl.dataset;
+                openCell(+row, +col);
+            });
+
+            cellEl.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                if (gameOver) return;
+                const { row, col } = cellEl.dataset;
+                toggleFlag(+row, +col);
+            });
+        }
+
+        function openCell(r, c) {
+            const cell = board[r][c];
+            if (cell.open || cell.flag || gameOver) return;
+
+            cell.open = true;
+            cellsOpened++;
+            updateCellView(cell);
+
+            if (cell.mine) {
+                gameOver = true;
+                revealAllMines();
+                gameStatusEl.textContent = "踩到地雷了！";
+                gameStatusEl.classList.add("danger");
+                messageEl.textContent = "再試一次吧～";
+                return;
+            }
+
+            if (cell.number === 0) {
+                const neighbors = getNeighbors(r, c);
+                neighbors.forEach(n => {
+                    if (!n.open && !n.mine) {
+                        openCell(n.row, n.col);
+                    }
+                });
+            }
+
+            checkWin();
+        }
+
+        function toggleFlag(r, c) {
+            const cell = board[r][c];
+            if (cell.open || gameOver) return;
+
+            if (cell.flag) {
+                cell.flag = false;
+                flagsLeft++;
+            } else {
+                if (flagsLeft <= 0) return;
+                cell.flag = true;
+                flagsLeft--;
+            }
+            flagsLeftEl.textContent = flagsLeft;
+            updateCellView(cell);
+        }
+
+        function updateCellView(cell) {
+            const el = cell.el;
+            el.className = "cell";
+
+            if (cell.open) {
+                el.classList.add("open");
+                if (cell.mine) {
+                    el.classList.add("mine");
+                    el.textContent = "";
+                } else if (cell.number > 0) {
+                    el.textContent = cell.number;
+                    el.classList.add(`cell-number-${cell.number}`);
+                } else {
+                    el.textContent = "";
+                }
+            } else {
+                el.textContent = "";
+            }
+
+            if (cell.flag && !cell.open) {
+                el.classList.add("flag");
+            }
+        }
+
+        function revealAllMines() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = board[r][c];
+                    if (cell.mine) {
+                        cell.open = true;
+                        updateCellView(cell);
+                    }
+                }
+            }
+        }
+
+        function checkWin() {
+            const totalCells = rows * cols;
+            if (cellsOpened === totalCells - minesCount) {
+                gameOver = true;
+                gameStatusEl.textContent = "你贏了！";
+                gameStatusEl.classList.remove("danger");
+                messageEl.textContent = "太強了！再來一局？";
+            }
+        }
+
+        restartBtn.addEventListener("click", () => {
+            initGame();
+        });
+
+        difficultyEl.addEventListener("change", () => {
+            initGame();
+        });
+
+        initGame();
+    </script>
+</body>
+
+</html>
