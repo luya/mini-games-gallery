@@ -1,199 +1,229 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-<meta charset="UTF-8">
-<title>連續點擊小遊戲</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👆</text></svg>">
+    <title>考驗手指速度</title>
 
-<style>
-  body {
-    font-family: sans-serif;
-    background: #222;
-    color: #fff;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    user-select: none;
-  }
+    <style>
+        html { font-size: 16px; }
+        canvas,
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
 
-  .top-bar {
-    margin-top: 20px;
-    font-size: 1.3rem;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+            -webkit-tap-highlight-color: transparent;
 
-  .click-area {
-    margin-top: 30px;
-    width: 80vw;
-    height: 80vw;
-    max-width: 350px;
-    max-height: 350px;
-    background: #444;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    cursor: pointer;
-    transition: background 0.1s, transform 0.1s;
-    -webkit-tap-highlight-color: transparent;
-    
-  }
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            touch-action: none;
+        }
 
-  .click-area:active {
-    background: #666;
-    transform: scale(0.97);
-  }
+        body {
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
+            background: #2e222f;
+            color: #ffffff;
+            height: 100svh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            user-select: none;
+        }
 
-  .bottom-bar {
-    margin-top: 30px;
-  }
+        .top-bar {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-  button {
-    padding: 14px 28px;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 8px;
-    background: #ff9800;
-    color: #222;
-    cursor: pointer;
-  }
+        .click-area {
+            margin-top: 30px;
+            width: 80vw;
+            height: 40svh;
+            /* max-width: 350px; */
+            /* max-height: 350px; */
+            background: #4d9be6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: background 0.1s, transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
 
-  button:disabled {
-    background: #777;
-    cursor: not-allowed;
-  }
+        }
 
-  .result {
-    margin-top: 20px;
-    font-size: 1.4rem;
-    color: #ffeb3b;
-  }
+        .click-area:active {
+            background: #3e3546;
+            transform: scale(0.97);
+        }
 
-  #backBtn {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 9999;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #8f7a66;
-    color: #fff;
-    text-decoration: none;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+        .bottom-bar {
+            margin-top: 30px;
+        }
 
-    /* 動畫 */
-    transition: transform 0.2s ease, background 0.2s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-  }
+        button {
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: #fb6b1d;
+            color: #45293f;
+            cursor: pointer;
+        }
 
-  #backBtn:hover {
-    transform: scale(1.15);
-    background: #a68b74;
-  }
-</style>
+        button:disabled {
+            background: #9babb2;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #fbff86;
+            white-space: pre-line;
+        }
+
+        #backBtn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8f7a66;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            /* 動畫 */
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        #backBtn:hover {
+            transform: scale(1.15);
+            background: #a68b74;
+        }
+    </style>
 </head>
+
 <body>
-<a id="backBtn" href="index.html">🏠</a>
-<div class="top-bar">
-  <div>倒數時間：<span id="time">10</span> 秒</div>
-  <div>連點次數：<span id="count">0</span></div>
-  <div>每秒點擊數（CPS）：<span id="cps">0</span></div>
-</div>
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="top-bar">
+        <div>倒數時間：<span id="time">10</span> 秒</div>
+        <div>連點次數：<span id="count">0</span></div>
+        <div>每秒點擊數（CPS）：<span id="cps">0</span></div>
+    </div>
 
-<div class="click-area" id="clickArea">點我！</div>
+    <div class="click-area" id="clickArea">點我！</div>
 
-<div class="bottom-bar">
-  <button id="startBtn">開始 / 繼續</button>
-</div>
+    <div class="bottom-bar">
+        <button id="startBtn">開始 / 繼續</button>
+    </div>
 
-<div class="result" id="result"></div>
+    <div class="result" id="result"></div>
 
-<script>
-  const timeEl = document.getElementById("time");
-  const countEl = document.getElementById("count");
-  const cpsEl = document.getElementById("cps");
-  const clickArea = document.getElementById("clickArea");
-  const startBtn = document.getElementById("startBtn");
-  const resultEl = document.getElementById("result");
+    <script>
+        const timeEl = document.getElementById("time");
+        const countEl = document.getElementById("count");
+        const cpsEl = document.getElementById("cps");
+        const clickArea = document.getElementById("clickArea");
+        const startBtn = document.getElementById("startBtn");
+        const resultEl = document.getElementById("result");
 
-  let totalTime = 10;
-  let remainingTime = totalTime;
-  let count = 0;
-  let timer = null;
-  let isRunning = false;
+        let totalTime = 3;
+        let remainingTime = totalTime;
+        let count = 0;
+        let timer = null;
+        let isRunning = false;
 
-  function updateUI() {
-    timeEl.textContent = remainingTime;
-    countEl.textContent = count;
-    cpsEl.textContent = (count / (totalTime - remainingTime)).toFixed(1);
-  }
+        function updateUI() {
+            timeEl.textContent = remainingTime;
+            countEl.textContent = count;
+            cpsEl.textContent = (count / (totalTime - remainingTime)).toFixed(1);
+        }
 
-  function getComment(cps) {
-    if (cps >= 10) return "⚡ 手速爆炸！你是閃電俠";
-    if (cps >= 6) return "🔥 手速很快！不錯喔";
-    if (cps >= 3) return "🙂 手速普通，再加油";
-    return "🐌 手速偏慢，多練練吧";
-  }
+        function getComment(cps) {
+            if (cps >= 10) return "⚡ 手速爆炸！你是閃電俠！";
+            if (cps >= 6) return "🔥 手速很快！不錯喔！";
+            if (cps >= 3) return "🙂 手速普通，再加油！";
+            return "🐌 手速偏慢，多練練吧！";
+        }
 
-  function startGame() {
-    if (isRunning) return;
+        function startGame() {
+            if (isRunning) return;
 
-    if (remainingTime <= 0) {
-      remainingTime = totalTime;
-      count = 0;
-      resultEl.textContent = "";
-    }
+            if (remainingTime <= 0) {
+                remainingTime = totalTime;
+                count = 0;
+                resultEl.textContent = "";
+            }
 
-    isRunning = true;
-    startBtn.disabled = true;
-    clickArea.textContent = "狂點！";
+            isRunning = true;
+            startBtn.disabled = true;
+            clickArea.textContent = "狂點！";
 
-    timer = setInterval(() => {
-      remainingTime--;
-      updateUI();
+            timer = setInterval(() => {
+                remainingTime--;
+                updateUI();
 
-      if (remainingTime <= 0) {
-        clearInterval(timer);
-        isRunning = false;
-        startBtn.disabled = false;
-        clickArea.textContent = "時間到！";
+                if (remainingTime <= 0) {
+                    clearInterval(timer);
+                    isRunning = false;
+                    startBtn.disabled = false;
+                    clickArea.textContent = "時間到！";
 
-        const cpsFinal = (count / totalTime).toFixed(1);
-        resultEl.textContent = `你的 CPS：${cpsFinal}　→　${getComment(cpsFinal)}`;
-      }
-    }, 1000);
-  }
+                    const cpsFinal = (count / totalTime).toFixed(1);
+                    resultEl.textContent = `你的CPS🎖️：${cpsFinal}→${getComment(cpsFinal)}`;
+                    const best = Number(localStorage.getItem("bestCPS") || 0).toFixed(1);
+                    resultEl.textContent += `\n目前最高CPS紀錄：${best}🏆`;
+                    if (cpsFinal > best){
+                        localStorage.setItem("bestCPS", cpsFinal);
+                        resultEl.textContent += "→恭喜破紀錄！🎊";
+                    }
+                }
+            }, 1000);
+        }
 
-  function handleClickArea() {
-    if (!isRunning) return;
-    count++;
-    updateUI();
-  }
+        function handleClickArea() {
+            if (!isRunning) return;
+            count++;
+            updateUI();
+        }
 
-  startBtn.addEventListener("click", startGame);
-  // 手機用 touchstart，電腦用 click
-  if ("ontouchstart" in window) {
-    clickArea.addEventListener("touchstart", (e) => {
-      e.preventDefault(); // 防止觸發 click
-      handleClickArea();
-    });
-  } else {
-    clickArea.addEventListener("click", handleClickArea);
-  }
+        startBtn.addEventListener("click", startGame);
+        // 手機用 touchstart，電腦用 click
+        if ("ontouchstart" in window) {
+            clickArea.addEventListener("touchstart", (e) => {
+                e.preventDefault(); // 防止觸發 click
+                handleClickArea();
+            });
+        } else {
+            clickArea.addEventListener("click", handleClickArea);
+        }
 
 
-  updateUI();
-</script>
+        updateUI();
+    </script>
 
 </body>
+
 </html>

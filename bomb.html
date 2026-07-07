@@ -2,42 +2,59 @@
 <html lang="zh-Hant">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>手機版踩地雷</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💣</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>踩地雷</title>
     <style>
         :root {
             --cell-size: 40px;
-            --bg: #222;
-            --board-bg: #333;
-            --cell-bg: #444;
-            --cell-border: #666;
-            --cell-open-bg: #222;
-            --accent: #00c896;
-            --danger: #ff4b4b;
-            --text: #f5f5f5;
+            --bg: #151d28;
+            --board-bg: #090a14;
+            --cell-bg: #394a50;
+            --cell-border: #577277;
+            --cell-open-bg: #202e37;
+            --accent: #a8ca58;
+            --danger: #cf573c;
+            --text: #ebede9;
         }
 
         * {
             box-sizing: border-box;
+        }
+        html { font-size: 16px; }
+        canvas,
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
             -webkit-tap-highlight-color: transparent;
+
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            touch-action: none;
         }
 
         body {
             margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-                sans-serif;
-            background: radial-gradient(circle at top, #444, #111);
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
+            background: var(--bg);
             color: var(--text);
             display: flex;
+            align-items: center;
             justify-content: center;
             align-items: flex-start;
-            min-height: 100vh;
+            height: 100svh;
         }
 
         .game-wrapper {
-            width: 100%;
-            max-width: 480px;
+             margin-top: 48px;
+            /* width: 100%; */
             padding: 16px;
         }
 

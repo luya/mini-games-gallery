@@ -1,410 +1,439 @@
 <!doctype html>
 <html lang="zh-TW">
+
 <head>
-<meta charset="utf-8" />
-<title>2048</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>2048</title>
 
-<style>
-  body {
-    margin: 0;
-    font-family: sans-serif;
-    background: #faf8ef;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-  }
-  h1 { margin: 16px 0 8px; }
+    <style>
 
-  #topbar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .scoreBox {
-    background: #bbada0;
-    padding: 10px 16px;
-    border-radius: 6px;
-    color: #fff;
-    text-align: center;
-    min-width: 80px;
-  }
-  .scoreBox div:first-child {
-    font-size: 0.8rem;
-    opacity: 0.8;
-  }
-  .scoreBox div:last-child {
-    font-size: 1.4rem;
-    font-weight: bold;
-  }
+        html { font-size: 16px; }
+        canvas,
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
 
-  #restartBtn {
-    background: #8f7a66;
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+            -webkit-tap-highlight-color: transparent;
 
-  #game {
-    width: 90vmin;
-    max-width: 420px;
-    aspect-ratio: 1 / 1;
-    background: #bbada0;
-    border-radius: 6px;
-    padding: 10px;
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 10px;
-  }
-  .cell {
-    background: #cdc1b4;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.4rem;
-    font-weight: bold;
-    color: #776e65;
-    transition: transform 0.1s ease;
-  }
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            touch-action: none;
+        }
 
-  #gameOver {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(238,228,218,0.9);
-    padding: 30px 40px;
-    border-radius: 6px;
-    font-size: 2rem;
-    font-weight: bold;
-    display: none;
-  }
+        body {
+            margin: 0;
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
+            background: #cab796;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100svh;
+            overflow: hidden;
+        }
 
-  #youWin {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(238,228,218,0.9);
-    padding: 30px 40px;
-    border-radius: 6px;
-    font-size: 2rem;
-    font-weight: bold;
-    display: none;
-    z-index: 9998;
-  }
+        h1 {
+            margin: 16px 0 8px;
+        }
 
-  #info {
-    font-size: 0.9rem;
-    color: #776e65;
-    margin-bottom: 8px;
-    text-align: center;
-  }
+        #topbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
 
-  #backBtn {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 9999;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #8f7a66;
-    color: #fff;
-    text-decoration: none;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+        .scoreBox {
+            background: #aca08a;
+            padding: 10px 16px;
+            border-radius: 6px;
+            color: #fff;
+            text-align: center;
+            min-width: 80px;
+        }
 
-    /* 動畫 */
-    transition: transform 0.2s ease, background 0.2s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-  }
+        .scoreBox div:first-child {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: bold;
+        }
 
-  #backBtn:hover {
-    transform: scale(1.15);
-    background: #a68b74;
-  }
-</style>
+        .scoreBox div:last-child {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        #restartBtn {
+            background: #999081;
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #restartBtn:active {
+            background: #e6ce90;
+            transform: scale(0.97);
+        }
+
+        #game {
+            width: 90vmin;
+            max-width: 420px;
+            aspect-ratio: 1 / 1;
+            background: #8f8c83;
+            border-radius: 6px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .cell {
+            background: #aca08a;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            font-weight: bold;
+            color: #655f57;
+            transition: transform 0.1s ease;
+        }
+
+        #youWin, #gameOver{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(238, 228, 218, 0.9);
+            padding: 30px 40px;
+            border-radius: 6px;
+            font-size: 2rem;
+            font-weight: bold;
+            display: none;
+            z-index: 9998;
+        }
+
+        #info {
+            font-size: 0.9rem;
+            color: #776e65;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        #backBtn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8f7a66;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            /* 動畫 */
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        #backBtn:hover {
+            transform: scale(1.15);
+            background: #a68b74;
+        }
+    </style>
 </head>
 
 <body>
-<a id="backBtn" href="index.html">🏠</a>
+    <a id="backBtn" href="index.html">🏠</a>
 
-<h1>2048</h1>
+    <h1>2048</h1>
 
-<div id="topbar">
-  <div class="scoreBox">
-    <div>SCORE</div>
-    <div id="score">0</div>
-  </div>
-  <div class="scoreBox">
-    <div>BEST</div>
-    <div id="best">0</div>
-  </div>
-  <button id="restartBtn">重新開始</button>
-</div>
-<div id="info">使用方向鍵（↑↓←→）或在手機上滑動來遊玩。</div>
-<div id="game"></div>
-<div id="youWin">You Win!</div>
-<div id="gameOver">Game Over</div>
+    <div id="topbar">
+        <div class="scoreBox">
+            <div>SCORE</div>
+            <div id="score">0</div>
+        </div>
+        <div class="scoreBox">
+            <div>BEST</div>
+            <div id="best">0</div>
+        </div>
+        <button id="restartBtn">重新開始</button>
+    </div>
+    <div id="info">使用方向鍵（↑↓←→）或在手機上滑動來遊玩。</div>
+    <div id="game"></div>
+    <div id="youWin">You Win!</div>
+    <div id="gameOver">Game Over</div>
 
-<script>
-const size = 4;
-let grid = [];
-let score = 0;
-let best = Number(localStorage.getItem("best2048") || 0);
-let endGameFlag = false
+    <script>
+        const size = 4;
+        let grid = [];
+        let score = 0;
+        let best = Number(localStorage.getItem("best2048") || 0);
+        let endGameFlag = false
 
-document.getElementById("best").textContent = best;
+        document.getElementById("best").textContent = best;
 
-const gameEl = document.getElementById('game');
-const scoreEl = document.getElementById('score');
-const gameOverEl = document.getElementById('gameOver');
+        const gameEl = document.getElementById('game');
+        const scoreEl = document.getElementById('score');
+        const gameOverEl = document.getElementById('gameOver');
 
-function emptyGrid() {
-  grid = [];
-  for (let r = 0; r < size; r++) {
-    const row = [];
-    for (let c = 0; c < size; c++) row.push(0);
-    grid.push(row);
-  }
-  //grid[0][0]=2048
-}
+        function emptyGrid() {
+            grid = [];
+            for (let r = 0; r < size; r++) {
+                const row = [];
+                for (let c = 0; c < size; c++) row.push(0);
+                grid.push(row);
+            }
+            // grid[0][0]=2048
+            // grid = [
+            //     [0, 2, 32, 4],
+            //     [4, 32, 4, 2],
+            //     [2, 4, 32, 4],
+            //     [4, 32, 2, 0],
+            // ];
+        }
 
-function drawGrid() {
-  gameEl.innerHTML = '';
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      const v = grid[r][c];
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      if (v) {
-        cell.textContent = v;
-        const n = Math.log2(v);
-        const hue = 40 + n * 8;
-        cell.style.background = `hsl(${hue}, 70%, 70%)`;
-      }
-      gameEl.appendChild(cell);
-    }
-  }
-}
+        function drawGrid() {
+            gameEl.innerHTML = '';
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const v = grid[r][c];
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (v) {
+                        cell.textContent = v;
+                        const n = Math.log2(v);
+                        const hue = 40 + n * 8;
+                        cell.style.background = `hsl(${hue}, 70%, 70%)`;
+                    }
+                    gameEl.appendChild(cell);
+                }
+            }
+        }
 
-function randomEmptyCell() {
-  const empties = [];
-  for (let r = 0; r < size; r++)
-    for (let c = 0; c < size; c++)
-      if (!grid[r][c]) empties.push({ r, c });
-  if (!empties.length) return null;
-  return empties[Math.floor(Math.random() * empties.length)];
-}
+        function randomEmptyCell() {
+            const empties = [];
+            for (let r = 0; r < size; r++)
+                for (let c = 0; c < size; c++)
+                    if (!grid[r][c]) empties.push({ r, c });
+            if (!empties.length) return null;
+            return empties[Math.floor(Math.random() * empties.length)];
+        }
 
-function spawnTile() {
-  const cell = randomEmptyCell();
-  if (!cell) return;
-  grid[cell.r][cell.c] = Math.random() < 0.9 ? 2 : 4;
-}
+        function spawnTile() {
+            const cell = randomEmptyCell();
+            if (!cell) return;
+            grid[cell.r][cell.c] = Math.random() < 0.9 ? 2 : 4;
+        }
 
-function slideRow(row) {
-  const arr = row.filter(v => v);
-  for (let i = 0; i < arr.length - 1; i++) {
-    if (arr[i] === arr[i + 1]) {
-      arr[i] *= 2;
-      score += arr[i];
-      arr[i + 1] = 0;
-    }
-  }
-  const merged = arr.filter(v => v);
-  while (merged.length < size) merged.push(0);
-  return merged;
-}
+        function slideRow(row) {
+            const arr = row.filter(v => v);
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] === arr[i + 1]) {
+                    arr[i] *= 2;
+                    score += arr[i];
+                    arr[i + 1] = 0;
+                }
+            }
+            const merged = arr.filter(v => v);
+            while (merged.length < size) merged.push(0);
+            return merged;
+        }
 
-function rotateGrid(times) {
-  for (let t = 0; t < times; t++) {
-    const newGrid = [];
-    for (let c = 0; c < size; c++) {
-      const row = [];
-      for (let r = size - 1; r >= 0; r--) row.push(grid[r][c]);
-      newGrid.push(row);
-    }
-    grid = newGrid;
-  }
-}
+        function rotateGrid(times) {
+            for (let t = 0; t < times; t++) {
+                const newGrid = [];
+                for (let c = 0; c < size; c++) {
+                    const row = [];
+                    for (let r = size - 1; r >= 0; r--) row.push(grid[r][c]);
+                    newGrid.push(row);
+                }
+                grid = newGrid;
+            }
+        }
 
-function move(dir) {
-  if (endGameFlag) return;
-  const before = JSON.stringify(grid);
+        function move(dir) {
+            if (endGameFlag) return;
+            const before = JSON.stringify(grid);
 
-  if (dir === 'left') {
-    for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r]);
-  } else if (dir === 'right') {
-    for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r].reverse()).reverse();
-  } else if (dir === 'up') {
-    rotateGrid(3);
-    for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r]);
-    rotateGrid(1);
-  } else if (dir === 'down') {
-    rotateGrid(3);
-    for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r].reverse()).reverse();
-    rotateGrid(1);
-  }
+            if (dir === 'left') {
+                for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r]);
+            } else if (dir === 'right') {
+                for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r].reverse()).reverse();
+            } else if (dir === 'up') {
+                rotateGrid(3);
+                for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r]);
+                rotateGrid(1);
+            } else if (dir === 'down') {
+                rotateGrid(3);
+                for (let r = 0; r < size; r++) grid[r] = slideRow(grid[r].reverse()).reverse();
+                rotateGrid(1);
+            }
 
-  const after = JSON.stringify(grid);
-  if (before !== after) {
-    spawnTile();
-    scoreEl.textContent = score;
-    if (score > best) {
-      best = score;
-      localStorage.setItem("best2048", best);
-      document.getElementById("best").textContent = best;
-    }
-    drawGrid();
-    endGameFlag = checkWin()
-    if (!endGameFlag) {
-      endGameFlag = checkGameOver();
-    }
-
-
-  }
-}
-
-function checkWin() {
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if (grid[r][c] === 2048) {
-        document.getElementById("youWin").style.display = "block";
-        return true;
-      }
-    }
-  }
-  return false;
-}
+            const after = JSON.stringify(grid);
+            if (before !== after) {
+                spawnTile();
+                scoreEl.textContent = score;
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem("best2048", best);
+                    document.getElementById("best").textContent = best;
+                }
+                drawGrid();
+                endGameFlag = checkWin()
+                if (!endGameFlag) {
+                    endGameFlag = checkGameOver();
+                }
 
 
-function checkGameOver() {
-  // 有空格 → 未結束
-  for (let r = 0; r < size; r++)
-    for (let c = 0; c < size; c++)
-      if (grid[r][c] === 0) return false;
+            }
+        }
 
-  // 有可合併 → 未結束
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      const v = grid[r][c];
-      if (r < size - 1 && grid[r + 1][c] === v) return false;
-      if (c < size - 1 && grid[r][c + 1] === v) return false;
-    }
-  }
+        function checkWin() {
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    if (grid[r][c] === 2048) {
+                        document.getElementById("youWin").style.display = "block";
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
-  // 否則 Game Over
-  gameOverEl.style.display = "block";
-  return true
-}
 
-function restart() {
-  endGameFlag = false
-  score = 0;
-  scoreEl.textContent = 0;
-  gameOverEl.style.display = "none";
-  document.getElementById("youWin").style.display = "none";
-  emptyGrid();
-  spawnTile();
-  spawnTile();
-  drawGrid();
-}
+        function checkGameOver() {
+            // 有空格 → 未結束
+            for (let r = 0; r < size; r++)
+                for (let c = 0; c < size; c++)
+                    if (grid[r][c] === 0) return false;
 
-document.getElementById("restartBtn").onclick = restart;
+            // 有可合併 → 未結束
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const v = grid[r][c];
+                    if (r < size - 1 && grid[r + 1][c] === v) return false;
+                    if (c < size - 1 && grid[r][c + 1] === v) return false;
+                }
+            }
 
-// Keyboard
-window.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') move('left');
-  else if (e.key === 'ArrowRight') move('right');
-  else if (e.key === 'ArrowUp') move('up');
-  else if (e.key === 'ArrowDown') move('down');
-});
+            // 否則 Game Over
+            gameOverEl.style.display = "block";
+            return true
+        }
 
-// Touch
-let sx = 0, sy = 0;
-gameEl.addEventListener('touchstart', e => {
-  sx = e.touches[0].clientX;
-  sy = e.touches[0].clientY;
-});
-gameEl.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - sx;
-  const dy = e.changedTouches[0].clientY - sy;
-  if (Math.abs(dx) > Math.abs(dy)) {
-    if (dx < 0) move('left'); else move('right');
-  } else {
-    if (dy < 0) move('up'); else move('down');
-  }
-});
+        function restart() {
+            endGameFlag = false
+            score = 0;
+            scoreEl.textContent = 0;
+            gameOverEl.style.display = "none";
+            document.getElementById("youWin").style.display = "none";
+            emptyGrid();
+            spawnTile();
+            spawnTile();
+            drawGrid();
+        }
 
-function assertEqual(a, b, msg) {
-  if (JSON.stringify(a) !== JSON.stringify(b)) {
-    console.error("❌ FAIL:", msg);
-    console.table(a);
-    console.table(b);
-  } else {
-    console.log("✔ PASS:", msg);
-  }
-}
+        document.getElementById("restartBtn").onclick = restart;
 
-function testRotateGrid() {
-  const original = [
-    [1,2,3,4],
-    [5,6,7,8],
-    [9,10,11,12],
-    [13,14,15,16]
-  ];
+        // Keyboard
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') move('left');
+            else if (e.key === 'ArrowRight') move('right');
+            else if (e.key === 'ArrowUp') move('up');
+            else if (e.key === 'ArrowDown') move('down');
+        });
 
-  const r90 = [
-    [13,9,5,1],
-    [14,10,6,2],
-    [15,11,7,3],
-    [16,12,8,4]
-  ];
+        // Touch
+        let sx = 0, sy = 0;
+        gameEl.addEventListener('touchstart', e => {
+            sx = e.touches[0].clientX;
+            sy = e.touches[0].clientY;
+        });
+        gameEl.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - sx;
+            const dy = e.changedTouches[0].clientY - sy;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx < 0) move('left'); else move('right');
+            } else {
+                if (dy < 0) move('up'); else move('down');
+            }
+        });
 
-  const r180 = [
-    [16,15,14,13],
-    [12,11,10,9],
-    [8,7,6,5],
-    [4,3,2,1]
-  ];
+        function assertEqual(a, b, msg) {
+            if (JSON.stringify(a) !== JSON.stringify(b)) {
+                console.error("❌ FAIL:", msg);
+                console.table(a);
+                console.table(b);
+            } else {
+                console.log("✔ PASS:", msg);
+            }
+        }
 
-  const r270 = [
-    [4,8,12,16],
-    [3,7,11,15],
-    [2,6,10,14],
-    [1,5,9,13]
-  ];
+        function testRotateGrid() {
+            const original = [
+                [1, 2, 3, 4],
+                [5, 6, 7, 8],
+                [9, 10, 11, 12],
+                [13, 14, 15, 16]
+            ];
 
-  grid = JSON.parse(JSON.stringify(original));
-  rotateGrid(1);
-  assertEqual(grid, r90, "Rotate 90°");
+            const r90 = [
+                [13, 9, 5, 1],
+                [14, 10, 6, 2],
+                [15, 11, 7, 3],
+                [16, 12, 8, 4]
+            ];
 
-  rotateGrid(1);
-  assertEqual(grid, r180, "Rotate 180°");
+            const r180 = [
+                [16, 15, 14, 13],
+                [12, 11, 10, 9],
+                [8, 7, 6, 5],
+                [4, 3, 2, 1]
+            ];
 
-  rotateGrid(1);
-  assertEqual(grid, r270, "Rotate 270°");
+            const r270 = [
+                [4, 8, 12, 16],
+                [3, 7, 11, 15],
+                [2, 6, 10, 14],
+                [1, 5, 9, 13]
+            ];
 
-  rotateGrid(1);
-  assertEqual(grid, original, "Rotate 360°");
-}
+            grid = JSON.parse(JSON.stringify(original));
+            rotateGrid(1);
+            assertEqual(grid, r90, "Rotate 90°");
 
-testRotateGrid();
+            rotateGrid(1);
+            assertEqual(grid, r180, "Rotate 180°");
 
-// Init
-restart();
-</script>
+            rotateGrid(1);
+            assertEqual(grid, r270, "Rotate 270°");
+
+            rotateGrid(1);
+            assertEqual(grid, original, "Rotate 360°");
+        }
+
+        testRotateGrid();
+
+        // Init
+        restart();
+    </script>
 </body>
+
 </html>
