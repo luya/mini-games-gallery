@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁版 NES 模擬器 (JSNES 範例)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #controls {
+            margin-bottom: 20px;
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        #canvas-container {
+            border: 4px solid #444;
+            background: #000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated; /* 保持像素風不模糊 */
+        }
+        .info-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 300px;
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: center;
+        }
+        .info-table th {
+            background-color: #444;
+        }
+    </style>
+    <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
+</head>
+<body>
+
+    <h1>網頁版 NES 模擬器</h1>
+    
+    <div id="controls">
+        <label for="rom-file">請選擇並上傳 .nes ROM 檔案：</label>
+        <input type="file" id="rom-file" accept=".nes">
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="nes-canvas" width="256" height="240" style="width: 512px; height: 480px;"></canvas>
+    </div>
+
+    <table class="info-table">
+        <thead>
+            <tr>
+                <th>NES 按鍵</th>
+                <th>鍵盤按鍵</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>上 / 下 / 左 / 右</td><td>W / S / A / D</td></tr>
+            <tr><td>A 按鈕</td><td>J</td></tr>
+            <tr><td>B 按鈕</td><td>K</td></tr>
+            <tr><td>SELECT</td><td>G</td></tr>
+            <tr><td>START</td><td>H</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        // 1. 初始化 Canvas 與 Context
+        const canvas = document.getElementById('nes-canvas');
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.createImageData(256, 240);
+        const buf = new ArrayBuffer(imageData.data.length);
+        const buf8 = new Uint8ClampedArray(buf);
+        const buf32 = new Uint32Array(buf);
+
+        // 2. 初始化音訊 (Web Audio API)
+        let audioCtx = null;
+        let audioBuffer = [];
+        const AUDIO_BUFFER_SIZE = 4096;
+
+        function initAudio() {
+            if (audioCtx) return;
+            // 瀏覽器限制：音訊必須由使用者互動（如點擊、上傳）觸發啟動
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+            
+            // 建立 ScriptProcessorNode 處理模擬器輸出的音訊流
+            const scriptProcessor = audioCtx.createScriptProcessor(AUDIO_BUFFER_SIZE, 0, 1);
+            scriptProcessor.onaudioprocess = function(e) {
+                const output = e.outputBuffer.getChannelData(0);
+                if (audioBuffer.length >= AUDIO_BUFFER_SIZE) {
+                    for (let i = 0; i < AUDIO_BUFFER_SIZE; i++) {
+                        output[i] = audioBuffer.shift();
+                    }
+                } else {
+                    // 若緩衝區不足，補靜音避免爆音
+                    for (let i = 0; i < AUDIO_BUFFER_SIZE; i++) {
+                        output[i] = 0;
+                    }
+                }
+            };
+            scriptProcessor.connect(audioCtx.destination);
+        }
+
+        // 3. 初始化 JSNES 模擬器核心
+        const nes = new jsnes.NES({
+            // 畫面渲染回呼
+            onFrame: function(buffer) {
+                let i = 0;
+                for (let y = 0; y < 240; ++y) {
+                    for (let x = 0; x < 256; ++x) {
+                        // JSNES 傳回的是 32-bit 的顏色資料
+                        buf32[i] = buffer[i] | 0xFF000000; 
+                        i++;
+                    }
+                }
+                imageData.data.set(buf8);
+                ctx.putImageData(imageData, 0, 0);
+            },
+            // 音訊取樣回呼
+            onAudioSample: function(left, right) {
+                if (audioCtx) {
+                    // 這裡採用單聲道混合，並將聲音推入緩衝區
+                    audioBuffer.push((left + right) / 2);
+                    // 避免緩衝區無限增長導致延遲
+                    if (audioBuffer.length > AUDIO_BUFFER_SIZE * 2) {
+                        audioBuffer.shift();
+                    }
+                }
+            }
+        });
+
+        // 4. 鍵盤事件映射 (Player 1)
+        const keyboardMap = {
+            87: jsnes.Controller.BUTTON_UP,      // W
+            83: jsnes.Controller.BUTTON_DOWN,    // S
+            65: jsnes.Controller.BUTTON_LEFT,    // A
+            68: jsnes.Controller.BUTTON_RIGHT,   // D
+            74: jsnes.Controller.BUTTON_A,       // J
+            75: jsnes.Controller.BUTTON_B,       // K
+            71: jsnes.Controller.BUTTON_SELECT,  // G
+            72: jsnes.Controller.BUTTON_START    // H
+        };
+
+        window.addEventListener("keydown", (e) => {
+            if (keyboardMap[e.keyCode] !== undefined) {
+                nes.buttonDown(1, keyboardMap[e.keyCode]);
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener("keyup", (e) => {
+            if (keyboardMap[e.keyCode] !== undefined) {
+                nes.buttonUp(1, keyboardMap[e.keyCode]);
+                e.preventDefault();
+            }
+        });
+
+        // 5. 處理 ROM 檔案上傳與遊戲主迴圈
+        let animationFrameId = null;
+
+        document.getElementById('rom-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 啟動音訊環境
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const reader = new FileReader();
+            reader.readAsBinaryString(file);
+            reader.onload = function(event) {
+                // 停止上一個可能正在執行的遊戲迴圈
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                
+                // 載入 ROM 資料到模擬器
+                nes.loadROM(event.target.result);
+                
+                // 啟動遊戲主迴圈 (每秒約 60 幀)
+                function update() {
+                    nes.frame();
+                    animationFrameId = requestAnimationFrame(update);
+                }
+                animationFrameId = requestAnimationFrame(update);
+            };
+        });
+    </script>
+</body>
+</html>

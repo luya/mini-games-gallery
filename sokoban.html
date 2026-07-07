@@ -124,11 +124,37 @@
             line-height: 1.8;
             color: #fff;
         }
+        #backBtn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8f7a66;
+            color: #fff;
+            text-decoration: none;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+
+            /* 動畫 */
+            transition: transform 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+        }
+
+        #backBtn:hover {
+            transform: scale(1.15);
+            background: #a68b74;
+        }
     </style>
     <link rel="stylesheet" href="nesjoystick.css">
 </head>
-
 <body>
+<a id="backBtn" href="index.html">🏠</a>
     
     <div id="ui-panel">
         <h1>勇者救公主之瘋狂巫師 🏰</h1>
