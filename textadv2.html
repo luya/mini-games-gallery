@@ -2,242 +2,33 @@
 <html lang="zh-Hant">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>黑色檔案夾：霓虹雨夜</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔦</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>異色檔案：霓虹之夜</title>
+    <link rel="stylesheet" href="textadv.css">
+    <link rel="stylesheet" href="ayakit.css">
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
         body {
-            margin: 0;
-            background: radial-gradient(circle at top, #141d26 0%, #0b0f14 60%, #05070a 100%);
-            color: #d1d7de;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background: #24142c;
+            color: #faffff;
         }
 
         .game {
-            width: 90%;
-            max-width: 720px;
-            border-radius: 8px;
-            background: rgba(15, 22, 30, 0.98);
-            box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(218, 51, 74, 0.1);
-            border: 1px solid #1f2d3d;
-            border-top: 2px solid #112a6e;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .header {
-            padding: 14px 16px;
-            border-bottom: 1px solid #1f2d3d;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: linear-gradient(to right, #0f1620, #16202c);
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
+            background: #050914;
+            border: 1px solid #352b42;
         }
 
         .title {
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #890d89;
-            text-shadow: 0 0 5px rgba(255, 59, 86, 0.4);
+            color: #94007a;
+            text-shadow: 0 0 5px #d61a88B0;
         }
 
         .inventory-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 16px;
             color: #b1a376;
-            flex-wrap: wrap;
-        }
-
-        .inventory {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        /* 讓道具與夥伴變成可點擊的互動按鈕 */
-        .inv-btn {
-            padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid #2c3e50;
-            background: rgba(36, 52, 71, 0.7);
-            color: #cbd5e1;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .inv-btn:hover {
-            border-color: #ffb74d;
-            color: #ffb74d;
-            background: rgba(56, 189, 248, 0.1);
-        }
-
-        .inv-btn.partner {
-            border-color: #ff3b56;
-            color: #ff8a9a;
-        }
-        .inv-btn.partner:hover {
-            background: rgba(255, 59, 86, 0.15);
-            border-color: #ff8a9a;
-            color: #fff;
-        }
-
-        .dialog {
-            padding: 22px 20px;
-            min-height: 190px;
-            line-height: 1.7;
-            font-size: 18px;
-            position: relative;
-            background: #0b1017;
-        }
-
-        .location-name {
-            font-size: 17px;
-            font-weight: bold;
-            color: #ffb74d;
-            margin-bottom: 8px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .dialog-text {
-            white-space: pre-line;
-            color: #e2e8f0;
-        }
-
-        .skull {
-            position: absolute;
-            right: 16px;
-            bottom: 12px;
-            opacity: 0.15;
-            font-size: 26px;
-        }
-
-        .options {
-            border-top: 1px solid #1f2d3d;
-            padding: 14px 16px 18px;
-            background: #080c12;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .option-btn {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 4px;
-            border: 1px solid #253344;
-            background: #121a24;
-            color: #cbd5e1;
-            font-size: 17px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .option-btn span {
-            max-width: 88%;
-        }
-
-        .option-btn:hover {
-            background: #182331;
-            border-color: #38bdf8;
-            color: #ffb74d;
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
-            transform: translateX(2px);
-        }
-
-        .option-btn:active {
-            transform: translateX(0);
-            background: #0f1620;
-        }
-
-        .option-key {
-            font-size: 18px;
-            color: #576f8a;
-            font-family: monospace;
-        }
-
-        .footer {
-            padding: 10px 16px 12px;
-            font-size: 18px;
-            color: #576f8a;
-            border-top: 1px solid #121a24;
-            background: #05070a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .restart-btn {
-            border: none;
-            background: transparent;
-            color: #718096;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .restart-btn:hover {
-            border-color: #4a5568;
-            color: #ff3b56;
-        }
-
-        @media (max-width: 480px) {
-            .dialog {
-                min-height: 170px;
-            }
-        }
-
-        #backBtn {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 9999;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #334155;
-            color: #fff;
-            text-decoration: none;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        #backBtn:hover {
-            transform: scale(1.15);
-            background: #475569;
         }
     </style>
 </head>
@@ -247,10 +38,9 @@
     <div class="game">
         <div class="header">
             <div class="header-top">
-                <div class="title">黑色檔案夾：霓虹雨夜</div>
+                <div class="title">異色檔案：霓虹之夜</div>
             </div>
             <div class="inventory-container">
-                <span>點擊可調查/交談：</span>
                 <div class="inventory" id="inventory"></div>
             </div>
         </div>

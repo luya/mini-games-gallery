@@ -2,212 +2,33 @@
 <html lang="zh-Hant">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>黑暗奇幻文字冒險：遺忘之燈（擴充版）</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            background: radial-gradient(circle at top, #222 0, #050608 55%, #000 100%);
-            color: #e5e5e5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .game {
-            width: 90%;
-            max-width: 720px;
-            border-radius: 12px;
-            background: rgba(10, 10, 16, 0.95);
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
-            border: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(to right, #1a1a1f, #101018);
-        }
-
-        .title {
-            font-size: 18px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #c9a86a;
-        }
-
-        .inventory {
-            font-size: 13px;
-            color: #aaa;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .inventory span {
-            padding: 2px 6px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            background: rgba(30, 30, 40, 0.8);
-        }
-
-        .dialog {
-            padding: 18px 16px;
-            min-height: 180px;
-            line-height: 1.6;
-            font-size: 15px;
-            position: relative;
-        }
-
-        .location-name {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 6px;
-            letter-spacing: 1px;
-        }
-
-        .dialog-text {
-            white-space: pre-line;
-        }
-
-        .skull {
-            position: absolute;
-            right: 12px;
-            bottom: 8px;
-            opacity: 0.3;
-            font-size: 22px;
-        }
-
-        .options {
-            border-top: 1px solid #333;
-            padding: 12px 16px 16px;
-            background: #0b0b10;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .option-btn {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            background: #14141c;
-            color: #e5e5e5;
-            font-size: 14px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .option-btn span {
-            max-width: 90%;
-        }
-
-        .option-btn:hover {
-            background: #1c1c26;
-            border-color: #c9a86a;
-            transform: translateY(-1px);
-        }
-
-        .option-btn:active {
-            transform: translateY(0);
-            background: #101018;
-        }
-
-        .option-key {
-            font-size: 11px;
-            color: #777;
-        }
-
-        .footer {
-            padding: 8px 16px 10px;
-            font-size: 11px;
-            color: #666;
-            border-top: 1px solid #222;
-            background: #050509;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .restart-btn {
-            border: none;
-            background: transparent;
-            color: #999;
-            cursor: pointer;
-            font-size: 11px;
-            padding: 4px 6px;
-            border-radius: 4px;
-            border: 1px solid transparent;
-        }
-
-        .restart-btn:hover {
-            border-color: #555;
-            color: #c9a86a;
-        }
-
-        @media (max-width: 480px) {
-            .dialog {
-                min-height: 160px;
-            }
-        }
-
-        #backBtn {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 9999;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #8f7a66;
-            color: #fff;
-            text-decoration: none;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-        }
-
-        #backBtn:hover {
-            transform: scale(1.15);
-            background: #a68b74;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛓️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>黑暗深淵：遺忘之都</title>
+    <link rel="stylesheet" href="textadv.css">
+    <link rel="stylesheet" href="ayakit.css">
 </head>
 
 <body>
     <a id="backBtn" href="index.html">🏠</a>
     <div class="game">
         <div class="header">
-            <div class="title">黑暗裂隙：遺忘之燈</div>
+            <div class="header-top">
+                <div class="title">黑暗深淵：遺忘之都</div>
+            </div>
+            <div class="inventory-container">
+                <div class="inventory" id="inventory"></div>
+            </div>
         </div>
-        <div class="header">
-            <div class="inventory" id="inventory"></div>
-        </div>
+
         <div class="dialog">
             <div class="location-name" id="locationName"></div>
             <div class="dialog-text" id="dialogText"></div>
-            <div class="skull">💀</div>
+            <div class="skull" id="sceneIcon">💀</div>
         </div>
 
         <div class="options" id="options"></div>
@@ -220,7 +41,7 @@
 
     <script>
         // 10 個道具（包含 3 個關鍵道具與中途加入的夥伴標記）
-        const ITEMS = {
+        const ITEMS_OLD = {
             TORCH: "破舊火把 🔥",
             DAGGER: "鏽蝕匕首 🗡️",
             LANTERN: "守墓人提燈 🪔",
@@ -233,6 +54,57 @@
             HOURGLASS: "倒流沙漏 ⏳"   // 關鍵道具 3
         };
 
+        // 10 個道具的完整鍵值與說明資料
+        const ITEM_DATA = {
+            TORCH: { name: "破舊火把 🔥", desc: "高功率的軍規手電筒。外殼有些磨損，但在漆黑的豪宅或地道裡，這是唯一能給人安全感的東西。玻璃鏡片上還沾著雨水。" },
+            DAGGER: { name: "鏽蝕匕首 🗡️", desc: "沉重、冰冷的鑄鐵撬棍。漆面大半剝落，前端有多次暴力破壞留下的凹痕。不管是鎖上的箱子還是黑幫的腦袋，這傢伙都能輕鬆搞定。" },
+            LANTERN: { name: "守墓人提燈 🪔", desc: "一罐細緻的黑色磁性指紋粉與配套的羊毛刷。偵探的必備工具，能在最細微的地方讓嫌犯的馬腳無所遁形。" },
+            SKULL: { name: "野獸顱骨 ☠️", desc: "沉甸甸的一串主鑰匙。鐵環上貼著標籤，似乎能打開警局或某些公共設施的核心大門。" },
+            BADGE: { name: "荊棘徽章 🛡️", desc: "未開封的琥珀色液體。在這樣的雨夜裡，一瓶好酒有時比防彈衣更能幫你打開那些社會底層或線人的大嘴巴。" },
+            POISON: { name: "鍊金術士的劇毒 🧪", desc: "牛皮紙袋裡裝著死者生前的部分日記與帳目。字裡行間充滿了對市政高層的不信任，以及他發現自己被跟蹤的恐懼。" },
+            PAGES: { name: "告解者殘頁 📜", desc: "純銅鑄造的重型籌碼硬幣，正面刻著骷髏與骰子。這是出入黑幫高層核心賭廳的隱密憑證。" },
+            RING: { name: "裂隙指環 💍", desc: "【關鍵道具】信紙帶有市政廳的浮水印，上面有市長親筆簽名。內容露骨地提到了如何瓜分碼頭走私利益，這是足以顛覆整座城市的致命鐵證。" },
+            SWORD: { name: "審判者大劍 🗡️", desc: "【關鍵道具】點38口徑的點金左輪，槍身刻有精美的復古藤蔓紋路。轉輪內已經壓滿了六發子彈。沉甸甸的重量代表著正義，或是毀滅。" },
+            HOURGLASS: { name: "倒流沙漏 ⏳", desc: "【關鍵道具】保存在防水小匣子裡的微縮膠卷底片。透過光源隱約能看見無數黑幫帳本與高層會面的偷拍照片，是本案不容辯駁的最終核心鐵證。" }
+        };
+
+        const ITEMS = {
+            TORCH: "TORCH", 
+            DAGGER: "DAGGER", 
+            LANTERN: "LANTERN",
+            SKULL: "SKULL", 
+            BADGE: "BADGE", 
+            POISON: "POISON",
+            PAGES: "PAGES", 
+            RING: "RING", 
+            SWORD: "SWORD", 
+            HOURGLASS: "HOURGLASS"
+        };
+
+        // 夥伴隨「不同場景」變更的動態對話庫
+        const PARTNER_DIALOGUE = {
+            office: "蘿絲環顧你破舊的事務所，撥了撥濕透的頭髮：『這地方真符合我對私家偵探的想像。少說廢話，快點出發吧，那些人隨時會追過來。』",
+            mansion: "看著被封鎖的富豪豪宅，蘿絲打了個冷顫：『他死的那天晚上，我就躲在窗簾後面⋯差一點點，躺在血泊裡的就是我了。』",
+            bar: "藍調酒吧裡，蘿絲優雅地靠在吧檯旁：『這裡的波本威士忌品質真差，但調酒師確實知道不少小道消息，去探探他的口風。』",
+            alley: "陰暗的後巷中，蘿絲警惕地看著四周：『小心，這條巷子以前常有黑幫處理不聽話的叛徒。』",
+            parking: "在地下停車場，蘿絲指著防彈車：『這輛車的後車廂有密倉，他平時習慣把最值錢或最危險的文件藏在那。』",
+            slum: "回到她差點被圍堵的紅燈區，蘿絲冷笑：『這地方就是這座城市的膿包，每個人都活得像地老鼠一樣。』",
+            club: "歌舞廳門前，蘿絲拉低了風衣領口，低聲說：『門口那兩個蠢貨我認識，等一下看我手勢，我過去引開他們。』",
+            vip: "在VIP賭廳裡，蘿絲眼神複雜：『以前我總陪坐在這裡，看著那些高官一邊數著不義之財一邊談笑風生。真讓人作嘔。』",
+            square: "看著大螢幕上的市長競選演講，蘿絲吐了一口唾沫：『聽聽那些滿口仁義道德的謊言。我們得撕爛他的面具。』",
+            archives: "檔案館的陰影裡，蘿絲拍了拍保險櫃：『這裡面鎖著黑幫教父當年的家底，要是能撬開，保證有驚喜。』",
+            dock: "碼頭狂風大作，蘿絲大聲喊道：『13號倉庫是他們走私的大本營！看守很嚴，得想個辦法混過去！』",
+            subway: "漆黑的地鐵隧道中，蘿絲緊緊抓著你的手臂：『聽，有腳步聲⋯別點燈，跟緊我，我知道這裡的暗號。』",
+            lab: "在暗紅色的沖印室，蘿絲看著洗出來的照片：『沒錯⋯就是這些照片。這就是他們犯罪的鐵證！』",
+            police: "警局檔案室內，蘿絲低聲警告：『快一點，巡邏的警員每隔十分鐘會經過這裡。被抓到我們就完了。』",
+            cityhall: "站在市政廳門前，蘿絲深吸了一口氣：『這棟樓裡裝滿了魔鬼。偵探，你準備好跟他們攤牌了嗎？』",
+            confrontation: "市長辦公室頂樓，蘿絲看著夜景，眼神無比冰冷：『這就是從最頂端看下來的風景啊⋯真是骯髒。』",
+            helipad: "直升機螺旋槳的狂風吹亂了她的長髮，蘿絲掏出藏在懷裡的小刀：『他們想跑？沒那麼容易！』",
+            vault: "金庫錢堆前，蘿絲咬牙切齒：『這麼多血汗錢⋯偵探，別答應他的條件，用你的槍給他應有的審判！』",
+            roseSecret: "（你們正在深入交談她的過去⋯）",
+            broadcasting: "廣播塔頂，雷電交加。蘿絲幫你擋在門口：『按下去，偵探！把真相播出去！後面的追兵交給我！』"
+        };
+        
         // 遊戲狀態
         const state = {
             location: "graveyard",
@@ -245,7 +117,8 @@
                 angeredShade: false,
                 sacrificedBlood: false
             },
-            ended: false
+            ended: false,
+            inspecting: null // 當前正在檢視的道具 Key 或 'ROSE'，為 null 表示在正常場景
         };
 
         // 20 個場景設定
@@ -674,112 +547,150 @@
         const inventoryEl = document.getElementById("inventory");
         const statusTextEl = document.getElementById("statusText");
         const restartBtn = document.getElementById("restartBtn");
-
-        function setDialog(text) {
-            dialogTextEl.textContent = text;
-        }
-
-        function setOptions(optionDefs) {
-            optionsEl.innerHTML = "";
-            optionDefs.forEach((opt, index) => {
-                const btn = document.createElement("button");
-                btn.className = "option-btn";
-                const label = document.createElement("span");
-                label.textContent = opt.text;
-                const keyHint = document.createElement("span");
-                keyHint.className = "option-key";
-                keyHint.textContent = `選項 ${index + 1}`;
-                btn.appendChild(label);
-                btn.appendChild(keyHint);
-
-                btn.addEventListener("click", () => {
-                    if (opt.action) {
-                        opt.action();
-                    }
-                    if (opt.next) {
-                        state.location = opt.next;
-                        render();
-                    }
-                });
-                optionsEl.appendChild(btn);
-            });
-        }
+        const sceneIconEl = document.getElementById("sceneIcon");
 
         function setStatus(text) {
             statusTextEl.textContent = text;
         }
 
-        function addItem(item) {
-            if (!state.inventory.includes(item)) {
-                state.inventory.push(item);
+        function addItem(itemKey) {
+            if (!state.inventory.includes(itemKey)) {
+                state.inventory.push(itemKey);
             }
             renderInventory();
         }
 
+        // 渲染上方可點擊的道具與夥伴列表
         function renderInventory() {
             inventoryEl.innerHTML = "";
-            let currentInv = [...state.inventory];
+            
+            // 如果有夥伴，生成對話按鈕
             if (state.flags.hasAlys) {
-                currentInv.unshift("夥伴：艾莉絲 👥");
+                const btn = document.createElement("button");
+                btn.className = "inv-btn partner";
+                btn.textContent = "夥伴：艾莉絲 👥";
+                btn.addEventListener("click", () => inspectSomething("Alys"));
+                inventoryEl.appendChild(btn);
             }
-            if (currentInv.length === 0) {
-                inventoryEl.textContent = "道具：無";
-                return;
-            }
-            inventoryEl.textContent = "道具：";
-            if (state.flags.hasAlys) {
-                inventoryEl.textContent = "隊伍以及道具：";
-            }
-            currentInv.forEach((item) => {
-                const span = document.createElement("span");
-                span.textContent = item;
-                inventoryEl.appendChild(span);
+
+            // 生成獲得的道具按鈕
+            state.inventory.forEach((itemKey) => {
+                const btn = document.createElement("button");
+                btn.className = "inv-btn";
+                btn.textContent = ITEM_DATA[itemKey].name;
+                btn.addEventListener("click", () => inspectSomething(itemKey));
+                inventoryEl.appendChild(btn);
             });
+
+            if (inventoryEl.children.length === 0) {
+                inventoryEl.textContent = "無可互動對象";
+            }
+        }
+
+        // 進入調查/對話模式
+        function inspectSomething(target) {
+            if (state.ended) return;
+            state.inspecting = target;
+            render();
         }
 
         function endGame(type) {
             state.ended = true;
             const ending = endings[type];
             locationNameEl.textContent = ending.title;
-            setDialog(ending.text);
-            setOptions([
-                {
-                    text: "在黑暗中重新睜眼，回到起點 🔁",
-                    next: "graveyard",
-                    action: () => restartGame()
-                }
-            ]);
-            setStatus("故事已落下帷幕。");
+            dialogTextEl.textContent = ending.text;
+            sceneIconEl.textContent = "⚖️";
+            
+            optionsEl.innerHTML = "";
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerHTML = `<span>在雨夜的事務所中再度睜眼，重啟調查 🔁</span><span class="option-key">重開</span>`;
+            btn.addEventListener("click", restartGame);
+            optionsEl.appendChild(btn);
+            
+            setStatus("案件調查已宣告落幕。");
         }
 
+        // 核心渲染邏輯：區分「現場探索」與「互動面板」
         function render() {
+            renderInventory();
+            optionsEl.innerHTML = "";
+
             if (state.ended) return;
+
+            // 情況 A：正在進行道具調查或夥伴交談
+            if (state.inspecting !== null) {
+                if (state.inspecting === "Alys") {
+                    // 夥伴對話
+                    locationNameEl.textContent = "💬 與艾莉絲交談中";
+                    sceneIconEl.textContent = "🌹";
+                    // 根據當前所在位置獲取動態台詞
+                    const currentLocKey = state.location;
+                    const dialogue = PARTNER_DIALOGUE[currentLocKey] || "『我們得快點，時間不多了。』";
+                    dialogTextEl.textContent = dialogue;
+                } else {
+                    // 道具調查
+                    const item = ITEM_DATA[state.inspecting];
+                    locationNameEl.textContent = `🔍 調查中：${item.name}`;
+                    sceneIconEl.textContent = "🧩";
+                    dialogTextEl.textContent = item.desc;
+                }
+
+                // 生成返回現場的按鈕
+                const returnBtn = document.createElement("button");
+                returnBtn.className = "option-btn";
+                returnBtn.innerHTML = `<span>繼續搜查任務 ↩️</span><span class="option-key">返回</span>`;
+                returnBtn.addEventListener("click", () => {
+                    state.inspecting = null;
+                    render();
+                });
+                optionsEl.appendChild(returnBtn);
+                return;
+            }
+
+            // 情況 B：正常場景探索
             const loc = locations[state.location];
             locationNameEl.textContent = loc.name;
-            setDialog(loc.text());
-            setOptions(loc.options());
-            renderInventory();
+            dialogTextEl.textContent = loc.text();
+            sceneIconEl.textContent = "🔍";
+
+            const optionDefs = loc.options();
+            optionDefs.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerHTML = `<span>${opt.text}</span><span class="option-key">線索 ${index + 1}</span>`;
+
+                btn.addEventListener("click", () => {
+                    if (opt.action) opt.action();
+                    if (opt.next) {
+                        state.location = opt.next;
+                    }
+                    render();
+                });
+                optionsEl.appendChild(btn);
+            });
         }
 
         function restartGame() {
-            state.location = "graveyard";
+            state.location = "office";
             state.inventory = [];
             state.flags = {
-                hasAlys: false,
-                metShade: false,
+                hasRose: false,
+                reportedToPolice: false,
                 hasKeyItem: false,
-                bargainedWithShade: false,
-                angeredShade: false,
-                sacrificedBlood: false
+                searchedDesk: false,
+                bribedGuard: false,
+                attackedThug: false
             };
             state.ended = false;
-            setStatus("選擇你的命運⋯");
+            state.inspecting = null;
+            setStatus("尋找案件的真相⋯");
             render();
         }
 
         restartBtn.addEventListener("click", restartGame);
 
-        // 遊戲啟動
+        // 啟動遊戲
         render();
     </script>
 </body>

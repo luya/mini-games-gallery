@@ -3,12 +3,33 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🃏</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <title>記憶翻牌遊戲</title>
     <style>
+        html { font-size: 16px; }
+        canvas,
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+            -webkit-tap-highlight-color: transparent;
+
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            touch-action: none;
+        }
+
         body {
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;            
+            height: 100svh;
             background: #1e1e2f;
             color: #fff;
-            font-family: system-ui;
             text-align: center;
             padding: 20px;
         }
@@ -21,6 +42,7 @@
             margin-bottom: 20px;
         }
 
+        headerInfo,
         select,
         button {
             padding: 10px;
@@ -72,13 +94,13 @@
         }
 
         .front {
-            background: #444;
-            color: #fff;
+            background: #202e37;
+            color: #ebede9;
         }
 
         .back {
-            background: #fff;
-            color: #000;
+            background: #ebede9;
+            color: #090a14;
             transform: rotateY(180deg);
         }
 
@@ -126,18 +148,18 @@
 
     <!-- 主選單 -->
     <div id="menu">
-        <label>選擇主題：</label>
+        <label id="headerInfo">選擇主題：
         <select id="theme">
             <option value="poker">撲克牌</option>
             <option value="emoji">笑臉</option>
             <option value="emojia">動物</option>
-        </select>
+        </select></label>
 
-        <label>選擇張數：</label>
+        <label id="headerInfo">選擇張數：
         <select id="size">
             <option value="4">4×4</option>
             <option value="6">6×6</option>
-        </select>
+        </select></label>
 
         <button onclick="startGame()">開始遊戲</button>
     </div>
