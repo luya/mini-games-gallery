@@ -3,19 +3,44 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Emoji 倉庫番：勇者救公主 (10關完整版)</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>勇者救公主之瘋狂巫師</title>
     <style>
+        html {
+            font-size: 20px;
+        }
+
+        canvas,
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+            -webkit-tap-highlight-color: transparent;
+
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            touch-action: none;
+        }
+
         body {
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
+            width: auto;
+            height: auto;
             margin: 0;
             background-color: #111;
             color: #fff;
-            font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
         }
 
         #ui-panel {
@@ -123,6 +148,7 @@
             line-height: 1.8;
             color: #fff;
         }
+
         #backBtn {
             position: fixed;
             top: 12px;
@@ -142,7 +168,7 @@
 
             /* 動畫 */
             transition: transform 0.2s ease, background 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
         }
 
         #backBtn:hover {
@@ -152,9 +178,10 @@
     </style>
     <link rel="stylesheet" href="nesjoystick.css">
 </head>
+
 <body>
-<a id="backBtn" href="index.html">🏠</a>
-    
+    <a id="backBtn" href="index.html">🏠</a>
+
     <div id="ui-panel">
         <h1>勇者救公主之瘋狂巫師 🏰</h1>
         <div class="info">關卡: <span id="current-level-val" class="highlight">1</span> / 10</div>
@@ -173,7 +200,7 @@
         <div id="map-layer"></div>
         <div id="objects-layer"></div>
     </div>
-    
+
     <div id="debug-panel">
         <h2>NES 搖桿測試數據(適用觸控裝置)</h2>
         <div class="data-grid">
@@ -187,9 +214,9 @@
         </div>
     </div>
     <div id="touch-container">
-        
+
         <div id="joystick-zone"></div>
-        
+
         <div id="joystick-base">
             <div id="joystick-stick"></div>
         </div>
@@ -224,95 +251,115 @@
         // P=玩家起點, B=箱子起點
         const levels = [
             // Level 1: 基礎教學
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 2, 1], 
-                    [1, 1, 0, 0, 0, 0, 0, 1], 
-                    [1, 1, 0, 1, 0, 1, 0, 1], 
-                    [1, 1, 0, 0, 0, 0, 0, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 2, y: 4 }, b: [{ x: 3, y: 2 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 2, 1],
+                [1, 1, 0, 0, 0, 0, 0, 1],
+                [1, 1, 0, 1, 0, 1, 0, 1],
+                [1, 1, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 2, y: 4 }, b: [{ x: 3, y: 2 }]
+            },
             // Level 2: 雙箱直線
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 0, 0, 0, 0, 0, 2, 1], 
-                    [1, 0, 1, 1, 0, 1, 1, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 0, 1, 0, 0, 1, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 2, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 2, y: 3 }, { x: 4, y: 3 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 0, 0, 0, 2, 1],
+                [1, 0, 1, 1, 0, 1, 1, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 0, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 2, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 2, y: 3 }, { x: 4, y: 3 }]
+            },
             // Level 3: 拐角練習
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 0, 0, 0, 1, 1, 1, 1], 
-                    [1, 0, 1, 0, 0, 0, 1, 1], 
-                    [1, 0, 0, 0, 0, 0, 1, 1], 
-                    [1, 1, 1, 0, 0, 2, 1, 1], 
-                    [1, 1, 1, 1, 1, 2, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 3, y: 2 }, { x: 4, y: 3 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 0, 1, 1, 1, 1],
+                [1, 0, 1, 0, 0, 0, 1, 1],
+                [1, 0, 0, 0, 0, 0, 1, 1],
+                [1, 1, 1, 0, 0, 2, 1, 1],
+                [1, 1, 1, 1, 1, 2, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 3, y: 2 }, { x: 4, y: 3 }]
+            },
             // Level 4: 狹窄通道
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 2, 0, 0, 0, 0, 2, 1], 
-                    [1, 1, 0, 1, 0, 1, 1, 1], 
-                    [1, 1, 0, 0, 0, 0, 0, 1], 
-                    [1, 1, 0, 1, 0, 1, 0, 1], 
-                    [1, 1, 0, 0, 0, 1, 0, 1], 
-                    [1, 1, 1, 0, 0, 0, 0, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 4, y: 1 }, b: [{ x: 2, y: 3 }, { x: 5, y: 3 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 0, 0, 0, 0, 2, 1],
+                [1, 1, 0, 1, 0, 1, 1, 1],
+                [1, 1, 0, 0, 0, 0, 0, 1],
+                [1, 1, 0, 1, 0, 1, 0, 1],
+                [1, 1, 0, 0, 0, 1, 0, 1],
+                [1, 1, 1, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 4, y: 1 }, b: [{ x: 2, y: 3 }, { x: 5, y: 3 }]
+            },
             // Level 5: 經典十字交叉
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 0, 0, 2, 1, 1, 1], 
-                    [1, 2, 0, 0, 0, 0, 1, 1], 
-                    [1, 0, 0, 1, 0, 0, 1, 1], 
-                    [1, 0, 0, 0, 0, 2, 1, 1], 
-                    [1, 1, 2, 0, 0, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 2, y: 2 }, b: [{ x: 3, y: 2 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 3, y: 4 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 0, 0, 2, 1, 1, 1],
+                [1, 2, 0, 0, 0, 0, 1, 1],
+                [1, 0, 0, 1, 0, 0, 1, 1],
+                [1, 0, 0, 0, 0, 2, 1, 1],
+                [1, 1, 2, 0, 0, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 2, y: 2 }, b: [{ x: 3, y: 2 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 3, y: 4 }]
+            },
             // Level 6: 倒退死角
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 0, 0, 1, 0, 0, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 0, 1, 2, 2, 1, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 0, 0, 0, 1, 0, 0, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 2, y: 2 }, { x: 5, y: 4 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 1, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 2, 2, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 1, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 1 }, b: [{ x: 2, y: 2 }, { x: 5, y: 4 }]
+            },
             // Level 7: 錯位排序
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 0, 2, 0, 2, 0, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 0, 1, 0, 1, 0, 1, 1], 
-                    [1, 0, 0, 0, 0, 0, 1, 1], 
-                    [1, 1, 0, 0, 0, 0, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 2 }, b: [{ x: 3, y: 2 }, { x: 3, y: 4 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 2, 0, 2, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 0, 1, 1],
+                [1, 0, 0, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 0, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 2 }, b: [{ x: 3, y: 2 }, { x: 3, y: 4 }]
+            },
             // Level 8: 迷宮推進
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 0, 0, 0, 1, 2, 2, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 0, 1, 1, 1, 0, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 1, 1], 
-                    [1, 1, 1, 0, 0, 0, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 4 }, b: [{ x: 2, y: 2 }, { x: 3, y: 4 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 0, 1, 2, 2, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 1, 1, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 1, 1],
+                [1, 1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 1, y: 4 }, b: [{ x: 2, y: 2 }, { x: 3, y: 4 }]
+            },
             // Level 9: 魔王前夜
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 2, 0, 0, 0, 0, 2, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 0, 0, 0, 0, 1, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 2, 0, 0, 0, 0, 2, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 3, y: 3 }, b: [{ x: 2, y: 2 }, { x: 4, y: 2 }, { x: 2, y: 4 }, { x: 4, y: 4 }] },
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 0, 0, 0, 0, 2, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 2, 0, 0, 0, 0, 2, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 3, y: 3 }, b: [{ x: 2, y: 2 }, { x: 4, y: 2 }, { x: 2, y: 4 }, { x: 4, y: 4 }]
+            },
             // Level 10: 終極試煉
-            { map: [[1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 2, 2, 2, 0, 0, 0, 1], 
-                    [1, 0, 0, 0, 0, 1, 0, 1], 
-                    [1, 0, 1, 0, 0, 1, 0, 1], 
-                    [1, 0, 0, 0, 0, 0, 0, 1], 
-                    [1, 1, 1, 1, 1, 0, 0, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1], 
-                    [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 6, y: 4 }, b: [{ x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 3 }] }
+            {
+                map: [[1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 2, 2, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 0, 0, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]], p: { x: 6, y: 4 }, b: [{ x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 3 }]
+            }
         ];
 
         const mapLayer = document.getElementById('map-layer');
@@ -510,21 +557,21 @@
             }
         });
 
-        function gameloop(){
-            if (gamepadState){
-                if (gamepadState.joystick.active){
+        function gameloop() {
+            if (gamepadState) {
+                if (gamepadState.joystick.active) {
                     console.log(gamepadState.joystick.dir)
-                    if (gamepadState.joystick.dir=='RIGHT') {
+                    if (gamepadState.joystick.dir == 'RIGHT') {
                         tryMove(1, 0)
-                    } else if (gamepadState.joystick.dir=='LEFT') {
+                    } else if (gamepadState.joystick.dir == 'LEFT') {
                         tryMove(-1, 0)
-                    } else if (gamepadState.joystick.dir=='UP') {
+                    } else if (gamepadState.joystick.dir == 'UP') {
                         tryMove(0, -1)
-                    } else if (gamepadState.joystick.dir=='DOWN') {
+                    } else if (gamepadState.joystick.dir == 'DOWN') {
                         tryMove(0, 1)
                     }
                 }
-                if(gamepadState.select){
+                if (gamepadState.select) {
                     loadLevel(currentLevel)
                 }
             }

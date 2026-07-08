@@ -9,10 +9,30 @@
     <style>
         * {
             box-sizing: border-box;
+        }
+
+        html {
+            font-size: 20px;
+        }
+
+        canvas,
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+            -webkit-tap-highlight-color: transparent;
+
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            touch-action: none;
         }
 
         body {
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
+            width: auto;
+            height: auto;
             margin: 0;
             padding: 0;
             background: #111;
@@ -28,9 +48,9 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            max-width: 600px;
+            max-width: 240px;
             /* 電腦版稍微拓寬一點，玩起來更舒服 */
-            max-height: 800px;
+            max-height: 960px;
             background: #000;
             border: 4px solid #333;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
@@ -53,6 +73,7 @@
             text-shadow: 2px 2px #000;
             z-index: 10;
         }
+
         #backBtn {
             position: fixed;
             top: 12px;
@@ -72,7 +93,7 @@
 
             /* 動畫 */
             transition: transform 0.2s ease, background 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
         }
 
         #backBtn:hover {
@@ -82,8 +103,9 @@
     </style>
     <link rel="stylesheet" href="nesjoystick.css">
 </head>
+
 <body>
-<a id="backBtn" href="index.html">🏠</a>
+    <a id="backBtn" href="index.html">🏠</a>
 
     <div id="game-container">
         <div id="score-board">得分: <span id="score">0</span></div>
@@ -105,9 +127,9 @@
     </div>
 
     <div id="touch-container">
-        
+
         <div id="joystick-zone"></div>
-        
+
         <div id="joystick-base">
             <div id="joystick-stick"></div>
         </div>
@@ -182,17 +204,17 @@
 
         function handleInput() {
 
-            if (gamepadState && isGameOver){
+            if (gamepadState && isGameOver) {
                 if (gamepadState.start) {
                     resetGame();
                 }
             }
             if (isGameOver) return;
-            if (gamepadState && !isGameOver){
-                if (gamepadState.joystick.active){
-                        console.log(gamepadState.joystick.dir)
-                        player.x += player.speed*gamepadState.joystick.x;
-                        player.y += player.speed*gamepadState.joystick.y;
+            if (gamepadState && !isGameOver) {
+                if (gamepadState.joystick.active) {
+                    console.log(gamepadState.joystick.dir)
+                    player.x += player.speed * gamepadState.joystick.x;
+                    player.y += player.speed * gamepadState.joystick.y;
                 }
             }
             // 左右移動 (支援 WASD 與 方向鍵)
@@ -210,7 +232,7 @@
             if (player.y > canvas.height - player.size / 2) player.y = canvas.height - player.size / 2;
 
             // 發射子彈 (空白鍵)
-            if ((keys[' ']||gamepadState.buttonA) && !player.shootCooldown) {
+            if ((keys[' '] || gamepadState.buttonA) && !player.shootCooldown) {
                 bullets.push({
                     x: player.x,
                     y: player.y - 20,
@@ -248,7 +270,7 @@
             // --- 核心改動在這裡 ---
             // 1. 計算當前過了大關卡幾次（每 100 分算一階）
             // 例如：80分時是 0+1 階，120分時是 1+1 階，250分時是 2+1 階
-            const speedLevel = Math.floor(score / 100) + 1; 
+            const speedLevel = Math.floor(score / 100) + 1;
 
             enemySpawnTimer++;
             if (enemySpawnTimer > 35) { // 數字越小生成越快
@@ -257,7 +279,7 @@
                     x: Math.random() * (canvas.width - 40) + 20,
                     y: -30,
                     size: 35,
-                    speed: Math.random() * (speedLevel/10), // 隨機速度 0.1+
+                    speed: Math.random() * (speedLevel / 10), // 隨機速度 0.1+
                     emoji: randomEmoji
                 });
                 enemySpawnTimer = 0;

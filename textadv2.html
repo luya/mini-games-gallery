@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔦</text></svg>">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔦</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -22,14 +24,40 @@
             border: 1px solid #352b42;
         }
 
+        .header-top {
+            border-bottom: 1px solid #352b42;
+        }
+
         .title {
             color: #94007a;
             text-shadow: 0 0 5px #d61a88B0;
         }
 
         .inventory-container {
-            color: #b1a376;
+            border-bottom: 1px solid #352b42;
         }
+
+        .location-name {
+            color: #ed4c40;
+            text-shadow: 0 0 5px #d61a88B0;
+        }
+
+        .dialog-text {
+            color: #c7d4e1;
+        }
+
+        .options {
+            border-top: 1px solid #352b42;
+        }
+
+        .footer {
+            border-top: 1px solid #352b42;
+        }
+
+        .footer_end {
+            border-top: 1px solid #352b42;
+        }
+        
     </style>
 </head>
 
@@ -55,7 +83,9 @@
 
         <div class="footer">
             <span id="statusText">尋找案件的真相⋯</span>
-            <button class="restart-btn" id="restartBtn">重新調查 🔁</button>
+        </div>
+        <div class="footer_end">
+            <button class="restart-btn" id="restartBtn">🔁重新調查</button>
         </div>
     </div>
     <script src="ayakit.js"></script>
@@ -71,14 +101,21 @@
             DOSSIER: { name: "機密調查報告 📂", desc: "牛皮紙袋裡裝著死者生前的部分日記與帳目。字裡行間充滿了對市政高層的不信任，以及他發現自己被跟蹤的恐懼。" },
             COIN: { name: "地下賭場紀念幣 🪙", desc: "純銅鑄造的重型籌碼硬幣，正面刻著骷髏與骰子。這是出入黑幫高層核心賭廳的隱密憑證。" },
             LETTER: { name: "市長的簽名密信 📜", desc: "【關鍵道具】信紙帶有市政廳的浮水印，上面有市長親筆簽名。內容露骨地提到了如何瓜分碼頭走私利益，這是足以顛覆整座城市的致命鐵證。" },
-            REVOLVER: { name: "雕花金屬左輪 🔫", desc: "【關鍵道具】點38口徑的點金左輪，槍身刻有精美的復古藤蔓紋路。轉輪內已經壓滿了六發子彈。沉甸甸的重量代表著正義，或是毀滅。" },
+            REVOLVER: { name: "雕花金屬左輪 👉", desc: "【關鍵道具】點38口徑的點金左輪，槍身刻有精美的復古藤蔓紋路。轉輪內已經壓滿了六發子彈。沉甸甸的重量代表著正義，或是毀滅。" },
             FILM: { name: "備份微縮膠卷 🎞️", desc: "【關鍵道具】保存在防水小匣子裡的微縮膠卷底片。透過光源隱約能看見無數黑幫帳本與高層會面的偷拍照片，是本案不容辯駁的最終核心鐵證。" }
         };
 
         const ITEMS = {
-            FLASHLIGHT: "FLASHLIGHT", CROWBAR: "CROWBAR", POWDER: "POWDER",
-            KEYRING: "KEYRING", WHISKEY: "WHISKEY", DOSSIER: "DOSSIER",
-            COIN: "COIN", LETTER: "LETTER", REVOLVER: "REVOLVER", FILM: "FILM"
+            FLASHLIGHT: "FLASHLIGHT",
+            CROWBAR: "CROWBAR",
+            POWDER: "POWDER",
+            KEYRING: "KEYRING",
+            WHISKEY: "WHISKEY",
+            DOSSIER: "DOSSIER",
+            COIN: "COIN",
+            LETTER: "LETTER",
+            REVOLVER: "REVOLVER",
+            FILM: "FILM"
         };
 
         // 夥伴隨「不同場景」變更的動態對話庫
@@ -126,17 +163,18 @@
             office: {
                 name: "1. 私人偵探事務所",
                 text: () => {
-                    let base = "窗外下著暴雨，霓虹燈光透過百葉窗投下血紅的陰影。"+
-                    "你的桌上放著一杯沒喝完的咖啡。"+
-                    "昨夜，名流富商之死震驚全城，而你收到了一封匿名恐嚇信，警告你別插手。"
+                    let base = "窗外下著暴雨，霓虹燈光透過百葉窗投下血紅的陰影。" +
+                        "你的桌上放著一杯沒喝完的咖啡。" +
+                        "昨夜，名流富商之死震驚全城，而你收到了一封匿名恐嚇信，警告你別插手。"
                     return base;
                 },
                 options: () => {
                     const opts = [
                         { text: "前往案發現場：富豪豪宅 🏙️", next: "mansion" },
                         { text: "前往常去的藍調酒吧打聽消息 🍸", next: "bar" },
-                        { text: "查看恐嚇信件 ✉️", 
-                          action: () => { setStatus("從各種書籍報章雜誌拼貼而成的信，想必沒有留下指紋。"); } 
+                        {
+                            text: "查看恐嚇信件 ✉️",
+                            action: () => { setStatus("從各種書籍報章雜誌拼貼而成的信，\n想必沒有留下指紋。"); }
                         }
                     ];
                     if (!state.inventory.includes(ITEMS.FLASHLIGHT)) {
@@ -529,10 +567,12 @@
 
         // 渲染上方可點擊的道具與夥伴列表
         function renderInventory() {
-            inventoryEl.innerHTML = "";
-            
+            inventoryEl.innerHTML = "道具：";
+
             // 如果有夥伴，生成對話按鈕
             if (state.flags.hasRose) {
+                
+                inventoryEl.innerHTML = "隊員以及道具：";
                 const btn = document.createElement("button");
                 btn.className = "inv-btn partner";
                 btn.textContent = "夥伴：蘿絲 👥";
@@ -550,7 +590,7 @@
             });
 
             if (inventoryEl.children.length === 0) {
-                inventoryEl.textContent = "無可互動對象";
+                inventoryEl.textContent = "道具：無";
             }
         }
 
@@ -567,14 +607,14 @@
             locationNameEl.textContent = ending.title;
             dialogTextEl.textContent = ending.text;
             sceneIconEl.textContent = "⚖️";
-            
+
             optionsEl.innerHTML = "";
             const btn = document.createElement("button");
             btn.className = "option-btn";
             btn.innerHTML = `<span>在雨夜的事務所中再度睜眼，重啟調查 🔁</span><span class="option-key">重開</span>`;
             btn.addEventListener("click", restartGame);
             optionsEl.appendChild(btn);
-            
+
             setStatus("案件調查已宣告落幕。");
         }
 

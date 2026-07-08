@@ -3,7 +3,7 @@
 }
 
 html {
-    font-size: 16px;
+    font-size: 20px;
 }
 
 canvas,
@@ -22,19 +22,22 @@ div {
 
 body {
     font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
-    width: 100vw;
-    height: 100svh;
+    width: auto;
+    height: auto;
     margin: 0;
     background: #646365;
-    color: #f2f0e5;
+    color: #faffff;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .game {
+    /* transform: translate(0, 10%); */
+    margin: 5%;
     height: 80%;
     width: 80%;
+    max-width: 640px;
     border-radius: 12px;
     background: #212123;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
@@ -56,33 +59,29 @@ body {
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #d3a068;
+    
 }
 
 .inventory-container {
+    min-height: 48px;
     padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 16px;
+    font-size: 0.9rem;
     border-bottom: 1px solid #646365;
     color: #b1a376;
     flex-wrap: wrap;
 }
 
 .inventory {
+    min-height: 32px;
     font-size: 0.9rem;
     color: #4b80ca;
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-}
-
-.inventory span {
-    padding-left: 6px;
-    padding-right: 6px;
-    border-radius: 6px;
-    border: 1px solid #ede19e;
-    background: #a2dcc720;
+    transform: translateY(10%);
 }
 
 /* 讓道具與夥伴變成可點擊的互動按鈕 */
@@ -92,9 +91,10 @@ body {
     border: 1px solid #2c3e50;
     background: rgba(36, 52, 71, 0.7);
     color: #cbd5e1;
-    font-size: 14px;
+    font-size: 0.9rem;;
     cursor: pointer;
     transition: all 0.2s;
+    transform: translateY(-10%);
 }
 
 .inv-btn:hover {
@@ -121,7 +121,7 @@ body {
 }
 
 .location-name {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: #868188;
     margin-bottom: 6px;
@@ -129,6 +129,7 @@ body {
 }
 
 .dialog-text {
+    color: #c7d4e1;
     white-space: pre-line;
 }
 
@@ -143,7 +144,7 @@ body {
 .options {
     border-top: 1px solid #646365;
     padding: 12px 16px 16px;
-    background: #212123;
+    /* background: #212123; */
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -188,15 +189,26 @@ body {
     color: #f2f0e5bb;
 }
 
+.footer_end {
+    padding: 8px 16px 10px;
+    font-size: 1.0rem;
+    color: #b8b5b9;
+    border-top: 1px solid #646365;
+    display: flex;
+    justify-content:end;
+    align-items: end;    
+    white-space: pre-line;
+}
+
 .footer {
     padding: 8px 16px 10px;
     font-size: 1.0rem;
     color: #b8b5b9;
     border-top: 1px solid #646365;
-    background: #212123;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: center;    
+    white-space: pre-line;
 }
 
 .restart-btn {

@@ -562,10 +562,11 @@
 
         // 渲染上方可點擊的道具與夥伴列表
         function renderInventory() {
-            inventoryEl.innerHTML = "";
+            inventoryEl.innerHTML = "道具：";
             
             // 如果有夥伴，生成對話按鈕
             if (state.flags.hasAlys) {
+                inventoryEl.innerHTML = "隊員以及道具：";
                 const btn = document.createElement("button");
                 btn.className = "inv-btn partner";
                 btn.textContent = "夥伴：艾莉絲 👥";
@@ -583,7 +584,7 @@
             });
 
             if (inventoryEl.children.length === 0) {
-                inventoryEl.textContent = "無可互動對象";
+                inventoryEl.textContent = "道具：無";
             }
         }
 
