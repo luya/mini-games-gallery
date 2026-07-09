@@ -12,8 +12,9 @@ canvas, div {
 }
 /* 遊戲控制器操作區域分流 */
 #touch-container {
+    top: 64px;
     width: 100%;
-    height: 100%;
+    height: 90%;
     position: absolute;
     z-index: 9999;
 }

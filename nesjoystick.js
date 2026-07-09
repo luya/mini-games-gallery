@@ -41,7 +41,7 @@
 
         // 設定中心點為玩家點擊的位置
         startX = touch.clientX;
-        startY = touch.clientY;
+        startY = touch.clientY-48;
 
         // 顯示搖桿外圈並定位
         joyBase.style.left = `${startX}px`;
@@ -67,7 +67,7 @@
 
         // 計算手指距離中心的位移
         let deltaX = touch.clientX - startX;
-        let deltaY = touch.clientY - startY;
+        let deltaY = touch.clientY -48 - startY;
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
         // 限制內圈不能超出最大半徑
