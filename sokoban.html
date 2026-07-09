@@ -20,11 +20,11 @@
         div {
             /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
             user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
+            /* -webkit-user-select: none; */
+            /* -webkit-touch-callout: none; */
 
             /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
-            -webkit-tap-highlight-color: transparent;
+            /* -webkit-tap-highlight-color: transparent; */
 
             /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
             /* touch-action: none; */
@@ -147,35 +147,9 @@
             font-size: 18px;
             line-height: 1.8;
             color: #fff;
-        }
-
-        #backBtn {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 9999;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #8f7a66;
-            color: #fff;
-            text-decoration: none;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-
-            /* 動畫 */
-            transition: transform 0.2s ease, background 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-        }
-
-        #backBtn:hover {
-            transform: scale(1.15);
-            background: #a68b74;
-        }
+        }       
     </style>
+    <link rel="stylesheet" href="ayakit.css">
     <link rel="stylesheet" href="nesjoystick.css">
 </head>
 
