@@ -4,31 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>NES 網頁動態觸控搖桿測試</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            /* -webkit-user-select: none; */
-            user-select: none;
-            /* -webkit-touch-callout: none; */
-        }
-        
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #222;
-            color: #fff;
-            font-family: monospace;
-            position: relative;
-            touch-action: none; /* 禁用瀏覽器預設的手勢行為 */
-        }
-    </style>
     <link rel="stylesheet" href="ayakit.css">
     <link rel="stylesheet" href="nesjoystick.css">
 </head>
 <body>
-    <script src="ayakit.js"></script>
+    <a id="backBtn" href="index.html">🏠</a>
     <div id="debug-panel">
         <h2>NES 搖桿測試數據(適用觸控裝置)</h2>
         <div class="data-grid">
@@ -61,6 +41,7 @@
         </div>
 
     </div>
+    <script src="ayakit.js"></script>
     <script src="nesjoystick.js"></script>
     <script>
         

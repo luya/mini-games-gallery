@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗒️</text></svg>">
+    <title>Emoji 英文單字拼字閃卡</title>
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --success: #2ec4b6;
+            --danger: #e71d36;
+            --background: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: #020202;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        /* 控制列：選單與分數 */
+        .controls-board {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .category-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #333;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .score-board {
+            font-size: 1.1rem;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .card {
+            background: #fff;
+            border: 4px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .emoji {
+            font-size: 5.5rem;
+            margin: 0 0 15px 0;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .audio-hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .word-display {
+            font-size: 2rem;
+            letter-spacing: 5px;
+            font-weight: bold;
+            min-height: 45px;
+            color: #333;
+        }
+
+        .letter-hint {
+            color: #ccc;
+            border-bottom: 3px solid #ccc;
+            display: inline-block;
+            width: 25px;
+            margin: 0 4px;
+            text-align: center;
+        }
+
+        .letter-correct {
+            color: var(--success);
+            border-bottom: 3px solid var(--success);
+        }
+
+        .message {
+            font-size: 1.1rem;
+            font-weight: bold;
+            height: 30px;
+            margin-bottom: 15px;
+        }
+
+        .message.success { color: var(--success); }
+        .message.error { color: var(--danger); }
+
+        /* 虛擬鍵盤 */
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .key {
+            background: #eee;
+            border: none;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .key:active {
+            background: #ddd;
+            transform: scale(0.95);
+        }
+
+        /* 結算過關畫面 Modal */
+        .game-over-modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .game-over-modal.active {
+            display: flex;
+        }
+
+        .game-over-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .final-score {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .restart-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(46, 196, 182, 0.4);
+            transition: transform 0.1s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="game-container">
+        <!-- 控制列：類別選擇 + 分數 -->
+        <div class="controls-board">
+            <select id="category-select" class="category-select">
+                <option value="fruits">🍎 水果系列</option>
+                <option value="animals">🐱 動物系列</option>
+                <option value="sports">🏀 運動系列</option>
+                <option value="others">🚀 其他</option>
+                <option value="all">🌟 全部主題</option>
+            </select>
+            <div class="score-board">
+                得分: <span id="score" style="color:var(--primary);">0</span>
+            </div>
+        </div>
+
+        <!-- 閃卡區 -->
+        <div class="card">
+            <span class="emoji" id="emoji-display" title="點擊聽發音">🍎</span>
+            <div class="audio-hint">🔊 點擊圖案可重複發音</div>
+            <div class="word-display" id="word-display"></div>
+        </div>
+
+        <div class="message" id="message">請輸入正確的英文字母！</div>
+
+        <!-- 虛擬鍵盤 -->
+        <div class="keyboard" id="keyboard"></div>
+
+        <!-- 通關結算畫面 -->
+        <div class="game-over-modal" id="game-over-modal">
+            <div class="game-over-title">🏆 恭喜通關！</div>
+            <div style="font-size: 4rem; margin-bottom: 10px;">🎉</div>
+            <div class="final-score">您的最終得分：<b id="final-score-val" style="color:var(--success);">0</b> 分</div>
+            <button class="restart-btn" id="restart-btn">再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. 分類題庫設定 (每類各 10 個，共 40 個單字)
+        const categories = {
+            fruits: [
+                { emoji: '🍎', word: 'APPLE' },
+                { emoji: '🍌', word: 'BANANA' },
+                { emoji: '🍇', word: 'GRAPE' },
+                { emoji: '🍉', word: 'WATERMELON' },
+                { emoji: '🍋', word: 'LEMON' },
+                { emoji: '🍓', word: 'STRAWBERRY' },
+                { emoji: '🍒', word: 'CHERRY' },
+                { emoji: '🍑', word: 'PEACH' },
+                { emoji: '🍍', word: 'PINEAPPLE' },
+                { emoji: '🍊', word: 'ORANGE' }
+            ],
+            animals: [
+                { emoji: '🐱', word: 'CAT' },
+                { emoji: '🐶', word: 'DOG' },
+                { emoji: '🐘', word: 'ELEPHANT' },
+                { emoji: '🦊', word: 'FOX' },
+                { emoji: '🦁', word: 'LION' },
+                { emoji: '🐻', word: 'BEAR' },
+                { emoji: '🐵', word: 'MONKEY' },
+                { emoji: '🐰', word: 'RABBIT' },
+                { emoji: '🐼', word: 'PANDA' },
+                { emoji: '🐯', word: 'TIGER' }
+            ],
+            sports: [ // 對應 HTML 的活動或運動 (我們把這裡改為 sports 比較好，下方有說明)
+                { emoji: '⚽', word: 'SOCCER' },
+                { emoji: '🏀', word: 'BASKETBALL' },
+                { emoji: '🎾', word: 'TENNIS' },
+                { emoji: '🏃', word: 'RUN' },
+                { emoji: '🏊', word: 'SWIM' },
+                { emoji: '🚲', word: 'BIKE' },
+                { emoji: '💃', word: 'DANCE' },
+                { emoji: '🏌️', word: 'GOLF' },
+                { emoji: '🛹', word: 'SKATE' },
+                { emoji: '🧗', word: 'CLIMB' }
+            ],
+            others: [ // 新增的其他分類
+                { emoji: '🏠', word: 'HOUSE' },
+                { emoji: '🚀', word: 'ROCKET' },
+                { emoji: '🍦', word: 'ICE' },
+                { emoji: '🎸', word: 'GUITAR' },
+                { emoji: '📚', word: 'BOOK' },
+                { emoji: '☀️', word: 'SUN' },
+                { emoji: '⏰', word: 'CLOCK' },
+                { emoji: '🔑', word: 'KEY' },
+                { emoji: '🌲', word: 'TREE' },
+                { emoji: '🍕', word: 'PIZZA' }
+            ]
+        };
+
+        // 2. 遊戲狀態變數
+        let currentDeck = [];
+        let currentCardIndex = 0;
+        let currentInputIndex = 0;
+        let score = 0;
+
+        // 3. DOM 元素
+        const categorySelect = document.getElementById('category-select');
+        const emojiDisplay = document.getElementById('emoji-display');
+        const wordDisplay = document.getElementById('word-display');
+        const messageDisplay = document.getElementById('message');
+        const scoreDisplay = document.getElementById('score');
+        const keyboardContainer = document.getElementById('keyboard');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const finalScoreVal = document.getElementById('final-score-val');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // 4. 語音發音功能
+       function speakWord(word, language='en-US', speedrare = 1.0, voicepitch = 1.0) {
+            // 檢查瀏覽器是否支援語音功能
+            if ('speechSynthesis' in window) {
+                // 先停止目前正在播放的聲音（避免連續切換題目時聲音重疊）
+                window.speechSynthesis.cancel(); 
+
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = language; // 也可以改成 'en-GB' 聽英式英語
+                utterance.rate = speedrare;     // 調整語速（0.1 ~ 10），0.9 稍微慢一點讓初學者聽得更清楚
+                utterance.pitch = voicepitch;    // 調整音高（0 ~ 2）
+
+                const synth = window.speechSynthesis;
+                let voices = synth.getVoices();
+                if (voices.length>1) {
+                    let voice=voices[Math.floor(Math.random()*voices.length)];
+                    while (voice.lang!=language) voice=voices[Math.floor(Math.random()*voices.length)];
+                    utterance.voice=voice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                messageDisplay.textContent = `❌ 很抱歉，您的瀏覽器不支援語音合成功能`;
+                messageDisplay.className = "message error";
+                console.log("很抱歉，您的瀏覽器不支援語音合成功能。");
+            }
+        }
+
+        // 5. 載入題庫（支援選單切換）
+        function loadDeck() {
+            const selectedCategory = categorySelect.value;
+            
+            if (selectedCategory === 'all') {
+                currentDeck = [
+                    ...categories.fruits,
+                    ...categories.animals,
+                    ...categories.sports,
+                    ...categories.others
+                ];
+            } else {
+                currentDeck = [...categories[selectedCategory]];
+            }
+
+            // 打散題目順序
+            currentDeck.sort(() => Math.random() - 0.5);
+            
+            // 重置遊戲進度
+            currentCardIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = score;
+            gameOverModal.classList.remove('active');
+
+            initRound();
+        }
+
+        // 6. 初始化新回合
+        function initRound() {
+            // 檢查是否已通關（所有卡片洗完）
+            if (currentCardIndex >= currentDeck.length) {
+                showGameOver();
+                return;
+            }
+
+            const currentCard = currentDeck[currentCardIndex];
+            emojiDisplay.textContent = currentCard.emoji;
+            currentInputIndex = 0;
+            messageDisplay.textContent = `剩餘 ${currentDeck.length - currentCardIndex} 張卡牌`;
+            messageDisplay.className = "message";
+
+            renderWordDisplay();
+            renderKeyboard();
+            speakWord(currentCard.word); // 題目出現時播放發音
+        }
+
+        // 7. 渲染單字底下底線
+        function renderWordDisplay() {
+            const word = currentDeck[currentCardIndex].word;
+            wordDisplay.innerHTML = '';
+            
+            for (let i = 0; i < word.length; i++) {
+                const span = document.createElement('span');
+                span.classList.add('letter-hint');
+                
+                if (i < currentInputIndex) {
+                    span.textContent = word[i];
+                    span.classList.add('letter-correct');
+                } else {
+                    span.textContent = '_';
+                }
+                wordDisplay.appendChild(span);
+            }
+        }
+
+        // 8. 產生鍵盤
+        function renderKeyboard() {
+            keyboardContainer.innerHTML = '';
+            const word = currentDeck[currentCardIndex].word;
+            
+            let letterPool = word.split('');
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            while (letterPool.length < 14) {
+                const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+                if (!letterPool.includes(randomLetter)) {
+                    letterPool.push(randomLetter);
+                }
+            }
+            letterPool.sort(() => Math.random() - 0.5);
+
+            letterPool.forEach(letter => {
+                const button = document.createElement('button');
+                button.classList.add('key');
+                button.textContent = letter;
+                button.addEventListener('click', () => handleInput(letter));
+                keyboardContainer.appendChild(button);
+            });
+        }
+
+        // 9. 核心輸入判斷
+        function handleInput(letter) {
+            if (currentCardIndex >= currentDeck.length) return; // 已過關不反應
+
+            const currentCard = currentDeck[currentCardIndex];
+            const targetLetter = currentCard.word[currentInputIndex];
+
+            if (letter.toUpperCase() === targetLetter) {
+                currentInputIndex++;
+                renderWordDisplay();
+                
+                // 拼完該單字
+                if (currentInputIndex === currentCard.word.length) {
+                    score += 10;
+                    scoreDisplay.textContent = score;
+                    messageDisplay.textContent = "🎉 答對了！";
+                    messageDisplay.className = "message success";
+                    speakWord("BINGO!");
+                    
+                    currentCardIndex++;
+                    setTimeout(initRound, 1000);
+                }
+            } else {
+                messageDisplay.textContent = `❌ 答錯囉！不是 ${letter.toUpperCase()}`;
+                speakWord("WRONG!");
+                score--;
+                if (score <=0) score = 0;
+                scoreDisplay.textContent = score;
+                messageDisplay.className = "message error";
+            }
+        }
+
+        // 10. 顯示過關畫面
+        function showGameOver() {
+            finalScoreVal.textContent = score;
+            gameOverModal.classList.add('active');
+            speakWord("Great job! You finished!");
+        }
+
+        // 11. 事件監聽 (EventListener)
+        // 選擇主題選單時重新載入
+        categorySelect.addEventListener('change', loadDeck);
+
+        // 點擊再玩一次按鈕
+        restartBtn.addEventListener('click', loadDeck);
+
+        // 點擊 Emoji 手動發音
+        emojiDisplay.addEventListener('click', () => {
+            if (currentDeck[currentCardIndex]) {
+                speakWord(currentDeck[currentCardIndex].word);
+            }
+        });
+
+        // 實體鍵盤監聽
+        window.addEventListener('keydown', (e) => {
+            if (e.key.match(/^[a-zA-Z]$/)) {
+                handleInput(e.key);
+            }
+        });
+
+        // 啟動遊戲
+        loadDeck();
+    </script>
+</body>
+</html>
