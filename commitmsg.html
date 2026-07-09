@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>Git Commit Msg 提示工具</title>
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        :root {
+            --primary: #2ea44f;
+            --primary-hover: #22863a;
+            --background: #f6f8fa;
+            --border: #d0d7de;
+            --dark: #24292f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            width: 90%;
+            max-width: 550px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.88rem;
+            color: #57606a;
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            outline: none;
+            background-color: #fff;
+        }
+
+        select:focus,
+        input[type="text"]:focus {
+            border-color: #0969da;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+        }
+
+        .preview-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hint-text {
+            font-size: 0.8rem;
+            color: #57606a;
+            font-weight: normal;
+        }
+
+        .preview-box {
+            background: #f6f8fa;
+            border: 1px solid #1f232826;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            word-break: break-all;
+            min-height: 24px;
+            color: #0969da;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-copy {
+            background-color: var(--primary);
+            color: white;
+            border: 1px solid rgba(27, 31, 36, 0.15);
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-copy:active {
+            transform: scale(0.99);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #24292f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="container">
+        <h2>Git Commit Msg 提示工具 📝</h2>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="type-select">1. 類型 (Type)</label>
+                <select id="type-select">
+                    <option value="FEA">FEA (新功能)</option>
+                    <option value="FIX">FIX (修復 Bug)</option>
+                    <option value="DOC">DOC (文件變更)</option>
+                    <option value="STY">STY (樣式排版)</option>
+                    <option value="REF">REF (程式重構)</option>
+                    <option value="CHORE">CHORE (建置/雜務)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="verb-select">2. 常用報告詞 (Verb)</label>
+                <select id="verb-select">
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="message-input" id="input-label">3. 描述對象 (Description)</label>
+            <input type="text" id="message-input" placeholder="" autocomplete="off">
+        </div>
+
+        <div class="preview-label-row">
+            <label>即時預覽 (Preview)</label>
+            <span class="hint-text">按 Enter 鍵可直接複製</span>
+        </div>
+        <div class="preview-box" id="preview-box">[]</div>
+
+        <button class="btn-copy" id="copy-btn">複製 Commit 訊息</button>
+    </div>
+
+    <div class="toast" id="toast">已成功複製到剪貼簿！</div>
+
+    <script>
+        // 定義聯動資料庫：根據不同的 Type，提供工程師最常用的語境動詞與 Placeholder 提示
+        const verbTemplates = {
+            FEA: [
+                { verb: "Add a new function:", placeholder: "例如: user authentication" },
+                { verb: "Add a new feature:", placeholder: "例如: dark mode support" },
+                { verb: "Add a new tool:", placeholder: "例如: Msg generator" },
+                { verb: "Add a new game:", placeholder: "例如: English Flash Card" },
+                { verb: "Implement", placeholder: "例如: payment gateway integration" },
+                { verb: "Introduce", placeholder: "例如: new responsive layout" }
+            ],
+            FIX: [
+                { verb: "Fix a bug where", placeholder: "例如: login button crashes on Safari" },
+                { verb: "Resolve an issue with", placeholder: "例如: memory leak in dashboard" },
+                { verb: "Correct", placeholder: "例如: incorrect calculations in shopping cart" },
+                { verb: "Handle null pointer exception in", placeholder: "例如: API response handler" }
+            ],
+            DOC: [
+                { verb: "Update README.md for", placeholder: "例如: installation guide" },
+                { verb: "Add documentation for", placeholder: "例如: API endpoint definitions" },
+                { verb: "Fix typos in", placeholder: "例如: getting started section" }
+            ],
+            STY: [
+                { verb: "Refactor CSS styles for", placeholder: "例如: navigation bar padding" },
+                { verb: "Adjust spacing and layout of", placeholder: "例如: product detail page" },
+                { verb: "Adjust font-color and bg-color of", placeholder: "例如: product detail page" },
+                { verb: "Fix responsive UI for", placeholder: "例如: mobile view table" }
+            ],
+            REF: [
+                { verb: "Refactor internal logic of", placeholder: "例如: data filtering function" },
+                { verb: "Optimize performance of", placeholder: "例如: database query loops" },
+                { verb: "Simplify", placeholder: "例如: redundant conditional statements" }
+            ],
+            CHORE: [
+                { verb: "Update dependencies to", placeholder: "例如: latest stable versions" },
+                { verb: "Configure build scripts for", placeholder: "例如: production environment" },
+                { verb: "Remove deprecated logs in", placeholder: "例如: server entry point" }
+            ]
+        };
+
+        // 抓取 DOM 元素
+        const typeSelect = document.getElementById('type-select');
+        const verbSelect = document.getElementById('verb-select');
+        const messageInput = document.getElementById('message-input');
+        const previewBox = document.getElementById('preview-box');
+        const copyBtn = document.getElementById('copy-btn');
+        const toast = document.getElementById('toast');
+
+        // 更新第二個選單（動詞）的內容
+        function updateVerbOptions() {
+            const selectedType = typeSelect.value;
+            const verbs = verbTemplates[selectedType] || [];
+
+            // 清空舊選項
+            verbSelect.innerHTML = '';
+
+            // 塞入新選項
+            verbs.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = item.verb;
+                option.textContent = item.verb;
+                // 將對應的 placeholder 暫存到 dataset 中
+                option.dataset.placeholder = item.placeholder;
+                verbSelect.appendChild(option);
+            });
+
+            // 更新輸入框的提示詞
+            updatePlaceholder();
+        }
+
+        // 更新輸入框的 Placeholder 提示
+        function updatePlaceholder() {
+            const selectedOption = verbSelect.options[verbSelect.selectedIndex];
+            if (selectedOption) {
+                messageInput.placeholder = selectedOption.dataset.placeholder || "";
+            }
+            // 動詞變了，預覽也要跟著變
+            updatePreview();
+        }
+
+        // 更新最終預覽
+        function updatePreview() {
+            const type = typeSelect.value;
+            const verb = verbSelect.value || "";
+            const desc = messageInput.value.trim();
+
+            // 組合語句：[TYPE]Verb Desc
+            if (desc === '') {
+                previewBox.textContent = `[${type}] ${verb} `;
+            } else {
+                previewBox.textContent = `[${type}] ${verb} ${desc}`;
+            }
+        }
+
+        // 一鍵複製
+        function copyToClipboard() {
+            navigator.clipboard.writeText(previewBox.textContent).then(() => {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1500);
+            });
+        }
+
+        // --- 事件綁定 ---
+
+        // 當 1.類型 改變時 ➜ 更新 2.動詞清單 ➜ 更新提示詞 ➜ 更新預覽
+        typeSelect.addEventListener('change', updateVerbOptions);
+
+        // 當 2.動詞 改變時 ➜ 更新提示詞 ➜ 更新預覽
+        verbSelect.addEventListener('change', updatePlaceholder);
+
+        // 當 3.輸入框 打字時 ➜ 更新預覽
+        messageInput.addEventListener('input', updatePreview);
+
+        // 點擊複製
+        copyBtn.addEventListener('click', copyToClipboard);
+
+        // Enter 快捷鍵複製
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') copyToClipboard();
+        });
+
+        // 首次進網頁，初始化第一個分類的動詞清單與預覽
+        updateVerbOptions();
+    </script>
+</body>
+
+</html>
