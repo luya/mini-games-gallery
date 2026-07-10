@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗒️</text></svg>">
-    <title>Emoji 英文單字拼字閃卡</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗒️</text></svg>">
+    <title>英文單字拼字閃卡</title>
     <link rel="stylesheet" href="ayakit.css">
     <style>
         :root {
@@ -17,7 +20,13 @@
             --background: #f4f7f6;
         }
 
+        html {
+            background-color: var(--background);
+        }
+
         body {
+            width: auto;
+            height: auto;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background);
             color: #020202;
@@ -25,18 +34,19 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             margin: 0;
         }
 
         .game-container {
+            margin-top: 5%;
+            touch-action: none;
             background: white;
             padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 90%;
-            max-width: 450px;
+            min-width: 450px;
             position: relative;
         }
 
@@ -71,7 +81,7 @@
             border-radius: 15px;
             padding: 30px 20px;
             margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
         .emoji {
@@ -83,8 +93,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .audio-hint {
@@ -122,8 +139,13 @@
             margin-bottom: 15px;
         }
 
-        .message.success { color: var(--success); }
-        .message.error { color: var(--danger); }
+        .message.success {
+            color: var(--success);
+        }
+
+        .message.error {
+            color: var(--danger);
+        }
 
         /* 虛擬鍵盤 */
         .keyboard {
@@ -199,6 +221,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <a id="backBtn" href="index.html">🏠</a>
@@ -206,11 +229,21 @@
         <!-- 控制列：類別選擇 + 分數 -->
         <div class="controls-board">
             <select id="category-select" class="category-select">
-                <option value="fruits">🍎 水果系列</option>
-                <option value="animals">🐱 動物系列</option>
-                <option value="sports">🏀 運動系列</option>
-                <option value="others">🚀 其他</option>
-                <option value="all">🌟 全部主題</option>
+                <option value="fruits">🍎 水果圖卡</option>
+                <option value="animals">🐱 野生動物圖卡</option>
+                <option value="birdsandothers">🦜 鳥類與其他圖卡</option>
+                <option value="farmandpets">🐶 農場動物與寵物圖卡</option>
+                <option value="seaanimals">🐬 海洋動物圖卡</option>
+                <option value="sports">🏀 運動圖卡</option>
+                <option value="foods">🍕 食物圖卡</option>
+                <option value="text2fruits">🍎 水果練習</option>
+                <option value="text2animals">🐱 野生動物練習</option>
+                <option value="text2birdsandothers">🦜 鳥類與其他練習</option>
+                <option value="text2farmandpets">🐶 農場動物與寵物練習</option>
+                <option value="text2seaanimals">🐬 海洋動物練習</option>
+                <option value="text2sports">🏀 運動練習</option>
+                <option value="text2foods">🍕 食物練習</option>
+                <!-- <option value="all">🌟 全部主題</option> -->
             </select>
             <div class="score-board">
                 得分: <span id="score" style="color:var(--primary);">0</span>
@@ -241,6 +274,25 @@
     <script>
         // 1. 分類題庫設定 (每類各 10 個，共 40 個單字)
         const categories = {
+            text2fruits: [
+                { emoji: '🍎蘋果 APPLE', word: 'APPLE' },
+                { emoji: '🍌香蕉 BANANA', word: 'BANANA' },
+                { emoji: '🍇葡萄 GRAPE', word: 'GRAPE' },
+                { emoji: '🍉西瓜 WATERMELON', word: 'WATERMELON' },
+                { emoji: '🍋檸檬 LEMON', word: 'LEMON' },
+                { emoji: '🍓草莓 STRAWBERRY', word: 'STRAWBERRY' },
+                { emoji: '🍒櫻桃 CHERRY', word: 'CHERRY' },
+                { emoji: '🍑桃子 PEACH', word: 'PEACH' },
+                { emoji: '🍍鳳梨 PINEAPPLE', word: 'PINEAPPLE' },
+                { emoji: '🍊橘子 ORANGE', word: 'ORANGE' },
+                { emoji: '🍐梨子 PEAR', word: 'PEAR' },
+                { emoji: '🍈香瓜 MELON', word: 'MELON' },
+                { emoji: '🥥椰子 COCONUT', word: 'COCONUT' },
+                { emoji: '🥝奇異果 KIWI', word: 'KIWI' },
+                { emoji: '🥭芒果 MANGO', word: 'MANGO' },
+                { emoji: '🥑酪梨 AVOCADO', word: 'AVOCADO' },
+                { emoji: '🍅番茄 TOMATO', word: 'TOMATO' },
+            ],
             fruits: [
                 { emoji: '🍎', word: 'APPLE' },
                 { emoji: '🍌', word: 'BANANA' },
@@ -251,19 +303,173 @@
                 { emoji: '🍒', word: 'CHERRY' },
                 { emoji: '🍑', word: 'PEACH' },
                 { emoji: '🍍', word: 'PINEAPPLE' },
-                { emoji: '🍊', word: 'ORANGE' }
+                { emoji: '🍊', word: 'ORANGE' },
+                { emoji: '🍐', word: 'PEAR' },
+                { emoji: '🍈', word: 'MELON' },
+                { emoji: '🥥', word: 'COCONUT' },
+                { emoji: '🥝', word: 'KIWI' },
+                { emoji: '🥭', word: 'MANGO' },
+                { emoji: '🥑', word: 'AVOCADO' },
+                { emoji: '🍅', word: 'TOMATO' },
+            ],
+            text2farmandpets: [
+                { emoji: '🐶狗 DOG', word: 'DOG' },
+                { emoji: '🐱貓 CAT', word: 'CAT' },
+                { emoji: '🐭老鼠 MOUSE', word: 'MOUSE' },
+                { emoji: '🐹倉鼠 HAMSTER', word: 'HAMSTER' },
+                { emoji: '🐰兔子 RABBIT', word: 'RABBIT' },
+                { emoji: '🐮牛 COW', word: 'COW' },
+                { emoji: '🐷豬 PIG', word: 'PIG' },
+                { emoji: '🐔雞 CHICKEN', word: 'CHICKEN' },
+                { emoji: '🦆鴨子 DUCK', word: 'DUCK' },
+                { emoji: '🐐山羊 GOAT', word: 'GOAT' },
+                { emoji: '🐑綿羊 SHEEP', word: 'SHEEP' },
+                { emoji: '🦃火雞 TURKEY', word: 'TURKEY' }
+            ],
+            farmandpets: [
+                { emoji: '🐶', word: 'DOG' },
+                { emoji: '🐱', word: 'CAT' },
+                { emoji: '🐭', word: 'MOUSE' },
+                { emoji: '🐹', word: 'HAMSTER' },
+                { emoji: '🐰', word: 'RABBIT' },
+                { emoji: '🐮', word: 'COW' },
+                { emoji: '🐷', word: 'PIG' },
+                { emoji: '🐔', word: 'CHICKEN' },
+                { emoji: '🦆', word: 'DUCK' },
+                { emoji: '🐐', word: 'GOAT' },
+                { emoji: '🐑', word: 'SHEEP' },
+                { emoji: '🦃', word: 'TURKEY' }
+            ],
+            text2birdsandothers: [
+                { emoji: '🐦鳥 BIRD', word: 'BIRD' },
+                { emoji: '🐧企鵝 PENGUIN', word: 'PENGUIN' },
+                { emoji: '🦅老鷹 EAGLE', word: 'EAGLE' },
+                { emoji: '🦉貓頭鷹 OWL', word: 'OWL' },
+                { emoji: '🦢天鵝 SWAN', word: 'SWAN' },
+                { emoji: '🦚孔雀 PEACOCK', word: 'PEACOCK' },
+                { emoji: '🦜鸚鵡 PARROT', word: 'PARROT' },
+                { emoji: '🦩紅鶴 FLAMINGO', word: 'FLAMINGO' },
+                { emoji: '🦋蝴蝶 BUTTERFLY', word: 'BUTTERFLY' },
+                { emoji: '🐝蜜蜂 BEE', word: 'BEE' },
+                { emoji: '🐜螞蟻 ANT', word: 'ANT' },
+                { emoji: '🦗蟋蟀 CRICKET', word: 'CRICKET' },
+                { emoji: '🐌蝸牛 SNAIL', word: 'SNAIL' }
+            ],
+            birdsandothers: [
+                { emoji: '🐦', word: 'BIRD' },
+                { emoji: '🐧', word: 'PENGUIN' },
+                { emoji: '🦅', word: 'EAGLE' },
+                { emoji: '🦉', word: 'OWL' },
+                { emoji: '🦢', word: 'SWAN' },
+                { emoji: '🦚', word: 'PEACOCK' },
+                { emoji: '🦜', word: 'PARROT' },
+                { emoji: '🦩', word: 'FLAMINGO' },
+                { emoji: '🦋', word: 'BUTTERFLY' },
+                { emoji: '🐝', word: 'BEE' },
+                { emoji: '🐜', word: 'ANT' },
+                { emoji: '🦗', word: 'CRICKET' },
+                { emoji: '🐌', word: 'SNAIL' }
+            ],
+            text2seaanimals: [
+                { emoji: '🐟魚 FISH', word: 'FISH' },
+                { emoji: '🦈鯊魚 SHARK', word: 'SHARK' },
+                { emoji: '🐬海豚 DOLPHIN', word: 'DOLPHIN' },
+                { emoji: '🐳鯨魚 WHALE', word: 'WHALE' },
+                { emoji: '🐙章魚 OCTOPUS', word: 'OCTOPUS' },
+                { emoji: '🦑烏賊 SQUID', word: 'SQUID' },
+                { emoji: '🦐蝦 SHRIMP', word: 'SHRIMP' },
+                { emoji: '🦞龍蝦 LOBSTER', word: 'LOBSTER' },
+                { emoji: '🦀螃蟹 CRAB', word: 'CRAB' },
+                { emoji: '🐢海龜 TURTLE', word: 'TURTLE' },
+                { emoji: '🐊鱷魚 CROCODILE', word: 'CROCODILE' },
+                { emoji: '🐍蛇 SNAKE', word: 'SNAKE' }
+            ],
+            seaanimals: [
+                { emoji: '🐟', word: 'FISH' },
+                { emoji: '🦈', word: 'SHARK' },
+                { emoji: '🐬', word: 'DOLPHIN' },
+                { emoji: '🐳', word: 'WHALE' },
+                { emoji: '🐙', word: 'OCTOPUS' },
+                { emoji: '🦑', word: 'SQUID' },
+                { emoji: '🦐', word: 'SHRIMP' },
+                { emoji: '🦞', word: 'LOBSTER' },
+                { emoji: '🦀', word: 'CRAB' },
+                { emoji: '🐢', word: 'TURTLE' },
+                { emoji: '🐊', word: 'CROCODILE' },
+                { emoji: '🐍', word: 'SNAKE' }
+            ],
+            text2animals: [
+                { emoji: '🦁獅子 LION', word: 'LION' },
+                { emoji: '🐯老虎 TIGER', word: 'TIGER' },
+                { emoji: '🐻熊 BEAR', word: 'BEAR' },
+                { emoji: '🐼熊貓 PANDA', word: 'PANDA' },
+                { emoji: '🐘大象 ELEPHANT', word: 'ELEPHANT' },
+                { emoji: '🦒長頸鹿 GIRAFFE', word: 'GIRAFFE' },
+                { emoji: '🦏犀牛 RHINOCEROS', word: 'RHINOCEROS' },
+                { emoji: '🦓斑馬 ZEBRA', word: 'ZEBRA' },
+                { emoji: '🦘袋鼠 KANGAROO', word: 'KANGAROO' },
+                { emoji: '🐨無尾熊 KOALA', word: 'KOALA' },
+                { emoji: '🦥樹懶 SLOTH', word: 'SLOTH' },
+                { emoji: '🐆豹 LEOPARD', word: 'LEOPARD' },
+                { emoji: '🦛河馬 HIPPO', word: 'HIPPO' },
+                { emoji: '🦝浣熊 RACCOON', word: 'RACCOON' },
+                { emoji: '🐺狼 WOLF', word: 'WOLF' },
+                { emoji: '🦌鹿 DEER', word: 'DEER' },
+                { emoji: '🦊狐狸 FOX', word: 'FOX' },
+                { emoji: '🦔刺蝟 HEDGEHOG', word: 'HEDGEHOG' },
+                { emoji: '🐿️松鼠 SQUIRREL', word: 'SQUIRREL' },
+                { emoji: '🦦水獺 OTTER', word: 'OTTER' },
+                { emoji: '🦙羊駝 LLAMA', word: 'LLAMA' },
+                { emoji: '🐵猴子 MONKEY', word: 'MONKEY' },
+                { emoji: '🦇蝙蝠 BAT', word: 'BAT' }
             ],
             animals: [
-                { emoji: '🐱', word: 'CAT' },
-                { emoji: '🐶', word: 'DOG' },
-                { emoji: '🐘', word: 'ELEPHANT' },
-                { emoji: '🦊', word: 'FOX' },
                 { emoji: '🦁', word: 'LION' },
+                { emoji: '🐯', word: 'TIGER' },
                 { emoji: '🐻', word: 'BEAR' },
-                { emoji: '🐵', word: 'MONKEY' },
-                { emoji: '🐰', word: 'RABBIT' },
                 { emoji: '🐼', word: 'PANDA' },
-                { emoji: '🐯', word: 'TIGER' }
+                { emoji: '🐘', word: 'ELEPHANT' },
+                { emoji: '🦒', word: 'GIRAFFE' },
+                { emoji: '🦏', word: 'RHINOCEROS' },
+                { emoji: '🦓', word: 'ZEBRA' },
+                { emoji: '🦘', word: 'KANGAROO' },
+                { emoji: '🐨', word: 'KOALA' },
+                { emoji: '🦥', word: 'SLOTH' },
+                { emoji: '🐆', word: 'LEOPARD' },
+                { emoji: '🦛', word: 'HIPPO' },
+                { emoji: '🦝', word: 'RACCOON' },
+                { emoji: '🐺', word: 'WOLF' },
+                { emoji: '🦌', word: 'DEER' },
+                { emoji: '🦊', word: 'FOX' },
+                { emoji: '🦔', word: 'HEDGEHOG' },
+                { emoji: '🐿️', word: 'SQUIRREL' },
+                { emoji: '🦦', word: 'OTTER' },
+                { emoji: '🦙', word: 'LLAMA' },
+                { emoji: '🐵', word: 'MONKEY' },
+                { emoji: '🦇', word: 'BAT' }
+            ],
+            text2sports: [
+                { emoji: '⚽足球 SOCCER', word: 'SOCCER' },
+                { emoji: '🏀籃球 BASKETBALL', word: 'BASKETBALL' },
+                { emoji: '🎾網球 TENNIS', word: 'TENNIS' },
+                { emoji: '🏃跑步 RUN', word: 'RUN' },
+                { emoji: '🏊游泳 SWIM', word: 'SWIM' },
+                { emoji: '💃跳舞 DANCE', word: 'DANCE' },
+                { emoji: '🏌️高爾夫 GOLF', word: 'GOLF' },
+                { emoji: '🛹滑板 SKATE', word: 'SKATE' },
+                { emoji: '🧗攀岩 CLIMB', word: 'CLIMB' },
+                { emoji: '🏈美式足球 FOOTBALL', word: 'FOOTBALL' },
+                { emoji: '⚾棒球 BASEBALL', word: 'BASEBALL' },
+                { emoji: '🏐排球 VOLLEYBALL', word: 'VOLLEYBALL' },
+                { emoji: '🏉橄欖球 RUGBY', word: 'RUGBY' },
+                { emoji: '🏸羽球 BADMINTON', word: 'BADMINTON' },
+                { emoji: '🏒冰球 ICE HOCKEY', word: 'ICE HOCKEY' },
+                { emoji: '🏓桌球 TABLE TENNIS', word: 'TABLE TENNIS' },
+                { emoji: '🥏飛盤 FRISBEE', word: 'FRISBEE' },
+                { emoji: '🥊拳擊 BOXING', word: 'BOXING' },
+                { emoji: '🏄衝浪 SURFING', word: 'SURFING' },
+                { emoji: '🧘瑜珈 YOGA', word: 'YOGA' },
+                { emoji: '🤸體操 GYMNASTICS', word: 'GYMNASTICS' }
             ],
             sports: [ // 對應 HTML 的活動或運動 (我們把這裡改為 sports 比較好，下方有說明)
                 { emoji: '⚽', word: 'SOCCER' },
@@ -271,23 +477,66 @@
                 { emoji: '🎾', word: 'TENNIS' },
                 { emoji: '🏃', word: 'RUN' },
                 { emoji: '🏊', word: 'SWIM' },
-                { emoji: '🚲', word: 'BIKE' },
                 { emoji: '💃', word: 'DANCE' },
                 { emoji: '🏌️', word: 'GOLF' },
                 { emoji: '🛹', word: 'SKATE' },
-                { emoji: '🧗', word: 'CLIMB' }
+                { emoji: '🧗', word: 'CLIMB' },
+                { emoji: '🏈', word: 'FOOTBALL' },
+                { emoji: '⚾', word: 'BASEBALL' },
+                { emoji: '🏐', word: 'VOLLEYBALL' },
+                { emoji: '🏉', word: 'RUGBY' },
+                { emoji: '🏸', word: 'BADMINTON' },
+                { emoji: '🏒', word: 'ICE HOCKEY' },
+                { emoji: '🏓', word: 'TABLE TENNIS' },
+                { emoji: '🥏', word: 'FRISBEE' },
+                { emoji: '🥊', word: 'BOXING' },
+                { emoji: '🏄', word: 'SURFING' },
+                { emoji: '🧘', word: 'YOGA' },
+                { emoji: '🤸', word: 'GYMNASTICS' }
             ],
-            others: [ // 新增的其他分類
-                { emoji: '🏠', word: 'HOUSE' },
-                { emoji: '🚀', word: 'ROCKET' },
-                { emoji: '🍦', word: 'ICE' },
-                { emoji: '🎸', word: 'GUITAR' },
-                { emoji: '📚', word: 'BOOK' },
-                { emoji: '☀️', word: 'SUN' },
-                { emoji: '⏰', word: 'CLOCK' },
-                { emoji: '🔑', word: 'KEY' },
-                { emoji: '🌲', word: 'TREE' },
-                { emoji: '🍕', word: 'PIZZA' }
+            text2foods: [
+                { emoji: '🍕披薩 PIZZA', word: 'PIZZA' },
+                { emoji: '🍔漢堡 HAMBURGER', word: 'HAMBURGER' },
+                { emoji: '🌭熱狗 HOT DOG', word: 'HOT DOG' },
+                { emoji: '🥪三明治 SANDWICH', word: 'SANDWICH' },
+                { emoji: '🍟薯條 FRENCH FRIES', word: 'FRENCH FRIES' },
+                { emoji: '🥗沙拉 SALAD', word: 'SALAD' },
+                { emoji: '🍚米飯 RICE', word: 'RICE' },
+                { emoji: '🍜麵條 NOODLES', word: 'NOODLES' },
+                { emoji: '🍝義大利麵 SPAGHETTI', word: 'SPAGHETTI' },
+                { emoji: '🍞麵包 BREAD', word: 'BREAD' },
+                { emoji: '🧀起司 CHEESE', word: 'CHEESE' },
+                { emoji: '🥚雞蛋 EGG', word: 'EGG' },
+                { emoji: '🍦冰淇淋 ICE CREAM', word: 'ICE CREAM' },
+                { emoji: '🍰蛋糕 CAKE', word: 'CAKE' },
+                { emoji: '🍪餅乾 COOKIE', word: 'COOKIE' },
+                { emoji: '🍩甜甜圈 DONUT', word: 'DONUT' },
+                { emoji: '🥛牛奶 MILK', word: 'MILK' },
+                { emoji: '☕茶 TEA', word: 'TEA' },
+                { emoji: '🧃果汁 JUICE', word: 'JUICE' },
+                { emoji: '💧水 WATER', word: 'WATER' }
+            ],
+            foods: [
+                { emoji: '🍕', word: 'PIZZA' },
+                { emoji: '🍔', word: 'HAMBURGER' },
+                { emoji: '🌭', word: 'HOT DOG' },
+                { emoji: '🥪', word: 'SANDWICH' },
+                { emoji: '🍟', word: 'FRENCH FRIES' },
+                { emoji: '🥗', word: 'SALAD' },
+                { emoji: '🍚', word: 'RICE' },
+                { emoji: '🍜', word: 'NOODLES' },
+                { emoji: '🍝', word: 'SPAGHETTI' },
+                { emoji: '🍞', word: 'BREAD' },
+                { emoji: '🧀', word: 'CHEESE' },
+                { emoji: '🥚', word: 'EGG' },
+                { emoji: '🍦', word: 'ICE CREAM' },
+                { emoji: '🍰', word: 'CAKE' },
+                { emoji: '🍪', word: 'COOKIE' },
+                { emoji: '🍩', word: 'DONUT' },
+                { emoji: '🥛', word: 'MILK' },
+                { emoji: '☕', word: 'TEA' },
+                { emoji: '🧃', word: 'JUICE' },
+                { emoji: '💧', word: 'WATER' }
             ]
         };
 
@@ -309,11 +558,11 @@
         const restartBtn = document.getElementById('restart-btn');
 
         // 4. 語音發音功能
-       function speakWord(word, language='en-US', speedrare = 1.0, voicepitch = 1.0) {
+        function speakWord(word, language = 'en-US', speedrare = 1.0, voicepitch = 1.0) {
             // 檢查瀏覽器是否支援語音功能
             if ('speechSynthesis' in window) {
                 // 先停止目前正在播放的聲音（避免連續切換題目時聲音重疊）
-                window.speechSynthesis.cancel(); 
+                window.speechSynthesis.cancel();
 
                 const utterance = new SpeechSynthesisUtterance(word);
                 utterance.lang = language; // 也可以改成 'en-GB' 聽英式英語
@@ -322,10 +571,10 @@
 
                 const synth = window.speechSynthesis;
                 let voices = synth.getVoices();
-                if (voices.length>1) {
-                    let voice=voices[Math.floor(Math.random()*voices.length)];
-                    while (voice.lang!=language) voice=voices[Math.floor(Math.random()*voices.length)];
-                    utterance.voice=voice;
+                if (voices.length > 1) {
+                    let voice = voices[Math.floor(Math.random() * voices.length)];
+                    while (voice.lang != language) voice = voices[Math.floor(Math.random() * voices.length)];
+                    utterance.voice = voice;
                 }
 
                 window.speechSynthesis.speak(utterance);
@@ -339,21 +588,23 @@
         // 5. 載入題庫（支援選單切換）
         function loadDeck() {
             const selectedCategory = categorySelect.value;
-            
-            if (selectedCategory === 'all') {
-                currentDeck = [
-                    ...categories.fruits,
-                    ...categories.animals,
-                    ...categories.sports,
-                    ...categories.others
-                ];
-            } else {
-                currentDeck = [...categories[selectedCategory]];
-            }
+
+            // if (selectedCategory === 'all') {
+            //     currentDeck = [
+            //         ...categories.fruits,
+            //         ...categories.animals,
+            //         ...categories.sports,
+            //         ...categories.foods,
+            //         ...categories.texts
+            //     ];
+            // } else {
+            //     currentDeck = [...categories[selectedCategory]];
+            // }
+            currentDeck = [...categories[selectedCategory]];
 
             // 打散題目順序
             currentDeck.sort(() => Math.random() - 0.5);
-            
+
             // 重置遊戲進度
             currentCardIndex = 0;
             score = 0;
@@ -386,11 +637,11 @@
         function renderWordDisplay() {
             const word = currentDeck[currentCardIndex].word;
             wordDisplay.innerHTML = '';
-            
+
             for (let i = 0; i < word.length; i++) {
                 const span = document.createElement('span');
                 span.classList.add('letter-hint');
-                
+
                 if (i < currentInputIndex) {
                     span.textContent = word[i];
                     span.classList.add('letter-correct');
@@ -405,7 +656,7 @@
         function renderKeyboard() {
             keyboardContainer.innerHTML = '';
             const word = currentDeck[currentCardIndex].word;
-            
+
             let letterPool = word.split('');
             const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             while (letterPool.length < 14) {
@@ -435,7 +686,7 @@
             if (letter.toUpperCase() === targetLetter) {
                 currentInputIndex++;
                 renderWordDisplay();
-                
+
                 // 拼完該單字
                 if (currentInputIndex === currentCard.word.length) {
                     score += 10;
@@ -443,7 +694,7 @@
                     messageDisplay.textContent = "🎉 答對了！";
                     messageDisplay.className = "message success";
                     speakWord("BINGO!");
-                    
+
                     currentCardIndex++;
                     setTimeout(initRound, 1000);
                 }
@@ -451,7 +702,7 @@
                 messageDisplay.textContent = `❌ 答錯囉！不是 ${letter.toUpperCase()}`;
                 speakWord("WRONG!");
                 score--;
-                if (score <=0) score = 0;
+                if (score <= 0) score = 0;
                 scoreDisplay.textContent = score;
                 messageDisplay.className = "message error";
             }
@@ -489,4 +740,5 @@
         loadDeck();
     </script>
 </body>
+
 </html>
