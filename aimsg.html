@@ -52,6 +52,25 @@
             margin-right: 5px;
             cursor: pointer;
         }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #24292f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -60,11 +79,15 @@
     <div class="section">
         <h3>1. 選擇並加入指令</h3>
         <select id="actionSelect">
-            <option value="請幫我移除以下文本或程式碼的所有空格與換行。">請幫我移除以下文本或程式碼的所有空格與換行。</option>
-            <option value="請幫我將以下內容翻譯成專業的繁體中文，並保持術語準確。">請幫我將以下內容翻譯成專業的繁體中文，並保持術語準確。</option>
-            <option value="請幫我優化以下程式碼，提升執行效率並加入詳細註解。">請幫我優化以下程式碼，提升執行效率並加入詳細註解。</option>
-            <option value="請幫我總結以下文本的核心重點，並以條列式呈現。">請幫我總結以下文本的核心重點，並以條列式呈現。</option>
-            <option value="請檢查以下文本的語法錯誤並進行潤飾。">請檢查以下文本的語法錯誤並進行潤飾。</option>
+            <option value="請幫忙把以下程式碼檢查文法有無錯誤。">請幫我把以下程式碼檢查文法有無錯誤。</option>
+            <option value="請幫忙把以下程式碼最佳化。">請幫我把以下程式碼最佳化。</option>
+            <option value="請幫忙把以下程式碼加上詳細註解。">請幫我把以下程式碼加上詳細註解。</option>
+            <option value="請幫忙把以下程式碼整理以及排版，內縮為四個空格。">請幫我把以下程式碼整理以及排版，內縮為四個空格。</option>
+            <option value="請幫忙把以下程式碼新增N個功能：1. XXX。...N. XXX。">請幫我把以下程式碼新增N個功能：1. XXX。...N. XXX。</option>
+            <option value="請幫忙將以下文本作錯字檢查。">請幫我將以下文本作錯字檢查。</option>
+            <option value="請幫忙將以下文本作潤飾，風格隨意直白。">請幫我將以下文本作潤飾，風格隨意直白。</option>
+            <option value="請幫忙將以下文本作延伸N個新段落，風格隨意直白。">請幫我將以下文本作延伸N個新段落，風格隨意直白。</option>
+            <option value="請幫忙將以下文本作重點鍵字整理，風格極簡。">請幫我將以下文本作重點鍵字整理，風格極簡。</option>
         </select>
         <button onclick="addInstruction()">加入指令</button>
     </div>
@@ -77,6 +100,7 @@
     <div class="section">
         <button onclick="clearText()" style="background-color: #ffcccc;">清除內容</button>
         <button onclick="copyToClipboard()" style="background-color: #ccffcc;">複製全部內容</button>
+        <div class="toast" id="toast">已成功複製到剪貼簿！</div>
     </div>
 
     <script>
@@ -84,7 +108,12 @@
             const action = document.getElementById('actionSelect').value;
             const textArea = document.getElementById('inputText');
             // 將指令插入到文字區塊的最上方
-            textArea.value = `${action}\n` + textArea.value;
+            if (!checkWordExists(textArea.value, "::==>>")){
+                textArea.value = `${action}\n::==>>\n` + textArea.value;
+            } else {
+                textArea.value = `${action}\n` + textArea.value;
+            }
+            
         }
 
         function clearText() {
@@ -92,11 +121,142 @@
         }
 
         function copyToClipboard() {
-            const textElement = document.getElementById('inputText');
-            textElement.select();
-            document.execCommand("copy");
-            alert("已複製到剪貼簿！");
+            const textArea = document.getElementById('inputText');
+            navigator.clipboard.writeText(textArea.value).then(() => {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1500);
+            });
+            // if (isPlaying) stopDoomFantasyMusic();
+            // else playDoomFantasyMusic();
+            // alert("已複製到剪貼簿！");
         }
+
+        function checkWordExists(targetcontent, targetWord) {
+            const text = targetcontent;
+
+            if (text.includes(targetWord)){
+                return true;
+            }
+            
+            // 使用正規表達式，'i' 代表忽略大小寫 (case-insensitive)
+            // \b 代表單字邊界，確保只匹配完整的單字
+            // \b 只對「字母、數字、底線」組成的單字有效
+            const regex = new RegExp(`\\b${targetWord}\\b`, 'i');
+            
+            if (regex.test(text)) {
+                // alert(`找到了！文本中包含 "${targetWord}"`);
+                return true;
+            } else {
+                // alert(`沒找到 "${targetWord}"`);
+                return false;
+            }
+        }
+
+        function playBeep() {
+            // 建立 AudioContext
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+
+            // 設定音效類型 (sine, square, sawtooth, triangle)
+            oscillator.type = 'square'; 
+            oscillator.frequency.setValueAtTime(440, context.currentTime); // 頻率 440Hz (A4音)
+            
+            // 設定音量變化 (快速淡出)
+            gainNode.gain.setValueAtTime(1.0, context.currentTime); // 音量大小
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.1);
+
+            // 連接並播放
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            
+            oscillator.start();
+            oscillator.stop(context.currentTime + 2.0); // 0.1秒後停止
+        }
+
+        let audioCtx;
+        let isPlaying = false; // 用來標記音樂是否在播放
+        let nextNoteTimeout;   // 用來儲存 setTimeout 的 ID，以便取消
+
+        function playBackgroundMusic() {
+            if (isPlaying) return; // 防止重複點擊導致多重循環
+            isPlaying = true;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // 簡單的旋律陣列 (頻率)
+            const melody = [261.63, 329.63, 392.00, 523.25]; // C E G C
+            let index = 0;
+
+            function playNote() {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle'; // 柔和的波形，適合當背景
+                osc.frequency.setValueAtTime(melody[index % melody.length], audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+                
+                index++;
+                nextNoteTimeout = setTimeout(playNote, 500); // 每 0.5 秒播放下一個音
+            }
+            
+            playNote();
+        }
+
+        function stopDoomFantasyMusic() {
+            isPlaying = false;
+            clearTimeout(nextNoteTimeout); // 停止下一個音符的排程
+            // 注意：正在播放中的當前音符會自然衰減直到結束，無法強制立即靜音，除非斷開所有連接
+        }
+
+
+        function playDoomFantasyMusic() {
+            if (isPlaying) return; // 防止重複點擊導致多重循環
+            isPlaying = true;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // 奇幻末日音階：使用較為沈重與不穩定的頻率 (以 D 小調為基底)
+            // 這些頻率組成一種不安與空靈的感覺
+            const doomMelody = [146.83, 174.61, 220.00, 261.63, 164.81, 130.81]; 
+            let index = 0;
+
+            function playNote() {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                // 使用 'sawtooth' (鋸齒波) 模擬破敗的機械音，或者 'triangle' 模擬空靈感
+                osc.type = 'triangle'; 
+                
+                // 隨機微調頻率，創造出一種「老舊設備運轉」的聲音不穩定感
+                const detune = (Math.random() - 0.5) * 20; 
+                osc.frequency.setValueAtTime(doomMelody[index % doomMelody.length] + detune, audioCtx.currentTime);
+                
+                // 慢速淡入淡出，營造遼闊感
+                gain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(Math.random()/2, audioCtx.currentTime + 1.0); // 慢速增強
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3.0);    // 慢速衰減
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 3.0);
+                
+                index++;
+                // 循環時間拉長，變成一種緩慢的背景環境音
+                nextNoteTimeout = setTimeout(playNote, 2500 + Math.random() * 1000); 
+            }
+            
+            playNote();
+        }
+    
     </script>
 
 </body>
