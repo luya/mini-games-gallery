@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
-    <title>我的 JS 小遊戲時光屋</title>
+    <title>香草味 JS 遊戲大廳</title>
+    <link rel="stylesheet" href="ayakit.css">
     <style>
         /* 基礎變數設定，方便你以後改顏色 */
         :root {
@@ -14,9 +15,11 @@
             --primary-color: #4a90e2;
             --hover-transform: translateY(-5px);
         }
-
+         html {
+            background-color: #ffffff;
+            color: #000000;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -132,13 +135,13 @@
 <body>
 
     <header>
-        <h1>JS 遊戲大廳🏠</h1>
+        <h1>🍦香草味 JS 遊戲大廳🏠</h1>
         <p>點選下方方塊，開啟你的遊戲冒險！</p>
         <p>Last Update Date: 20260711</p>
     </header>
 
     <main class="game-grid">
-        <a href="aimsg.html" class="game-card card-5">
+        <a href="aimsg.html" class="game-card card-4">
             <div class="game-image">📝</div>
             <div class="game-info">
                 <div class="game-title">AI Msg 提示工具</div>
@@ -255,11 +258,11 @@
             </div>
         </a>
 
-        <a href="#" class="game-card card-1">
-            <div class="game-image">❓</div>
+        <a href="#" class="game-card card-5">
+            <div class="game-image">🏛️</div>
             <div class="game-info">
-                <div class="game-title">神秘新遊戲</div>
-                <div class="game-desc">新遊戲正在緊鑼密鼓開發中，敬請期待全新玩法上線！</div>
+                <div class="game-title">神秘老遊戲博物館</div>
+                <div class="game-desc">一堆練手小遊戲的存放區！</div>
                 <div class="game-action">準備中 →</div>
             </div>
         </a>
