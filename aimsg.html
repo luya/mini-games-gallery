@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <title>AI 提示詞管理工具</title>
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        html {
+            background: #ffffff;
+        }
+        body {
+            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
+            background: #ffffff;
+            color: #000000;
+            padding: 20px;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            margin: 10px 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .section {
+            background: #f4f4f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+    <div class="section">
+        <h3>1. 選擇並加入指令</h3>
+        <select id="actionSelect">
+            <option value="請幫我移除以下文本或程式碼的所有空格與換行。">請幫我移除以下文本或程式碼的所有空格與換行。</option>
+            <option value="請幫我將以下內容翻譯成專業的繁體中文，並保持術語準確。">請幫我將以下內容翻譯成專業的繁體中文，並保持術語準確。</option>
+            <option value="請幫我優化以下程式碼，提升執行效率並加入詳細註解。">請幫我優化以下程式碼，提升執行效率並加入詳細註解。</option>
+            <option value="請幫我總結以下文本的核心重點，並以條列式呈現。">請幫我總結以下文本的核心重點，並以條列式呈現。</option>
+            <option value="請檢查以下文本的語法錯誤並進行潤飾。">請檢查以下文本的語法錯誤並進行潤飾。</option>
+        </select>
+        <button onclick="addInstruction()">加入指令</button>
+    </div>
+
+    <div class="section">
+        <h3>2. 文本或程式碼區域</h3>
+        <textarea id="inputText" placeholder="請先在此貼上您的內容...然後用上方的常用提示或是自訂輸入..."></textarea>
+    </div>
+
+    <div class="section">
+        <button onclick="clearText()" style="background-color: #ffcccc;">清除內容</button>
+        <button onclick="copyToClipboard()" style="background-color: #ccffcc;">複製全部內容</button>
+    </div>
+
+    <script>
+        function addInstruction() {
+            const action = document.getElementById('actionSelect').value;
+            const textArea = document.getElementById('inputText');
+            // 將指令插入到文字區塊的最上方
+            textArea.value = `${action}\n` + textArea.value;
+        }
+
+        function clearText() {
+            document.getElementById('inputText').value = "";
+        }
+
+        function copyToClipboard() {
+            const textElement = document.getElementById('inputText');
+            textElement.select();
+            document.execCommand("copy");
+            alert("已複製到剪貼簿！");
+        }
+    </script>
+
+</body>
+
+</html>
