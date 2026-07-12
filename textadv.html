@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛓️</text></svg>">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛓️</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -44,11 +46,11 @@
     <script>
         // 10 個道具的完整鍵值與說明資料
         const ITEM_DATA = {
-            TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp:5, sanity:5, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat:true},
-            SHIELD: { name: "青銅盾牌 🛡️", desc: "充滿使用痕跡的盾牌，冒險中帶著似乎也不是什壞事。", def:3 },
-            MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp:25, sanity:25 },
-            BBQ: { name: "烤排骨肉 🍖", desc: "帶骨的火炙強身大餐。", hp:50, sanity:50 },
-            DAGGER: { name: "鏽蝕匕首 🗡️", desc: "復古的雕飾，經過歲月的摧殘，還算堪用的武器，雖然可能只能劃開皮膚而已。", atk:1},
+            TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp: 5, sanity: 5, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat: true },
+            SHIELD: { name: "青銅盾牌 🛡️", desc: "充滿使用痕跡的盾牌，冒險中帶著似乎也不是什壞事。", def: 3 },
+            MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 25, sanity: 25 },
+            BBQ: { name: "烤排骨肉 🍖", desc: "帶骨的火炙強身大餐。", hp: 50, sanity: 50 },
+            DAGGER: { name: "鏽蝕匕首 🗡️", desc: "復古的雕飾，經過歲月的摧殘，還算堪用的武器，雖然可能只能劃開皮膚而已。", atk: 1 },
             GUARDKEY: { name: "無名鑰匙 🗝️", desc: "鑰匙上方有著類似老鷹個符號。" },
             LANTERN: { name: "守墓人提燈 🪔", desc: "裏面尚有些許燃料，也許有著意外的功用。" },
             SKULL: { name: "野獸顱骨 ☠️", desc: "怪異的遺駭，感覺是一種祭品，原本可能是個巨大的野獸。" },
@@ -56,29 +58,29 @@
             POISON: { name: "鍊金術士的劇毒 🍾", desc: "試探了一下，一小滴就可以把植物融化，最好不要打破容器。" },
             PAGES: { name: "告解者殘頁 📜", desc: "奇特的頁面，上面的敘事有如詛咒，仔細閱讀就會暈眩。" },
             RING: { name: "裂隙指環 💍", desc: "【關鍵道具】未知且強大的物品，帶上的時候，內心會出現巨大的空洞感。" },
-            SWORD: { name: "審判者大劍 🗡️", desc: "【關鍵道具】有著精美的製作與附魔，大部分都還閃閃發亮，握在手上也十分輕盈。" , atk:10},
+            SWORD: { name: "審判者大劍 🗡️", desc: "【關鍵道具】有著精美的製作與附魔，大部分都還閃閃發亮，握在手上也十分輕盈。", atk: 10 },
             HOURGLASS: { name: "倒流沙漏 ⏳", desc: "【關鍵道具】散發神秘的氣息，不知道有什功用。" }
         };
 
         const ITEMS = {
-            TORCH: "TORCH", 
-            SHIELD: "SHIELD", 
-            DAGGER: "DAGGER", 
+            TORCH: "TORCH",
+            SHIELD: "SHIELD",
+            DAGGER: "DAGGER",
             LANTERN: "LANTERN",
-            SKULL: "SKULL", 
-            BADGE: "BADGE", 
+            SKULL: "SKULL",
+            BADGE: "BADGE",
             POISON: "POISON",
-            PAGES: "PAGES", 
-            RING: "RING", 
-            SWORD: "SWORD", 
+            PAGES: "PAGES",
+            RING: "RING",
+            SWORD: "SWORD",
             HOURGLASS: "HOURGLASS"
         };
 
         // 夥伴隨「不同場景」變更的動態對話庫
         const PARTNER_DIALOGUE = {
-            graveyard: "艾莉絲環顧四周，撥了撥的髮絲：『這裡是一切的原點。』",
-            mansion: "看著被封鎖的富豪豪宅，蘿絲打了個冷顫：『他死的那天晚上，我就躲在窗簾後面⋯差一點點，躺在血泊裡的就是我了。』",
-            bar: "藍調酒吧裡，蘿絲優雅地靠在吧檯旁：『這裡的波本威士忌品質真差，但調酒師確實知道不少小道消息，去探探他的口風。』",
+            graveyard: "艾莉絲環顧四周：『‧‧‧，噁心的地方。。』",
+            village: "艾莉絲：『這裡是一切的原點。』",
+            guardhouse: "艾莉絲：『該不會衝出殭屍吧？媽阿，噁心的地方。』",
             alley: "陰暗的後巷中，蘿絲警惕地看著四周：『小心，這條巷子以前常有黑幫處理不聽話的叛徒。』",
             parking: "在地下停車場，蘿絲指著防彈車：『這輛車的後車廂有密倉，他平時習慣把最值錢或最危險的文件藏在那。』",
             slum: "回到她差點被圍堵的紅燈區，蘿絲冷笑：『這地方就是這座城市的膿包，每個人都活得像地老鼠一樣。』",
@@ -97,7 +99,7 @@
             roseSecret: "（你們正在深入交談她的過去⋯）",
             broadcasting: "廣播塔頂，雷電交加。蘿絲幫你擋在門口：『按下去，偵探！把真相播出去！後面的追兵交給我！』"
         };
-        
+
         // 遊戲狀態
         const state = {
             location: "graveyard",
@@ -106,11 +108,13 @@
             sanity: 100,
             atk: 0,
             def: 0,
-            coin: 0, 
+            coin: 0,
+            fame: 0,
             flags: {
                 metWorld: false,
-                unlockGuardHouse: false,  
+                unlockGuardHouse: false,
                 metBug: false,
+                metAlys: false,        // 夥伴：盜賊艾莉絲
                 hasAlys: false,        // 夥伴：盜賊艾莉絲
                 metShade: false,
                 hasKeyItem: false,
@@ -126,12 +130,15 @@
         const locations = {
             // 1. 起點
             graveyard: {
-                name: "⚰️無名墓園",
+                name: "⚰️ 無名墓園",
                 text: () => {
                     let base = "夜色濃得像墨，破碎的墓碑在霧中歪斜。";
-                    if (!state.flags.metWorld){
-                        base += "你在一座無名墓前醒來，指尖沾著冷硬的泥土。\n遠處的鐘聲在黑暗中迴盪——每一聲都像在為你倒數。";
+                    if (!state.flags.metWorld) {
+                        base += "\n你在一座無名墓前醒來，指尖沾著冷硬的泥土。\n遠處的鐘聲在黑暗中迴盪——每一聲都像在為你倒數。";
                         state.flags.metWorld = true;
+                    }
+                    if (!state.inventory.includes(ITEMS.SHIELD) && state.sanity >= 80) {
+                        base += "\n你感覺到附近可能會有些有用的東西。";
                     }
                     return base;
                 },
@@ -141,29 +148,28 @@
                         { text: "沿著小徑前往枯萎森林 🌲", next: "forest" }
                     ];
                     opts.unshift({
-                        text: "環顧四週，到處調查👁️‍🗨️",
+                        text: "環顧四週，到處調查 👁️‍🗨️",
                         next: "graveyard",
-                        action: () => { 
+                        action: () => {
                             const stext = [
-                                "你身處在一個墓園，大門出口旁邊有個守衛室，更遠處有個小徑，通往一片森林。",
-                                "看來這個墓園，應該都是埋葬無名屍，每個坑都已經被弄到凌亂不堪。",
-                                "當望向遠方的時候，白霧幾乎擋住所有的視線。",
-                                "你在搜索的時候，踢到一個盾牌。"
+                                "你身處在一個墓園，大門出口旁邊有個守衛室 🏚️，更遠處有個小徑，通往一片森林 🌲。",
+                                "看來這個墓園，應該都是埋葬無名屍，每個坑都已經被弄到凌亂不堪 🕳️。",
+                                "當望向遠方的時候，白霧幾乎擋住所有的視線 🌫️。",
+                                "你在搜索的時候，踢到一個盾牌 🛡️。"
                             ];
-                            let sindex = Math.floor(Math.random()*stext.length)
-                            if (state.inventory.includes(ITEMS.SHIELD)){
-                                if (sindex==3) sindex = 0;
+                            let sindex = Math.floor(Math.random() * stext.length)
+                            if (state.inventory.includes(ITEMS.SHIELD)) {
+                                if (sindex == 3) sindex = 0;
                             }
                             setStatus(stext[sindex]);
-                            if (sindex==3) addItem(ITEMS.SHIELD);
+                            if (sindex == 3) addItem(ITEMS.SHIELD);
                         }
                     });
-
                     if (!state.inventory.includes(ITEMS.TORCH)) {
                         opts.unshift({
-                            text: "翻找無名墓，看看有沒有遺物 🕯️",
+                            text: "翻找無名墓，看看有沒有遺物 🦴",
                             next: "graveyard",
-                            action: () => { addItem(ITEMS.TORCH); setStatus("你找到一支幾乎熄滅的火把。它仍微微發熱。"); }
+                            action: () => { addItem(ITEMS.TORCH); setStatus("你找到一支幾乎熄滅的火把。它仍微微發熱。 🔥"); }
                         });
                     }
                     return opts;
@@ -171,42 +177,53 @@
             },
             // 2. 守衛室
             guardhouse: {
-                name: "🏚️墓園守衛室",
+                name: "🏚️ 墓園守衛室",
                 text: () => {
-                    let baseText = "已經沒有任何居住痕跡的小屋。\n牆角有一群散發異味盲眼蟲在蠕動。"
+                    let baseText = "已經沒有任何居住痕跡的小屋。\n屋內牆角有一群散發異味盲眼蟲在蠕動。"
                     if (!state.flags.unlockGuardHouse) baseText = "守衛室的小門異常的結實。\n四周也看不到窗戶以及其他入口。"
                     return baseText;
                 },
                 options: () => {
                     const opts = [
                         { text: "往無名墓園 ⚰️", next: "graveyard" },
-                        { text: "朝出口處的破敗大教堂前進 ⛪", next: "cathedral" }
+                        { text: "朝出口處的破敗教堂前進 ⛪", next: "cathedral" }
                     ];
-                     if (!state.flags.unlockGuardHouse) {
+                    if (!state.flags.unlockGuardHouse) {
                         opts.unshift({
                             text: "環顧四週，到處調查👁️‍🗨️",
                             next: "guardhouse",
-                            action: () => { 
+                            action: () => {
                                 const stext = [
-                                    "你試著撞開門，但是沒有效果。",
-                                    "守衛室的外牆也十分堅固。",
-                                    "地面下也沒有任何密道。",
-                                    "你在搜索的時候，踢到一隻散發異味盲眼蟲。"
+                                    "你試著撞開門，但是沒有效果。 💪",
+                                    "守衛室的外牆也十分堅固。🧱",
+                                    "地面下也沒有任何密道🕳️。",
+                                    "你在搜索的時候，踢到一隻散發異味盲眼蟲。 🐛"
                                 ];
-                                let sindex = Math.floor(Math.random()*stext.length)
-                                if (sindex==3){
-                                    if (!state.flags.metBug ) {
-                                        state.sanity -=5;
+                                let sindex = Math.floor(Math.random() * stext.length)
+                                if (sindex == 3) {
+                                    if (!state.flags.metBug) {
+                                        state.sanity -= 5;
                                         state.flags.metBug = true;
                                     }
                                     else sindex = 0;
                                 }
                                 setStatus(stext[sindex]);
-                                
+
                             }
                         });
+                        if (state.flags.hasAlys) {
+                            opts.unshift({
+                                text: "請艾莉絲開鎖 🗝️",
+                                next: "guardhouse",
+                                action: () => {
+                                    state.flags.unlockGuardHouse = true;
+                                    setStatus("艾莉絲：『沒問題，小意思。』沒多久時間，鎖已經成功打開了。");
+                                }
+                            });
+                        }
+
                     }
-                    if (state.flags.unlockGuardHouse){
+                    if (state.flags.unlockGuardHouse) {
                         if (state.inventory.includes(ITEMS.TORCH) && !state.inventory.includes(ITEMS.LANTERN)) {
                             opts.unshift({
                                 text: "用火把驅趕飛蟲，搜查守衛遺物 🪔",
@@ -220,7 +237,7 @@
             },
             // 3. 大教堂
             cathedral: {
-                name: "⛪破敗大教堂",
+                name: "⛪ 破敗教堂",
                 text: () => "教堂的彩繪玻璃早已碎裂。祭壇後方有一道被封死的石門，上面刻著：\n「唯有...者，得以穿越...。」\n上面的字跡過於古老，難以閱讀。",
                 options: () => {
                     const opts = [
@@ -228,14 +245,14 @@
                         { text: "走向教堂旁的哀嚎廢村 🏘️", next: "village" }
                     ];
                     if (!state.inventory.includes(ITEMS.DAGGER)) {
-                        opts.push({
+                        opts.unshift({
                             text: "在教堂祭壇下搜尋可用的武器 🔍",
                             next: "cathedral",
                             action: () => { addItem(ITEMS.DAGGER); setStatus("你在祈禱台下翻出了一把「鏽蝕匕首」。"); }
                         });
                     }
                     if (state.inventory.includes(ITEMS.RING)) {
-                        opts.push({ text: "將裂隙指環貼近石門，開啟通道 💍", next: "rift" });
+                        opts.unshift({ text: "將裂隙指環貼近石門，開啟通道 💍", next: "rift" });
                     }
                     return opts;
                 }
@@ -284,28 +301,93 @@
             },
             // 6. 哀嚎廢村 (夥伴加入)
             village: {
-                name: "6. 哀嚎廢村",
+                name: "🏘️ 絕叫之村",
                 text: () => {
-                    let base = "這裡死寂一片，屋舍皆化為廢墟。";
-                    if (!state.flags.hasAlys) {
-                        base += "\n在廢墟角落，你發現一名雙眼蒙著布的盲眼少女。她平靜地轉向你：「外來者，我能聽見你靈魂的顫抖。帶我走吧，我能為你聆聽黑暗的祕密。」";
+                    let base = "這裡死寂一片，所見屋舍大部分都很破舊。";
+                    if (!state.flags.metAlys) {
+                        base += "\n你面前一個惡漢看起來來者不善，正向你逼近。\n並且在某個黑暗角落，一雙眼睛正盯著你。";
                     } else {
-                        base += "\n盲女艾莉絲靜靜地跟在你的身旁。";
+                        if (!state.flags.hasAlys) {
+                            base += "\n在某個黑暗角落，一雙眼睛正盯著你。";
+                        } else {
+                            base += "\n盜賊艾莉絲靜靜地跟在你的身旁。";
+                        }
                     }
                     return base;
                 },
                 options: () => {
-                    const opts = [
-                        { text: "前往嘆息之橋 🌉", next: "bridge" },
-                        { text: "折返回大教堂 ⛪", next: "cathedral" }
-                    ];
-                    if (!state.flags.hasAlys) {
-                        opts.push({
-                            text: "邀請盲女艾莉絲加入旅程 👥",
-                            next: "village",
-                            action: () => { state.flags.hasAlys = true; setStatus("「無名盲女」艾莉絲加入了你的隊伍！"); }
-                        });
+                    let opts = [];
+                    if (!state.flags.metAlys) {
+                        opts = [
+                            {
+                                text: "使出純粹的力量 💪",
+                                next: "village",
+                                action: () => {
+                                    state.flags.metAlys = true;
+                                    state.hp -= 5;
+                                    state.sanity -= 5;
+                                    state.fame += 5;
+                                    setStatus("惡漢看來只是餓壞了，單純想要搶劫而已，你兩三下就了結了戰鬥。\n但是你受了一些擦傷，惡漢也逃跑了。");
+                                }
+                            }
+                        ];
+                        if (state.inventory.includes(ITEMS.SHIELD)) {
+                            opts.push({
+                                text: "先防禦再說 🛡️",
+                                next: "village",
+                                action: () => {
+                                    state.flags.metAlys = true;
+                                    state.coin += 50;
+                                    state.sanity -= 10;
+                                    state.fame += 10;
+                                    setStatus("惡漢出拳攻擊，可是換來的只有疼痛。\n你趁機用盾牌敲暈他。\n然後搜刮戰利品，他身上倒是有一些金幣？");
+                                }
+                            });
+                            if (state.inventory.includes(ITEMS.DAGGER) || state.inventory.includes(ITEMS.SWORD)) {
+                                opts.push({
+                                    text: "反殺對方 🗡️",
+                                    next: "village",
+                                    action: () => {
+                                        state.flags.metAlys = true;
+                                        state.coin += 50;
+                                        state.sanity -= 15;
+                                        state.fame += 15;
+                                        setStatus("惡漢出拳攻擊，你格擋之後，抹了對方的脖子。\n然後搜刮戰利品，他身上倒是有一些金幣？");
+                                    }
+                                });
+                            }
+                        }
+                        if (state.inventory.includes(ITEMS.DAGGER) || state.inventory.includes(ITEMS.SWORD)) {
+                            opts.push({
+                                text: "拿出武器展現自己不好惹 🗡️",
+                                next: "village",
+                                action: () => {
+                                    setStatus("惡漢忽然驚慌地逃跑了。");
+                                    state.flags.metAlys = true;
+                                }
+                            });
+                        }
+
+                    } else {
+                        opts = [
+                            { text: "前往嘆息之橋 🌉", next: "bridge" },
+                            { text: "折返回破敗教堂 ⛪", next: "cathedral" }
+                        ];
+                        if (!state.flags.hasAlys) {
+                            opts.push({
+                                text: "與監看者交談 💬",
+                                next: "village",
+                                action: () => {
+
+                                    state.flags.hasAlys = true;
+                                    setStatus("艾莉絲現出身影：『很有趣的身手，讓我跟著你吧，你無法拒絕我的。』「女盜賊」艾莉絲 👩🏻‍🦳 加入了你的隊伍！");
+                                }
+                            });
+                        }
                     }
+
+
+
                     return opts;
                 }
             },
@@ -621,7 +703,7 @@
             renderInventory();
         }
 
-         function removeItem(itemKey) {
+        function removeItem(itemKey) {
             if (state.inventory.includes(itemKey)) {
                 // console.log(itemKey)
                 state.inventory.pop(itemKey);
@@ -632,13 +714,13 @@
         // 渲染上方可點擊的道具與夥伴列表
         function renderInventory() {
             inventoryEl.innerHTML = "道具：";
-            
+
             // 如果有夥伴，生成對話按鈕
             if (state.flags.hasAlys) {
                 inventoryEl.innerHTML = "隊員以及道具：";
                 const btn = document.createElement("button");
                 btn.className = "inv-btn partner";
-                btn.textContent = "夥伴：艾莉絲 👥";
+                btn.textContent = "夥伴：艾莉絲 👩🏻‍🦳";
                 btn.addEventListener("click", () => inspectSomething("Alys"));
                 inventoryEl.appendChild(btn);
             }
@@ -670,14 +752,14 @@
             locationNameEl.textContent = ending.title;
             dialogTextEl.textContent = ending.text;
             sceneIconEl.textContent = "⚖️";
-            
+
             optionsEl.innerHTML = "";
             const btn = document.createElement("button");
             btn.className = "option-btn";
             btn.innerHTML = `<span>在雨夜的事務所中再度睜眼，重啟調查 🔁</span><span class="option-key">重開</span>`;
             btn.addEventListener("click", restartGame);
             optionsEl.appendChild(btn);
-            
+
             setStatus("案件調查已宣告落幕。");
         }
 
@@ -705,7 +787,7 @@
                     sceneIconEl.textContent = "🧩";
                     dialogTextEl.textContent = item.desc;
                     // console.log(item.hp);
-                    if (item.hp){
+                    if (item.hp) {
                         const useBtn = document.createElement("button");
                         useBtn.className = "option-btn";
                         useBtn.innerHTML = `<span>使用道具 🤏</span><span class="option-key">選項</span>`;
@@ -719,7 +801,7 @@
                             state.inspecting = null;
                             render();
                         });
-                        optionsEl.appendChild(useBtn);    
+                        optionsEl.appendChild(useBtn);
                     }
                 }
 
@@ -741,8 +823,8 @@
             dialogTextEl.textContent = loc.text();
             sceneIconEl.textContent = "🔍";
 
-            if (state.hp <= 12) dialogTextEl.textContent +="\n(😓你覺得身體不適。)";
-            if (state.sanity <= 12) dialogTextEl.textContent +="\n(🤪你覺得非常恐慌。)";
+            if (state.hp <= 12) dialogTextEl.textContent += "\n(😓你覺得身體不適。)";
+            if (state.sanity <= 12) dialogTextEl.textContent += "\n(🤪你覺得非常恐慌。)";
 
             const optionDefs = loc.options();
             optionDefs.forEach((opt, index) => {
@@ -773,7 +855,7 @@
             state.inventory = [];
             state.flags = {
                 metWorld: false,
-                unlockGuardHouse: false,  
+                unlockGuardHouse: false,
                 metBug: false,
                 hasAlys: false,        // 夥伴：盜賊艾莉絲
                 metShade: false,
