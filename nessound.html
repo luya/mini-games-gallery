@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>JS Nescaline with Realtime Scope</title>
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        :root {
+            --bg-color: #1a1a24;
+            --panel-color: #2d2d3d;
+            --border-color: #44445c;
+            --accent-color: #ff4554;
+            --text-color: #e0e0e6;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px #000;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #8888a0;
+            margin-bottom: 25px;
+        }
+
+        /* 示波器 Canvas 樣式 */
+        #waveform-scope {
+            width: 100%;
+            height: 200px;
+            background-color: black;
+            border: 4px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-width: 1000px;
+        }
+
+        /* 合成器主面板 */
+        .synth-panel {
+            background-color: var(--panel-color);
+            border: 4px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .channel {
+            background: #22222e;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .channel-title {
+            font-weight: bold;
+            text-align: center;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            color: #aaa;
+        }
+
+        input[type="range"],
+        select {
+            background: #333;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 虛擬鋼琴鍵盤 */
+        .keyboard {
+            display: flex;
+            margin-top: 30px;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px #000;
+            position: relative;
+        }
+
+        .key {
+            height: 120px;
+            width: 40px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 0 0 4px 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            color: #333;
+            font-size: 10px;
+            font-weight: bold;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        .key.black {
+            height: 80px;
+            width: 26px;
+            background: #222;
+            border: 1px solid #000;
+            margin-left: -13px;
+            margin-right: -13px;
+            z-index: 2;
+            color: white;
+        }
+
+        .key:active,
+        .key.active,
+        .key.black:active,
+        .key.black.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* 虛擬鋼琴鍵盤容器：加上橫向捲軸以防小螢幕破版 */
+        .keyboard {
+            display: flex;
+            margin-top: 30px;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px #000;
+            position: relative;
+            max-width: 1000px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+            align-items: top;
+            justify-content: center;
+            /* 寬度不夠時允許橫向捲動 */
+        }
+
+        /* 白鍵：寬度縮小到 28px，讓 25 鍵更容易一目了然 */
+        .key {
+            height: 120px;
+            width: 36px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 0 0 4px 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            color: #333;
+            font-size: 9px;
+            font-weight: bold;
+            box-sizing: border-box;
+            z-index: 1;
+            flex-shrink: 0;
+            margin-left: 1px;
+            margin-right: 1px;
+            /* 防止寬度被瀏覽器壓縮 */
+        }
+
+        /* 黑鍵：配合白鍵寬度等比例縮小 */
+        .key.black {
+            height: 80px;
+            width: 24px;
+            background: #222;
+            border: 1px solid #000;
+            margin-left: -11px;
+            margin-right: -11px;
+            z-index: 2;
+            color: white;
+        }
+    </style>
+
+    
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+
+    <h1>Nescaline with Realtime Scope</h1>
+    <div class="subtitle">Vanilla JS + Web Audio Analyser 即時波形示波器</div>
+
+    <!-- A. 新增示波器畫布 -->
+    <canvas id="waveform-scope"></canvas>
+
+    <!-- 合成器控制面板 -->
+    <div class="synth-panel">
+
+        <!-- PULSE 1 -->
+        <div class="channel" id="p1">
+            <div class="channel-title">Pulse 1</div>
+            <div class="control-group">
+                <label>啟用通道 <input type="checkbox" id="p1-enable" checked></label>
+            </div>
+            <div class="control-group">
+                <label>脈衝寬度 (Duty) <span id="p1-duty-val">50%</span></label>
+                <select id="p1-duty">
+                    <option value="0.125">12.5% (扁細)</option>
+                    <option value="0.25">25% (標準)</option>
+                    <option value="0.5" selected>50% (中空)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>音量衰減 (Decay) <span id="p1-decay-val">0.2s</span></label>
+                <input type="range" id="p1-decay" min="0.05" max="1" step="0.05" value="0.2">
+            </div>
+        </div>
+
+        <!-- (這裡省略 CH2-CH4 控制代碼，保持與上一題一致) -->
+        <!-- PULSE 2 -->
+        <div class="channel" id="p2">
+            <div class="channel-title">Pulse 2 (方波2)</div>
+            <div class="control-group">
+                <label>啟用通道 <input type="checkbox" id="p2-enable"></label>
+            </div>
+            <div class="control-group">
+                <label>脈衝寬度 (Duty) <span id="p2-duty-val">25%</span></label>
+                <select id="p2-duty">
+                    <option value="0.125">12.5%</option>
+                    <option value="0.25" selected>25%</option>
+                    <option value="0.5">50%</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>音量衰減 (Decay) <span id="p2-decay-val">0.3s</span></label>
+                <input type="range" id="p2-decay" min="0.05" max="1" step="0.05" value="0.3">
+            </div>
+        </div>
+
+        <!-- TRIANGLE -->
+        <div class="channel" id="tri">
+            <div class="channel-title">Triangle (三角波)</div>
+            <div class="control-group">
+                <label>啟用通道 <input type="checkbox" id="tri-enable" checked></label>
+            </div>
+            <div class="control-group">
+                <label style="visibility: hidden;">預留</label>
+                <div style="height: 30px; color: #666; font-size: 11px; text-align: center;">固定輸出低音三角波</div>
+            </div>
+            <div class="control-group">
+                <label>音量衰減 (Decay) <span id="tri-decay-val">0.4s</span></label>
+                <input type="range" id="tri-decay" min="0.05" max="1" step="0.05" value="0.4">
+            </div>
+        </div>
+
+        <!-- NOISE -->
+        <div class="channel" id="noise">
+            <div class="channel-title">Noise (雜音)</div>
+            <div class="control-group">
+                <label>啟用通道 <input type="checkbox" id="noise-enable"></label>
+            </div>
+            <div class="control-group">
+                <label>頻率類型 <span id="noise-type-val">白噪音</span></label>
+                <select id="noise-type">
+                    <option value="white" selected>白噪音 (爆炸/小鼓)</option>
+                    <option value="metallic">金屬感 (機槍/硬音)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>音量衰減 (Decay) <span id="noise-decay-val">0.15s</span></label>
+                <input type="range" id="noise-decay" min="0.05" max="1" step="0.05" value="0.15">
+            </div>
+        </div>
+    </div>
+
+    <!-- 鋼琴鍵盤 -->
+    <div class="keyboard" id="keyboard"></div>
+
+    <script>
+        // 等待 HTML 完全載入後才執行
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // 1. 初始化音訊環境與分析器
+            let audioCtx = null;
+            let analyser = null;
+            let dataArray = null;
+            let bufferLength = 0;
+
+            // 2. 初始化 Canvas
+            const canvas = document.getElementById('waveform-scope');
+            const canvasCtx = canvas.getContext('2d');
+            if (!canvas) {
+                console.error("找不到 #waveform-scope Canvas 元素！");
+                return;
+            }
+
+            // 3. 音符資料 (C4 到 C5)
+            let notes = [
+                { name: 'C4', freq: 261.63, black: false },
+                { name: 'C#4', freq: 277.18, black: true },
+                { name: 'D4', freq: 293.66, black: false },
+                { name: 'D#4', freq: 311.13, black: true },
+                { name: 'E4', freq: 329.63, black: false },
+                { name: 'F4', freq: 349.23, black: false },
+                { name: 'F#4', freq: 369.99, black: true },
+                { name: 'G4', freq: 392.00, black: false },
+                { name: 'G#4', freq: 415.30, black: true },
+                { name: 'A4', freq: 440.00, black: false },
+                { name: 'A#4', freq: 466.16, black: true },
+                { name: 'B4', freq: 493.88, black: false },
+                { name: 'C5', freq: 523.25, black: false }
+            ];
+
+            // 3e. 擴充後的音符與頻率對照表 (C3 到 C5，共兩個八度 25 鍵)
+            notes = [
+                // --- 第一個八度 (低音組 C3 ~ B3) ---
+                { name: 'C3', freq: 130.81, black: false },
+                { name: 'C#3', freq: 138.59, black: true },
+                { name: 'D3', freq: 146.83, black: false },
+                { name: 'D#3', freq: 155.56, black: true },
+                { name: 'E3', freq: 164.81, black: false },
+                { name: 'F3', freq: 174.61, black: false },
+                { name: 'F#3', freq: 185.00, black: true },
+                { name: 'G3', freq: 196.00, black: false },
+                { name: 'G#3', freq: 207.65, black: true },
+                { name: 'A3', freq: 220.00, black: false },
+                { name: 'A#3', freq: 233.08, black: true },
+                { name: 'B3', freq: 246.94, black: false },
+
+                // --- 第二個八度 (中音組 C4 ~ C5) ---
+                { name: 'C4', freq: 261.63, black: false },
+                { name: 'C#4', freq: 277.18, black: true },
+                { name: 'D4', freq: 293.66, black: false },
+                { name: 'D#4', freq: 311.13, black: true },
+                { name: 'E4', freq: 329.63, black: false },
+                { name: 'F4', freq: 349.23, black: false },
+                { name: 'F#4', freq: 369.99, black: true },
+                { name: 'G4', freq: 392.00, black: false },
+                { name: 'G#4', freq: 415.30, black: true },
+                { name: 'A4', freq: 440.00, black: false },
+                { name: 'A#4', freq: 466.16, black: true },
+                { name: 'B4', freq: 493.88, black: false },
+                { name: 'C5', freq: 523.25, black: false }
+            ];
+
+            // 4. 繪製鍵盤
+            const keyboardDiv = document.getElementById('keyboard');
+            if (!keyboardDiv) {
+                console.error("找不到 #keyboard 元素！");
+                return;
+            }
+
+            notes.forEach(note => {
+                const keyBtn = document.createElement('div');
+                keyBtn.className = `key ${note.black ? 'black' : ''}`;
+                keyBtn.innerText = note.name;
+                keyBtn.addEventListener('pointerdown', () => {
+                    // 在互動時建立 audioCtx 和 analyser
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                        // --- C. 初始化分析器 ---
+                        analyser = audioCtx.createAnalyser();
+                        analyser.fftSize = 2048; // 資料長度
+                        bufferLength = analyser.frequencyBinCount;
+                        dataArray = new Uint8Array(bufferLength);
+
+                        // 開始啟動分析器繪圖迴圈
+                        drawWaveform();
+                    }
+                    playNESNote(note.freq);
+                });
+                keyboardDiv.appendChild(keyBtn);
+            });
+
+            // --- D. 核心繪圖函式：即時示波器 ---
+            function drawWaveform() {
+                if (!analyser) return;
+
+                // 不斷重複繪製下一幀
+                requestAnimationFrame(drawWaveform);
+
+                // 1. 抓取目前的時域音波資料
+                analyser.getByteTimeDomainData(dataArray);
+
+                // 2. 準備乾淨畫布
+                canvasCtx.fillStyle = 'black'; // 設為黑色背景
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 3. 設定畫筆樣式 (綠色示波器風格)
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = '#00ff00';
+
+                // 4. 開始畫路徑 (將陣列資料對應到 Y 軸)
+                canvasCtx.beginPath();
+
+                // 計算每一格在 Canvas 上的寬度
+                const sliceWidth = canvas.width * 1.0 / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    // 振幅資料是 Uint8 (0 到 255 之間)
+                    const v = dataArray[i] / 128.0; // 歸一化到 0 ~ 2 之間
+                    // 將歸一化後的數值對應到 Canvas 的 Y 軸高度 (喇叭在中間震動)
+                    const y = v * canvas.height / 2;
+
+                    if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                // 最後一筆畫回 Canvas 右側中央
+                canvasCtx.lineTo(canvas.width, canvas.height / 2);
+                canvasCtx.stroke();
+            }
+
+            // --- 監聽 UI 更新 (已簡化，保持上一題邏輯) ---
+            ['p1-decay'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', (e) => {
+                        document.getElementById(`${id}-val`).innerText = e.target.value + 's';
+                    });
+                }
+            });
+
+            // --- 輔助函式：產生 Pulse Wave ---
+            function createPulseWave(duty) {
+                const real = new Float32Array(32);
+                const imag = new Float32Array(32);
+                real[0] = 0;
+                imag[0] = 0;
+                for (let n = 1; n < 32; n++) {
+                    imag[n] = (2 / (n * Math.PI)) * Math.sin(n * Math.PI * duty);
+                }
+                return audioCtx.createPeriodicWave(real, imag);
+            }
+
+            // --- 核心播放邏輯 (以 CH1 Pulse 1 為示意範例) ---
+            function playNESNote(freq) {
+                if (!audioCtx || !analyser) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+
+                // 通道 1: Pulse 1
+                if (document.getElementById('p1-enable')?.checked) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    const duty = parseFloat(document.getElementById('p1-duty').value);
+                    const decay = parseFloat(document.getElementById('p1-decay').value);
+                    osc.setPeriodicWave(createPulseWave(duty));
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0, now + decay);
+
+                    // --- E. 關鍵接線變動：osc -> gain -> analyser -> destination ---
+                    osc.connect(gain);
+                    gain.connect(analyser); // 先接到分析器
+                    analyser.connect(audioCtx.destination); // 分析器再接到喇叭
+
+                    osc.start(now);
+                    osc.stop(now + decay);
+                }
+
+                // (這裡省略 CH2-CH4 的播放代碼，因為接線方式完全一致)
+                // --- 通道 2: Pulse 2 ---
+                if (document.getElementById('p2-enable').checked) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    const duty = parseFloat(document.getElementById('p2-duty').value);
+                    const decay = parseFloat(document.getElementById('p2-decay').value);
+
+                    osc.setPeriodicWave(createPulseWave(duty));
+                    // 稍微降個幾音分(Detune)或改變頻率，重現 Nescaline 豐富度
+                    osc.frequency.setValueAtTime(freq * 1.003, now);
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0, now + decay);
+
+                    // --- E. 關鍵接線變動：osc -> gain -> analyser -> destination ---
+                    osc.connect(gain);
+                    gain.connect(analyser); // 先接到分析器
+                    analyser.connect(audioCtx.destination); // 分析器再接到喇叭
+
+                    osc.start(now);
+                    osc.stop(now + decay);
+                }
+
+                // --- 通道 3: Triangle (低音，通常降一個八度) ---
+                if (document.getElementById('tri-enable').checked) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    const decay = parseFloat(document.getElementById('tri-decay').value);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq / 2, now); // 降八度模擬 NES Bass
+
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.linearRampToValueAtTime(0, now + decay);
+
+                    // --- E. 關鍵接線變動：osc -> gain -> analyser -> destination ---
+                    osc.connect(gain);
+                    gain.connect(analyser); // 先接到分析器
+                    analyser.connect(audioCtx.destination); // 分析器再接到喇叭
+
+                    osc.start(now);
+                    osc.stop(now + decay);
+                }
+
+                // --- 通道 4: Noise ---
+                if (document.getElementById('noise-enable').checked) {
+                    const decay = parseFloat(document.getElementById('noise-decay').value);
+                    const type = document.getElementById('noise-type').value;
+
+                    const bufferSize = audioCtx.sampleRate * decay;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+
+                    // 根據類型產生不同的 8-bit 顆粒感雜音
+                    let lastOut = 0.0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        const white = Math.random() * 2 - 1;
+                        if (type === 'metallic') {
+                            // 金屬感短週期噪訊：利用簡易下採樣與持值產生顆粒感
+                            if (i % 8 === 0) lastOut = white;
+                            data[i] = lastOut;
+                        } else {
+                            data[i] = white;
+                        }
+                    }
+
+                    const noiseNode = audioCtx.createBufferSource();
+                    const gain = audioCtx.createGain();
+                    noiseNode.buffer = buffer;
+
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.linearRampToValueAtTime(0, now + decay);
+
+                    // --- E. 關鍵接線變動：osc -> gain -> analyser -> destination ---
+                    noiseNode.connect(gain);
+                    gain.connect(analyser); // 先接到分析器
+                    analyser.connect(audioCtx.destination); // 分析器再接到喇叭
+
+                    noiseNode.start(now);
+                    noiseNode.stop(now + decay);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
