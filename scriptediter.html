@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <title>劇本創作筆記本 Pro</title>
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        /* 左側：自訂標籤區 */
+        .sidebar {
+            width: auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn-add {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add:hover {
+            background-color: #45a049;
+        }
+
+        .tag-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tag-btn-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-shortcut {
+            flex: 1;
+            padding: 10px;
+            background-color: #e7f3fe;
+            color: #1e88e5;
+            border: 1px solid #bbdefb;
+            border-radius: 4px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-shortcut:hover {
+            background-color: #d0e7ff;
+        }
+
+        .btn-delete-tag {
+            padding: 10px;
+            background-color: #ffcdd2;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 右側：編輯器區 */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+
+        /* 搜尋取代工具列 */
+        .find-replace-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            align-items: center;
+        }
+
+        .find-replace-bar input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .btn-replace {
+            padding: 6px 12px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .btn-replace:hover {
+            background-color: #f57c00;
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2196F3;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="backBtn" href="index.html">🏠</a>
+    <!-- 全域 Toast 容器 -->
+    <div id="toast-container"></div>
+    <header>
+        <h1>劇本創作筆記本</h1>
+    </header>
+
+    <div class="main-container">
+        <!-- 左側自訂快速鍵 -->
+        <div class="sidebar">
+            <h3>自訂劇本名詞</h3>
+            <div class="input-group">
+                <input type="text" id="tagInput" placeholder="輸入主角名/場景..." autocomplete="off">
+                <button class="btn-add" id="addTagBtn">新增</button>
+            </div>
+            <div class="tag-container" id="tagContainer">
+                <!-- 動態生成的按鈕會放在這裡 -->
+            </div>
+        </div>
+
+        <!-- 右側文字編輯器 -->
+        <div class="editor-container">
+            <!-- 搜尋與取代工具列 -->
+            <div class="find-replace-bar">
+                <input type="text" id="findInput" placeholder="搜尋文字...">
+                <input type="text" id="replaceInput" placeholder="取代為...">
+                <button class="btn-replace" id="replaceBtn">全部取代</button>
+            </div>
+            <div class="action-bar">
+                <button class="button-base" id="clearBtn">清空內容</button>
+                <button class="button-base" id="copyBtn">複製全部</button>
+                <button class="button-base" id="pasteBtn">最下方貼上</button>
+            </div>
+
+            <textarea id="editor" placeholder="在此開始撰寫你的劇本...可以使用左側的快捷按鈕插入常用名詞。"></textarea>
+
+            <div class="action-bar">
+                <button class="button-base" id="exportBtn">輸出為 .txt 檔案</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="ayakit.js"></script>
+    <script>
+        const tagInput = document.getElementById('tagInput');
+        const addTagBtn = document.getElementById('addTagBtn');
+        const tagContainer = document.getElementById('tagContainer');
+        const editor = document.getElementById('editor');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const pasteBtn= document.getElementById('pasteBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const toastContainer = document.getElementById('toast-container');
+
+        // 搜尋取代相關元素
+        const findInput = document.getElementById('findInput');
+        const replaceInput = document.getElementById('replaceInput');
+        const replaceBtn = document.getElementById('replaceBtn');
+
+        // 預設名詞按鈕
+        const defaultTags = [
+            '【場景】', '【時間】', '【補充】', '【註解】', '【提醒】',
+            '主人翁', '女主角', '：『。』', '：『？』', '：『！』',
+            '齊尼', '亞蕾芙', '阿雷莎', '艾莉絲', '愛麗絲',
+            '【描述】', '【形容】', '【動作】', '【感應】', '【情緒】',
+            '【道具】', '【魔法】', '【關鍵】', '【交易】', '【生死】',
+            '【貧富】', '【路人】', '【角色】', '【戰鬥】', '【惡意】',
+            '瑠亞', '華達卡', '婆羅墮', '凱因', '姬芮',
+            '萍琪', '索羅', '迪夫', '沃切', '艾克妮斯',
+        ];
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            defaultTags.forEach(tag => createTagButton(tag));
+        });
+
+        // 新增按鈕的觸發事件
+        addTagBtn.addEventListener('click', handleAddTag);
+        tagInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAddTag();
+        });
+
+        function handleAddTag() {
+            const tagText = tagInput.value.trim();
+            if (tagText === '') {
+                alert('請輸入名詞內容！');
+                return;
+            }
+            createTagButton(tagText);
+            tagInput.value = '';
+            tagInput.focus();
+        }
+
+        // 動態建立名詞按鈕
+        function createTagButton(text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'tag-btn-wrapper';
+
+            const shortcutBtn = document.createElement('button');
+            shortcutBtn.className = 'btn-shortcut';
+            shortcutBtn.textContent = text;
+            shortcutBtn.title = `點擊插入: ${text}`;
+            shortcutBtn.addEventListener('click', () => insertTextAtCursor(text));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete-tag';
+            deleteBtn.textContent = '✕';
+            deleteBtn.title = '刪除此按鈕';
+            deleteBtn.addEventListener('click', () => wrapper.remove());
+
+            wrapper.appendChild(shortcutBtn);
+            wrapper.appendChild(deleteBtn);
+            tagContainer.appendChild(wrapper);
+        }
+
+        // 精準游標動態插入文字法
+        function insertTextAtCursor(text) {
+            const startPos = editor.selectionStart;
+            const endPos = editor.selectionEnd;
+            const originalText = editor.value;
+
+            editor.value = originalText.substring(0, startPos) + text + originalText.substring(endPos);
+
+            const newCursorPos = startPos + text.length;
+            editor.selectionStart = newCursorPos;
+            editor.selectionEnd = newCursorPos;
+            editor.focus();
+        }
+
+        // 功能 1: 搜尋並全部取代
+        replaceBtn.addEventListener('click', () => {
+            const findText = findInput.value;
+            const replaceText = replaceInput.value;
+            const currentContent = editor.value;
+
+            if (findText === '') {
+                alert('請輸入想要搜尋的文字！');
+                return;
+            }
+
+            if (!currentContent.includes(findText)) {
+                alert(`找不到要取代的文字：「${findText}」`);
+                return;
+            }
+
+            const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapedFindText, 'g');
+
+            const newContent = currentContent.replace(regex, replaceText);
+            editor.value = newContent;
+
+            const matchCount = currentContent.match(regex).length;
+            alert(`成功！已將 ${matchCount} 處的「${findText}」取代為「${replaceText}」。`);
+
+            findInput.value = '';
+            replaceInput.value = '';
+        });
+
+        // 功能 2: 清空內容 (附帶防呆提示)
+        clearBtn.addEventListener('click', () => {
+            if (editor.value.trim() === '') {
+                return; // 如果已經是空的就不處理
+            }
+
+            const confirmClear = confirm('確定要清空目前所有的劇本內容嗎？此動作無法復原喔！');
+            if (confirmClear) {
+                editor.value = '';
+                editor.focus();
+            }
+        });
+
+        // 功能 3: 複製到剪貼簿
+        pasteBtn.addEventListener('click', () => {
+            navigator.clipboard.readText()
+            .then((cliptext) => {
+                if (cliptext.trim() === '') {                    
+                    AyaKits.createToast(toastContainer, '⚠️ 剪貼簿內容是空的，沒什麼好貼上的喔！', 'warn');
+                    return;
+                }
+                editor.value += cliptext;
+                AyaKits.createToast(toastContainer, '🎉 從剪貼簿貼上到最後方成功。', 'success');
+            });
+        });
+
+
+        copyBtn.addEventListener('click', () => {
+            const textContent = editor.value;
+            if (textContent.trim() === '') {
+                AyaKits.createToast(toastContainer, '⚠️ 內容是空的，沒什麼好複製的喔！', 'warn');
+                return;
+            }
+
+            navigator.clipboard.writeText(textContent)
+            .then(() => {
+                AyaKits.createToast(toastContainer, '🎉 複製全文到剪貼簿成功。', 'success');
+            });
+        });
+
+        // 輸出為 .txt 檔案
+        exportBtn.addEventListener('click', () => {
+            const textContent = editor.value;
+            if (textContent.trim() === '') {
+                AyaKits.createToast(toastContainer, '⚠️ 筆記本內容是空的，請先輸入內容再輸出。', 'warn');
+                return;
+            }
+
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(blob);
+
+            const date = new Date();
+            const timestamp = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}`;
+            downloadLink.download = `劇本創作_${timestamp}.txt`;
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(downloadLink.href);
+        });
+    </script>
+</body>
+
+</html>

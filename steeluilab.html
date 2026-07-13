@@ -14,22 +14,9 @@
 
     <link rel="stylesheet" href="ayakit.css">
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --border: #334155;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-            --success: #22c55e;
-            --warning: #eab308;
-            --danger: #ef4444;
-        }
-
         body {
             background-color: var(--bg-dark);
             color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -99,23 +86,6 @@
         }
 
         /* 共享的控制項基礎樣式 */
-        button,
-        select,
-        input[type="text"] {
-            background-color: #0f172a;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
 
         /* 進度條容器 */
         .bar-bg {
@@ -177,78 +147,15 @@
             font-weight: bold;
         }
 
-        .tag-input {
+        /* .tag-input {
             border: none;
             padding: 4px;
             outline: none;
             flex: 1;
             min-width: 60px;
-        }
+        } */
 
-        /* Toast 專屬樣式 */
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-            /* 確保容器本身不擋住後面的點擊 */
-        }
-
-        .toast-item {
-            pointer-events: auto;
-            /* 讓個別的 Toast 可以被點擊 */
-            min-width: 240px;
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            transition: all 0.3s ease;
-        }
-
-        .toast-close {
-            cursor: pointer;
-            margin-left: 12px;
-            opacity: 0.6;
-            font-weight: bold;
-        }
-
-        .toast-close:hover {
-            opacity: 1;
-        }
-
-        @keyframes toastIn {
-            from {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes toastOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            to {
-                transform: translateX(120%);
-                opacity: 0;
-            }
-        }
+        
     </style>
 </head>
 
@@ -263,13 +170,13 @@
         <!-- 1. 標準按鈕 (因果反饋) -->
         <div class="component-card">
             <div class="component-title">01. 基礎按鈕 (Button Click)</div>
-            <button id="btn-standard">點擊觸發事件</button>
+            <button id="btn-standard" class="button-base">點擊觸發事件</button>
         </div>
 
         <!-- 2. 下拉選單 (結構化選擇) -->
         <div class="component-card">
             <div class="component-title">02. 下拉選單 (Dropdown / Select)</div>
-            <select id="select-ui">
+            <select id="select-ui" class="select-base">
                 <option value="選項 A">選項 A</option>
                 <option value="選項 B">選項 B</option>
                 <option value="選項 C">選項 C</option>
@@ -286,7 +193,7 @@
         <!-- 4. 長按蓄力 (時間物理化) -->
         <div class="component-card">
             <div class="component-title">04. 長按元件 (Long Press / Hold)</div>
-            <button id="btn-hold" style="background-color: var(--warning); color: #000;">按住不放進行蓄力</button>
+            <button id="btn-hold" style="background-color: var(--warning); color: #000;" class="button-base">按住不放進行蓄力</button>
             <div class="bar-bg">
                 <div class="bar-fill" id="hold-fill" style="background-color: var(--warning);"></div>
             </div>
@@ -304,7 +211,7 @@
         <!-- 6. QTE 限時應激計時器 -->
         <div class="component-card">
             <div class="component-title">06. 限時反應 (QTE / Timer)</div>
-            <button id="btn-qte" style="background-color: var(--danger);">啟動 QTE 考驗</button>
+            <button id="btn-qte" style="background-color: var(--danger);" class="button-base">啟動 QTE 考驗</button>
             <div class="bar-bg" id="qte-bg" style="display:none;">
                 <div class="bar-fill" id="qte-fill" style="background-color: var(--danger);"></div>
             </div>
@@ -315,7 +222,7 @@
             <div class="component-title">07. 標籤輸入 (Tags Input)</div>
             <div class="tags-wrapper" id="tags-area">
                 <div class="tag-item">JS<span class="tag-del">&times;</span></div>
-                <input type="text" class="tag-input" id="input-tag" placeholder="輸入後換行...">
+                <input type="text" class="tag-input input-base" id="input-tag" placeholder="輸入後換行...">
             </div>
         </div>
         <!-- 8. 圓形範圍滑塊 (幾何三角函數) -->
@@ -347,7 +254,7 @@
             <!-- 控制方位用的下拉選單 -->
             <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">標籤方位：</span>
-                <select id="select-tab-position" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                <select id="select-tab-position" style="width: auto; padding: 4px 8px; font-size: 12px;" class="select-base">
                     <option value="row">上方 (Top)</option>
                     <option value="row-reverse">下方 (Bottom)</option>
                     <option value="column">左側 (Left)</option>
@@ -361,12 +268,12 @@
 
                 <!-- Tab 按鈕群組 (如果是左右方位，改用 flex-direction: column) -->
                 <div id="tab-headers" style="display: flex; gap: 4px; flex-wrap: wrap;">
-                    <button class="tab-btn" data-target="tab-content-1"
-                        style="background: var(--primary); width: auto; flex: 1;">個人資料</button>
-                    <button class="tab-btn" data-target="tab-content-2"
-                        style="background: #1e293b; width: auto; flex: 1;">安全性</button>
-                    <button class="tab-btn" data-target="tab-content-3"
-                        style="background: #1e293b; width: auto; flex: 1;">進階設定</button>
+                    <button class="tab-btn button-base" data-target="tab-content-1"
+                        style="background: var(--primary); width: auto; flex: 1; color: #ffffff;">個人資料</button>
+                    <button class="tab-btn button-base" data-target="tab-content-2"
+                        style="background: #1e293b; width: auto; flex: 1; color: #ffffff;">安全性</button>
+                    <button class="tab-btn button-base" data-target="tab-content-3"
+                        style="background: #1e293b; width: auto; flex: 1; color: #ffffff;">進階設定</button>
                 </div>
 
                 <!-- Tab 內容面板群組 -->
@@ -399,10 +306,10 @@
         <div class="component-card">
             <div class="component-title">11. 訊息通知 (Toast Generator)</div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button id="btn-toast-success" style="background-color: var(--success); border: none;">發送成功通知</button>
+                <button id="btn-toast-success" style="background-color: var(--success); border: none;" class="button-base">發送成功通知</button>
                 <button id="btn-toast-warn"
-                    style="background-color: var(--warning); color: #000; border: none;">發送警告通知</button>
-                <button id="btn-toast-danger" style="background-color: var(--danger); border: none;">發送錯誤通知</button>
+                    style="background-color: var(--warning); color: #000; border: none;" class="button-base">發送警告通知</button>
+                <button id="btn-toast-danger" style="background-color: var(--danger); border: none;" class="button-base">發送錯誤通知</button>
             </div>
         </div>
 
@@ -416,7 +323,8 @@
         <button id="btn-clear"
             style="margin-top: 10px; padding: 6px; font-size: 12px; background-color: #334155;">清空日誌</button>
     </div>
-
+    
+    <script src="ayakit.js"></script>
     <script>
         // 日誌輸出核心函式
         const logBox = document.getElementById('log-box');
@@ -436,7 +344,7 @@
         // ------------------------------------------------
         // 01. 標準按鈕 (Pointer Events 偵測來源)
         // ------------------------------------------------
-        document.getElementById('btn-standard').addEventListener('pointerdown', (e) => {
+        document.getElementById('btn-standard').addEventListener('click', (e) => {
             log(`click 觸發 | 來源裝置：${e.pointerType.toUpperCase()}`, 'success');
         });
 
@@ -775,59 +683,19 @@
         // ------------------------------------------------
         const toastContainer = document.getElementById('toast-container');
 
-        function createToast(message, type = 'success') {
-            // 1. 動態建立 div 元素
-            const toast = document.createElement('div');
-            toast.className = `toast-item`;
-
-            // 2. 根據類型設定外觀色彩
-            if (type === 'success') toast.style.backgroundColor = 'var(--success)';
-            if (type === 'warn') { toast.style.backgroundColor = 'var(--warning)'; toast.style.color = '#000'; }
-            if (type === 'danger') toast.style.backgroundColor = 'var(--danger)';
-
-            // 3. 組裝內部文字與關閉按鈕
-            toast.innerHTML = `
-        <span>${message}</span>
-        <span class="toast-close">&times;</span>
-    `;
-
-            // 4. 將 Toast 塞進全域容器中
-            toastContainer.appendChild(toast);
-            log(`DOM 操作 | 創建 [${type.toUpperCase()}] 通知`, type);
-
-            // 5. 自動銷毀邏輯 (4秒後自動消失)
-            const autoDismissTimer = setTimeout(() => {
-                dismiss();
-            }, 4000);
-
-            // 6. 點擊 X 提前手動銷毀
-            toast.querySelector('.toast-close').addEventListener('click', () => {
-                clearTimeout(autoDismissTimer); // 清除定時器，避免重複執行
-                dismiss();
-            });
-
-            // 銷毀用的封裝函式（加上退場動畫）
-            function dismiss() {
-                toast.style.animation = 'toastOut 0.3s ease forwards';
-                // 等退場動畫跑完後，再徹底從 DOM 樹移出元素
-                toast.addEventListener('animationend', () => {
-                    toast.remove();
-                    log('DOM 操作 | 通知生命週期結束，已重記憶體銷毀');
-                });
-            }
-        }
+        
 
         // 綁定按鈕點擊事件
         document.getElementById('btn-toast-success').addEventListener('click', () => {
-            createToast('🎉 資料同步成功！連線一切正常。', 'success');
+            AyaKits.createToast(toastContainer, '🎉 資料同步成功！連線一切正常。', 'success');
         });
 
         document.getElementById('btn-toast-warn').addEventListener('click', () => {
-            createToast('⚠️ 偵測到密碼強度過低，請儘速變更。', 'warn');
+            AyaKits.createToast(toastContainer, '⚠️ 偵測到密碼強度過低，請儘速變更。', 'warn');
         });
 
         document.getElementById('btn-toast-danger').addEventListener('click', () => {
-            createToast('❌ 伺服器 500 異常，請稍後再試。', 'danger');
+            AyaKits.createToast(toastContainer, '❌ 伺服器 500 異常，請稍後再試。', 'danger');
         });
 
         // 初始化日誌
