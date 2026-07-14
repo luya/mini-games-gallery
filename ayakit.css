@@ -55,6 +55,7 @@ canvas {
 }
 
 /* 共享的控制項基礎樣式 */
+.label-base,
 .button-base,
 .select-base,
 .input-base[type="text"] {

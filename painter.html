@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
     <title>極簡像素小畫家</title>
     <link rel="stylesheet" href="ayakit.css">
     <style>
@@ -13,23 +14,28 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 20px;
             color: #333;
+            /* width: 100%; */
+            /* height: 100%; */
         }
 
         h1 {
-            font-size: 16px;
+            font-size: 1.5rem;
             margin-bottom: 10px;
         }
 
         /* 讓外層容器可以隨視窗縮放 */
         .container {
+            align-items: center;
+            justify-content: center;
             display: flex;
             gap: 20px;
             background: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             height: 95%;
             width: 95%;
             /* 寬度隨視窗縮放 */
@@ -42,7 +48,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            width: 200px;
+            /* width: 20%px; */
         }
 
         .tool-group {
@@ -59,13 +65,13 @@
         /* 調色盤 */
         .palette {
             display: grid;
-            grid-template-columns: repeat(12, 1fr);
+            grid-template-columns: repeat(8, 1fr);
             gap: 4px;
         }
 
         .color-swatch {
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-radius: 4px;
             border: 2px solid transparent;
             cursor: pointer;
@@ -91,12 +97,13 @@
             cursor: pointer;
         }
 
-        
+
 
         canvas {
             flex: 1;
             /* 讓 Canvas 自動填滿容器剩餘空間 */
-            min-width: 250px;
+            min-height: 512px;
+            min-width: 512px;
             /* 限制最小寬度，避免手機版縮太小 */
             aspect-ratio: 1 / 1;
             /* 強制保持 1:1 完美正方形 */
@@ -113,19 +120,19 @@
 </head>
 
 <body>
-<a id="backBtn" href="index.html">🏠</a>
+    <a id="backBtn" href="index.html">🏠</a>
     <h1>像素小畫家 🎨</h1>
 
-    <div class="container">
+    <div id="container" class="container">
         <!-- 工具箱 -->
         <div class="toolbox">
             <div class="tool-group">
-                <label>自訂顏色</label>
+                <label style="font-size: 1rem;">自訂顏色</label>
                 <input type="color" id="customColor" value="#2e222f">
             </div>
 
             <div class="tool-group">
-                <label>經典調色盤</label>
+                <label style="font-size: 1rem;">經典調色盤</label>
                 <select id="palettes" class="select-base">
                     <option value="Resurrect64">Resurrect 64</option>
                     <option value="AAP64">AAP 64</option>
@@ -139,37 +146,37 @@
             </div>
 
             <div class="tool-group">
-                <label>網格大小 (解析度)</label>
+                <label style="font-size: 1rem;">網格大小 (解析度)</label>
                 <select id="gridSize" class="select-base">
                     <option value="8">8 x 8</option>
                     <option value="16">16 x 16</option>
                     <option value="32" selected>32 x 32</option>
                     <option value="64">64 x 64</option>
                     <option value="128">128 x 128</option>
-                    <option value="256">256 x 256</option>
-                    <option value="512">512 x 512</option>
+                    <!-- <option value="256">256 x 256</option> -->
+                    <!-- <option value="512">512 x 512</option> -->
                 </select>
             </div>
 
             <div class="tool-group">
-                <label>設定</label>
+                <label style="font-size: 1rem;">設定</label>
+                <button id="toggleFullScreen" class="button-base">全螢幕</button>
                 <button id="toggleGrid" class="button-base">隱藏網格線</button>
                 <button id="clearBtn" class="button-base">全部清除</button>
                 <div class="tool-group">
-                    <label>
+                    <label style="font-size: 1rem;">
                         <input type="checkbox" id="pixelPerfectToggle">
                         簡易像素完美
                     </label>
                 </div>
             </div>
             <div class="tool-group">
-                <label>畫布顏色</label>
+                <label style="font-size: 1rem;">畫布顏色</label>
                 <input type="color" id="customBG" value="#FFFFFF">
             </div>
             <div class="tool-group">
-                <label>匯出作品</label>
-                <button id="downloadPngBtn" class="button-base">下載
-                    PNG</button>
+                <label style="font-size: 1rem;">匯出作品</label>
+                <button id="downloadPngBtn" class="button-base">下載PNG</button>
             </div>
 
         </div>
@@ -177,7 +184,8 @@
         <!-- 畫布 -->
         <canvas id="paintCanvas" style="background-color: #ffffff;"></canvas>
     </div>
-
+    
+    <script src="ayakit.js"></script>
     <script>
         // 1. 初始化 DOM 元素
         const canvas = document.getElementById('paintCanvas');
@@ -187,6 +195,7 @@
         const paletteContainer = document.getElementById('palette');
         const customBG = document.getElementById('customBG');
         const gridSizeSelect = document.getElementById('gridSize');
+        const toggleFullScreenBtn = document.getElementById('toggleFullScreen');
         const toggleGridBtn = document.getElementById('toggleGrid');
         const clearBtn = document.getElementById('clearBtn');
         const pixelPerfectToggle = document.getElementById('pixelPerfectToggle');
@@ -290,6 +299,8 @@
 
         // 5. 重新調整繪圖（draw）邏輯
         function draw() {
+            // if (canvas.width>viewportWidth){canvas.width=viewportWidth;}
+            // if (canvas.height>viewportWidth){canvas.height=viewportWidth;}
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cellSize = canvas.width / gridSize; // 依據 800 解析度來算格尺寸
 
@@ -436,7 +447,7 @@
 
         window.addEventListener('pointerup', () => {
             isDrawing = false;
-            if (usePixelPerfect) {               
+            if (usePixelPerfect) {
                 currentStrokePixels.clear();
             }
         });
@@ -469,6 +480,16 @@
         });
 
         // 網格線開關
+        toggleFullScreenBtn.addEventListener('click', () => {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+
+            if (!isFullscreen) {
+                AyaKits.launchFullScreen(document.documentElement);
+            } else {
+                AyaKits.exitFullScreen();
+            }
+        });
+
         toggleGridBtn.addEventListener('click', () => {
             showGrid = !showGrid;
             toggleGridBtn.textContent = showGrid ? '隱藏網格線' : '顯示網格線';

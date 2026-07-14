@@ -1,5 +1,29 @@
 var AyaKits = AyaKits || {};
 
+AyaKits.launchFullScreen = function (element) {
+    // 檢查並呼叫各瀏覽器支援的全螢幕方法
+    if (element.requestFullscreen) {
+        element.requestFullscreen();
+    } else if (element.mozRequestFullScreen) { // Firefox
+        element.mozRequestFullScreen();
+    } else if (element.webkitRequestFullscreen) { // Chrome, Safari 和 Opera
+        element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) { // IE/Edge
+        element.msRequestFullscreen();
+    }
+}
+
+AyaKits.exitFullScreen = function () {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) { // Firefox
+        document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) { // Chrome, Safari 和 Opera
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { // IE/Edge
+        document.msExitFullscreen();
+    }
+}
 
 // 核心偵測：判斷是否為行動裝置/觸控螢幕
 AyaKits.detectTouchDevice = function () {
@@ -8,31 +32,31 @@ AyaKits.detectTouchDevice = function () {
         (navigator.msMaxTouchPoints > 0);
 }
 
-AyaKits.saveGame = function(state, slotname = "my_game_save_slot_1") {
-  try {
-    state.lastSaved = Date.now(); // 記錄存檔時間
-    const jsonString = JSON.stringify(state);
-    localStorage.setItem(slotname, jsonString);
-    console.log("存檔成功！");
-  } catch (error) {
-    // 如果超過 5MB，會觸發 QuotaExceededError
-    console.error("存檔失敗，空間可能不足：", error);
-  }
+AyaKits.saveGame = function (state, slotname = "my_game_save_slot_1") {
+    try {
+        state.lastSaved = Date.now(); // 記錄存檔時間
+        const jsonString = JSON.stringify(state);
+        localStorage.setItem(slotname, jsonString);
+        console.log("存檔成功！");
+    } catch (error) {
+        // 如果超過 5MB，會觸發 QuotaExceededError
+        console.error("存檔失敗，空間可能不足：", error);
+    }
 }
 
 AyaKits.loadGame = function (slotname = "my_game_save_slot_1") {
-  const jsonString = localStorage.getItem(slotname);
-  if (!jsonString) {
-    return { ...defaultGameState }; // 沒存檔就給初始值
-  }
-  try {
-    const loadedState = JSON.parse(jsonString);
-    // 建議與預設值合併，防止遊戲更新後，舊存檔缺少新欄位而報錯
-    return { ...defaultGameState, ...loadedState };
-  } catch (error) {
-    console.error("存檔損毀，無法讀取：", error);
-    return { ...defaultGameState };
-  }
+    const jsonString = localStorage.getItem(slotname);
+    if (!jsonString) {
+        return { ...defaultGameState }; // 沒存檔就給初始值
+    }
+    try {
+        const loadedState = JSON.parse(jsonString);
+        // 建議與預設值合併，防止遊戲更新後，舊存檔缺少新欄位而報錯
+        return { ...defaultGameState, ...loadedState };
+    } catch (error) {
+        console.error("存檔損毀，無法讀取：", error);
+        return { ...defaultGameState };
+    }
 }
 
 
