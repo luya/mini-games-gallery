@@ -18,9 +18,11 @@
         }
 
         h1 {
-            margin-bottom: 20px;
+            font-size: 16px;
+            margin-bottom: 10px;
         }
 
+        /* 讓外層容器可以隨視窗縮放 */
         .container {
             display: flex;
             gap: 20px;
@@ -28,6 +30,12 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: 95%;
+            width: 95%;
+            /* 寬度隨視窗縮放 */
+            /* max-width: 900px; */
+            /* 設定最大寬度，避免寬螢幕下太大 */
+            user-select: none;
         }
 
         .toolbox {
@@ -83,19 +91,7 @@
             cursor: pointer;
         }
 
-        /* 讓外層容器可以隨視窗縮放 */
-        .container {
-            display: flex;
-            gap: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            /* 寬度隨視窗縮放 */
-            max-width: 900px;
-            /* 設定最大寬度，避免寬螢幕下太大 */
-        }
+        
 
         canvas {
             flex: 1;
@@ -377,7 +373,29 @@
 
         // 7. 綁定事件監聽器
 
-        canvas.addEventListener('mousedown', (e) => {
+        // const drawstart = (e) => {
+        //     // if (e.type == 'touchstart') {e.preventDefault();}
+        //     isDrawing = true;
+        //     if (!usePixelPerfect) {
+        //         paint(e);
+        //     } else {
+        //         const { col, row } = getGridCoords(e);
+
+        //         lastCol = col;
+        //         lastRow = row;
+        //         currentStrokePixels.clear(); // 新的一筆畫開始，清空紀錄
+
+        //         const drawColor = e.buttons === 2 ? null : currentColor;
+        //         drawLine(row, col, row, col, drawColor); // 畫下第一點
+        //         draw();
+        //     }
+
+        // };
+
+        // canvas.addEventListener('pointerdown', drawstart);
+        // canvas.addEventListener('touchstart', drawstart);
+
+        canvas.addEventListener('pointerdown', (e) => {
             isDrawing = true;
             if (!usePixelPerfect) {
                 paint(e);
@@ -395,7 +413,7 @@
 
         });
 
-        canvas.addEventListener('mousemove', (e) => {
+        canvas.addEventListener('pointermove', (e) => {
             if (!usePixelPerfect) {
                 if (isDrawing) paint(e);
             } else {
@@ -416,7 +434,7 @@
             }
         });
 
-        window.addEventListener('mouseup', () => {
+        window.addEventListener('pointerup', () => {
             isDrawing = false;
             if (usePixelPerfect) {               
                 currentStrokePixels.clear();

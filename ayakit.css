@@ -24,6 +24,32 @@ body {
     font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
 }
 
+div {
+    /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+    user-select: none;
+    /* -webkit-user-select: none; */
+    /* -webkit-touch-callout: none; */
+
+    /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+    /* -webkit-tap-highlight-color: transparent; */
+
+    /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+    /* touch-action: none; */
+}
+
+canvas {
+    /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+
+    /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+    -webkit-tap-highlight-color: transparent;
+
+    /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+    touch-action: none;
+}
+
 /* 共享的控制項基礎樣式 */
 .button-base,
 .select-base,
