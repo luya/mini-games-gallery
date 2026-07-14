@@ -14,8 +14,7 @@
     --danger: #ef4444;
 }
 
-body,
-html {
+body {
     margin: 0;
     padding: 0;
     width: auto;

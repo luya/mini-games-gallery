@@ -19,6 +19,10 @@
             background-color: #f5f5f5;
             display: flex;
             flex-direction: column;
+            
+    width: 100%;
+    height: 100%;
+            /* resize: vertical; */
         }
 
         header {
@@ -37,20 +41,23 @@
 
         .main-container {
             display: flex;
-            flex: 1;
+            /* flex: 1; */
             gap: 20px;
-            min-height: 0;
+            /* min-height: 0; */
+            /* resize: vertical; */            
+    width: auto;
+    height: auto;
         }
 
         /* 左側：自訂標籤區 */
         .sidebar {
-            width: auto;
             background: white;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
+            width: 30%;
         }
 
         .input-group {
@@ -82,20 +89,25 @@
 
         .tag-container {
             flex: 1;
-            overflow-y: auto;
+            /* overflow-y: auto; */
             display: flex;
-            flex-direction: column;
+            /* flex-direction: column; */
+            flex-wrap: wrap;
             gap: 8px;
+            /* resize: vertical; */
         }
 
         .tag-btn-wrapper {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
         }
 
         .btn-shortcut {
-            flex: 1;
+            /* flex: 1; */
+            
+            font-size: 12px;
             padding: 10px;
             background-color: #e7f3fe;
             color: #1e88e5;
@@ -104,8 +116,8 @@
             text-align: left;
             cursor: pointer;
             font-weight: bold;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            /* overflow: hidden; */
+            /* text-overflow: ellipsis; */
             white-space: nowrap;
         }
 
@@ -114,11 +126,14 @@
         }
 
         .btn-delete-tag {
-            padding: 10px;
+            /* padding: 10px; */
+            margin-left: -30px;
+            font-size: 6px;
+            margin-top: -25px;
             background-color: #ffcdd2;
             color: #c62828;
             border: 1px solid #ef9a9a;
-            border-radius: 4px;
+            border-radius: 2px;
             cursor: pointer;
         }
 
@@ -131,6 +146,8 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             padding: 15px;
+    width: auto;
+    height: auto;
         }
 
         /* 搜尋取代工具列 */
@@ -169,14 +186,17 @@
         }
 
         textarea {
-            flex: 1;
-            resize: none;
+            /* flex: 1; */
             padding: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 1.1rem;
             line-height: 1.6;
             outline: none;
+            
+    width: auto;
+    height: 480px;
+            resize: both;
         }
 
         textarea:focus {
@@ -225,13 +245,12 @@
                 <button class="button-base" id="clearBtn">清空內容</button>
                 <button class="button-base" id="copyBtn">複製全部</button>
                 <button class="button-base" id="pasteBtn">最下方貼上</button>
+                <button class="button-base" id="exportBtn">輸出txt</button>
             </div>
 
             <textarea id="editor" placeholder="在此開始撰寫你的劇本...可以使用左側的快捷按鈕插入常用名詞。"></textarea>
 
-            <div class="action-bar">
-                <button class="button-base" id="exportBtn">輸出為 .txt 檔案</button>
-            </div>
+            
         </div>
     </div>
 
