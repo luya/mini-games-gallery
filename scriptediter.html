@@ -19,9 +19,9 @@
             background-color: #f5f5f5;
             display: flex;
             flex-direction: column;
-            
-    width: 100%;
-    height: 100%;
+
+            width: 100%;
+            height: 100%;
             /* resize: vertical; */
         }
 
@@ -39,14 +39,21 @@
             color: #333;
         }
 
+        h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
         .main-container {
             display: flex;
             /* flex: 1; */
             gap: 20px;
             /* min-height: 0; */
-            /* resize: vertical; */            
-    width: auto;
-    height: auto;
+            /* resize: vertical; */
+            width: auto;
+            height: auto;
         }
 
         /* 左側：自訂標籤區 */
@@ -106,7 +113,7 @@
 
         .btn-shortcut {
             /* flex: 1; */
-            
+
             font-size: 12px;
             padding: 10px;
             background-color: #e7f3fe;
@@ -146,12 +153,12 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             padding: 15px;
-    width: auto;
-    height: auto;
+            width: auto;
+            height: auto;
         }
 
         /* 搜尋取代工具列 */
-        .find-replace-bar {
+        /* .find-replace-bar {
             display: flex;
             gap: 8px;
             margin-bottom: 10px;
@@ -168,7 +175,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 0.9rem;
-        }
+        } */
 
         .btn-replace {
             padding: 6px 12px;
@@ -193,9 +200,9 @@
             font-size: 1.1rem;
             line-height: 1.6;
             outline: none;
-            
-    width: auto;
-    height: 480px;
+
+            width: auto;
+            height: 480px;
             resize: both;
         }
 
@@ -204,11 +211,19 @@
         }
 
         .action-bar {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             margin-top: 10px;
             margin-bottom: 10px;
         }
+
+        /* .action-bar input {
+            padding: 3px 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        } */
     </style>
 </head>
 
@@ -226,7 +241,7 @@
             <h3>自訂劇本名詞</h3>
             <div class="input-group">
                 <input type="text" id="tagInput" placeholder="輸入主角名/場景..." autocomplete="off">
-                <button class="btn-add" id="addTagBtn">新增</button>
+                <button class="button-base" id="addTagBtn">新增</button>
             </div>
             <div class="tag-container" id="tagContainer">
                 <!-- 動態生成的按鈕會放在這裡 -->
@@ -236,21 +251,25 @@
         <!-- 右側文字編輯器 -->
         <div class="editor-container">
             <!-- 搜尋與取代工具列 -->
-            <div class="find-replace-bar">
+            <div class="input-group">
                 <input type="text" id="findInput" placeholder="搜尋文字...">
+                <button class="button-base" id="searchBtn">逐一搜尋</button>
                 <input type="text" id="replaceInput" placeholder="取代為...">
-                <button class="btn-replace" id="replaceBtn">全部取代</button>
+                <button class="button-base" id="replaceOneBtn">逐一取代</button>
+                <button class="button-base" id="replaceBtn">全部取代</button>
             </div>
             <div class="action-bar">
-                <button class="button-base" id="clearBtn">清空內容</button>
+                <button class="button-base" id="copyAreaBtn">複製所選</button>
                 <button class="button-base" id="copyBtn">複製全部</button>
-                <button class="button-base" id="pasteBtn">最下方貼上</button>
+                <button class="button-base" id="pasteCursorBtn">貼上游標處</button>
+                <button class="button-base" id="pasteBtn">貼上最後方</button>
                 <button class="button-base" id="exportBtn">輸出txt</button>
+                <button class="button-base" id="clearBtn">清空內容</button>
             </div>
 
             <textarea id="editor" placeholder="在此開始撰寫你的劇本...可以使用左側的快捷按鈕插入常用名詞。"></textarea>
 
-            
+
         </div>
     </div>
 
@@ -260,15 +279,20 @@
         const addTagBtn = document.getElementById('addTagBtn');
         const tagContainer = document.getElementById('tagContainer');
         const editor = document.getElementById('editor');
+        const copyAreaBtn = document.getElementById('copyAreaBtn');
+        const pasteCursorBtn = document.getElementById('pasteCursorBtn');
         const clearBtn = document.getElementById('clearBtn');
         const copyBtn = document.getElementById('copyBtn');
-        const pasteBtn= document.getElementById('pasteBtn');
+        const pasteBtn = document.getElementById('pasteBtn');
         const exportBtn = document.getElementById('exportBtn');
         const toastContainer = document.getElementById('toast-container');
 
         // 搜尋取代相關元素
         const findInput = document.getElementById('findInput');
+        const searchBtn = document.getElementById('searchBtn');
+
         const replaceInput = document.getElementById('replaceInput');
+        const replaceOneBtn = document.getElementById('replaceOneBtn');
         const replaceBtn = document.getElementById('replaceBtn');
 
         // 預設名詞按鈕
@@ -341,19 +365,106 @@
             editor.focus();
         }
 
+
         // 功能 1: 搜尋並全部取代
+        // 搜尋與選取函數
+        function findAndReplace(textarea, targetText, replacementText) {
+            if (!targetText) {
+                AyaKits.createToast(toastContainer, '❌ 請先輸入尋找目標！', 'danger');
+                return false;
+            }
+
+            const fullText = textarea.value;
+            // 這裡使用目前選取的起點 (selectionStart)，
+            // 這樣如果使用者剛用「尋找」功能把字反白了，點「取代」就能直接原地取代。
+            const searchStartPos = textarea.selectionStart;
+
+            let index = fullText.indexOf(targetText, searchStartPos);
+
+            // 循環搜尋
+            let cycled = false;
+            if (index === -1) {
+                index = fullText.indexOf(targetText, 0);
+                cycled = true;
+            }
+
+            if (index !== -1) {
+                // 執行取代
+                textarea.value =
+                    fullText.substring(0, index) +
+                    replacementText +
+                    fullText.substring(index + targetText.length);
+
+                textarea.focus();
+
+                // 將取代後的新文字反白
+                textarea.selectionStart = index;
+                textarea.selectionEnd = index + replacementText.length;
+
+                AyaKits.createToast(
+                    toastContainer, 
+                    cycled ? '⚠️已繞回文件開頭進行取代！' : '🎉取代成功！', 
+                    cycled ? 'warn' : 'success'
+                );
+                return true;
+            }
+
+            AyaKits.createToast(toastContainer, '❌ 找不到目標字串！', 'danger');
+            return false;
+        }
+
+        replaceOneBtn.addEventListener('click', () => {
+            findAndReplace(editor, findInput.value, replaceInput.value);
+        });
+
+        function findAndHighlight(textarea, targetText) {
+            if (!targetText) {
+                AyaKits.createToast(toastContainer, '❌ 請先輸入搜尋關鍵字！', 'danger');
+                return false;
+            }
+
+            const fullText = textarea.value;
+            const searchStartPos = textarea.selectionEnd;
+
+            // 尋找目標
+            let index = fullText.indexOf(targetText, searchStartPos);
+
+            // 循環搜尋
+            if (index === -1) {
+                index = fullText.indexOf(targetText, 0);
+                if (index !== -1) {
+                    AyaKits.createToast(toastContainer, '⚠️ 已搜尋到文件底部，從頭開始繼續搜尋。', 'warn');
+                }
+            }
+
+            if (index !== -1) {
+                textarea.focus();
+                textarea.selectionStart = index;
+                textarea.selectionEnd = index + targetText.length;
+                return true;
+            }
+
+            AyaKits.createToast(toastContainer, '❌ 找不到該字串！', 'danger');
+            return false;
+        }
+
+        searchBtn.addEventListener('click', () => {
+            const keyword = findInput.value;
+            findAndHighlight(editor, keyword);
+        });
+
         replaceBtn.addEventListener('click', () => {
             const findText = findInput.value;
             const replaceText = replaceInput.value;
             const currentContent = editor.value;
 
             if (findText === '') {
-                alert('請輸入想要搜尋的文字！');
+                AyaKits.createToast(toastContainer, '❌ 請輸入想要搜尋的文字！', 'danger');
                 return;
             }
 
             if (!currentContent.includes(findText)) {
-                alert(`找不到要取代的文字：「${findText}」`);
+                AyaKits.createToast(toastContainer, `❌ 找不到要取代的文字：「${findText}」`, 'danger');
                 return;
             }
 
@@ -364,10 +475,10 @@
             editor.value = newContent;
 
             const matchCount = currentContent.match(regex).length;
-            alert(`成功！已將 ${matchCount} 處的「${findText}」取代為「${replaceText}」。`);
+            AyaKits.createToast(toastContainer, `🎉 成功！已將 ${matchCount} 處的「${findText}」取代為「${replaceText}」。`, 'success');
 
-            findInput.value = '';
-            replaceInput.value = '';
+            // findInput.value = '';
+            // replaceInput.value = '';
         });
 
         // 功能 2: 清空內容 (附帶防呆提示)
@@ -384,19 +495,43 @@
         });
 
         // 功能 3: 複製到剪貼簿
+        pasteCursorBtn.addEventListener('click', () => {
+            navigator.clipboard.readText()
+                .then((cliptext) => {
+                    if (cliptext.trim() === '') {
+                        AyaKits.createToast(toastContainer, '⚠️ 剪貼簿內容是空的，沒什麼好貼上的喔！', 'warn');
+                        return;
+                    }
+                    insertTextAtCursor(cliptext);
+                    AyaKits.createToast(toastContainer, '🎉 從剪貼簿貼上到游標處或是反白處成功。', 'success');
+                });
+        });
         pasteBtn.addEventListener('click', () => {
             navigator.clipboard.readText()
-            .then((cliptext) => {
-                if (cliptext.trim() === '') {                    
-                    AyaKits.createToast(toastContainer, '⚠️ 剪貼簿內容是空的，沒什麼好貼上的喔！', 'warn');
-                    return;
-                }
-                editor.value += cliptext;
-                AyaKits.createToast(toastContainer, '🎉 從剪貼簿貼上到最後方成功。', 'success');
-            });
+                .then((cliptext) => {
+                    if (cliptext.trim() === '') {
+                        AyaKits.createToast(toastContainer, '⚠️ 剪貼簿內容是空的，沒什麼好貼上的喔！', 'warn');
+                        return;
+                    }
+                    editor.value += cliptext;
+                    AyaKits.createToast(toastContainer, '🎉 從剪貼簿貼上到最後方成功。', 'success');
+                });
         });
 
-
+        copyAreaBtn.addEventListener('click', () => {
+            const startPos = editor.selectionStart;
+            const endPos = editor.selectionEnd;
+            if (startPos != endPos) {
+                const selectedText = editor.value.substring(startPos, endPos);
+                navigator.clipboard.writeText(selectedText)
+                    .then(() => {
+                        AyaKits.createToast(toastContainer, '🎉 複製反白字串到剪貼簿成功。', 'success');
+                    });
+            } else {
+                AyaKits.createToast(toastContainer, '⚠️ 內容是空的，沒什麼好複製的喔！', 'warn');
+                return;
+            }
+        });
         copyBtn.addEventListener('click', () => {
             const textContent = editor.value;
             if (textContent.trim() === '') {
@@ -405,9 +540,9 @@
             }
 
             navigator.clipboard.writeText(textContent)
-            .then(() => {
-                AyaKits.createToast(toastContainer, '🎉 複製全文到剪貼簿成功。', 'success');
-            });
+                .then(() => {
+                    AyaKits.createToast(toastContainer, '🎉 複製全文到剪貼簿成功。', 'success');
+                });
         });
 
         // 輸出為 .txt 檔案
