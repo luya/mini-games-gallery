@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 
-<head> 
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -47,12 +49,11 @@
         /* 示波器 Canvas 樣式 */
         #waveform-scope {
             width: 100%;
-            height: 200px;
+            height: 100px;
             background-color: black;
             border: 4px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 20px;
-            max-width: 1000px;
         }
 
         /* 合成器主面板 */
@@ -114,7 +115,7 @@
         }
 
         /* 虛擬鋼琴鍵盤 */
-        .keyboard {
+        /* .keyboard {
             display: flex;
             margin-top: 30px;
             background: #111;
@@ -140,6 +141,8 @@
             font-weight: bold;
             box-sizing: border-box;
             z-index: 1;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .key.black {
@@ -151,15 +154,9 @@
             margin-right: -13px;
             z-index: 2;
             color: white;
-        }
-
-        .key:active,
-        .key.active,
-        .key.black:active,
-        .key.black.active {
-            background: var(--accent-color);
-            color: white;
-        }
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        } */
 
         /* 虛擬鋼琴鍵盤容器：加上橫向捲軸以防小螢幕破版 */
         .keyboard {
@@ -170,10 +167,10 @@
             border-radius: 4px;
             box-shadow: inset 0 0 10px #000;
             position: relative;
-            max-width: 1000px;
+            /* max-width: 1000px; */
             width: 100%;
             box-sizing: border-box;
-            overflow-x: auto;
+            /* overflow-x: visible; */
             align-items: top;
             justify-content: center;
             /* 寬度不夠時允許橫向捲動 */
@@ -181,8 +178,8 @@
 
         /* 白鍵：寬度縮小到 28px，讓 25 鍵更容易一目了然 */
         .key {
-            height: 120px;
-            width: 36px;
+            height: 160px;
+            width: 4%;
             background: white;
             border: 1px solid #ccc;
             border-radius: 0 0 4px 4px;
@@ -196,26 +193,36 @@
             font-weight: bold;
             box-sizing: border-box;
             z-index: 1;
-            flex-shrink: 0;
+            /* flex-shrink: 0; */
             margin-left: 1px;
             margin-right: 1px;
             /* 防止寬度被瀏覽器壓縮 */
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* 黑鍵：配合白鍵寬度等比例縮小 */
         .key.black {
             height: 80px;
-            width: 24px;
+            width: 36px;
             background: #222;
             border: 1px solid #000;
-            margin-left: -11px;
-            margin-right: -11px;
+            margin-left: -17px;
+            margin-right: -17px;
             z-index: 2;
+            color: white;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .key.active,
+        .key.black.active {
+            background: var(--accent-color);
             color: white;
         }
     </style>
 
-    
+
 </head>
 
 <body>
@@ -377,6 +384,117 @@
                 { name: 'C5', freq: 523.25, black: false }
             ];
 
+            notes = [
+                // --- 第一個八度 (C3 ~ B3) ---
+                { name: 'C3', freq: 130.81, black: false },
+                { name: 'C#3', freq: 138.59, black: true },
+                { name: 'D3', freq: 146.83, black: false },
+                { name: 'D#3', freq: 155.56, black: true },
+                { name: 'E3', freq: 164.81, black: false },
+                { name: 'F3', freq: 174.61, black: false },
+                { name: 'F#3', freq: 185.00, black: true },
+                { name: 'G3', freq: 196.00, black: false },
+                { name: 'G#3', freq: 207.65, black: true },
+                { name: 'A3', freq: 220.00, black: false },
+                { name: 'A#3', freq: 233.08, black: true },
+                { name: 'B3', freq: 246.94, black: false },
+
+                // --- 第二個八度 (C4 ~ B4) ---
+                { name: 'C4', freq: 261.63, black: false },
+                { name: 'C#4', freq: 277.18, black: true },
+                { name: 'D4', freq: 293.66, black: false },
+                { name: 'D#4', freq: 311.13, black: true },
+                { name: 'E4', freq: 329.63, black: false },
+                { name: 'F4', freq: 349.23, black: false },
+                { name: 'F#4', freq: 369.99, black: true },
+                { name: 'G4', freq: 392.00, black: false },
+                { name: 'G#4', freq: 415.30, black: true },
+                { name: 'A4', freq: 440.00, black: false },
+                { name: 'A#4', freq: 466.16, black: true },
+                { name: 'B4', freq: 493.88, black: false },
+
+                // --- 第三個八度 (C5 ~ C6) ---
+                { name: 'C5', freq: 523.25, black: false },
+                { name: 'C#5', freq: 554.37, black: true },
+                { name: 'D5', freq: 587.33, black: false },
+                { name: 'D#5', freq: 622.25, black: true },
+                { name: 'E5', freq: 659.25, black: false },
+                { name: 'F5', freq: 698.46, black: false },
+                { name: 'F#5', freq: 739.99, black: true },
+                { name: 'G5', freq: 783.99, black: false },
+                { name: 'G#5', freq: 830.61, black: true },
+                { name: 'A5', freq: 880.00, black: false },
+                { name: 'A#5', freq: 932.33, black: true },
+                { name: 'B5', freq: 987.77, black: false },
+                { name: 'C6', freq: 1046.50, black: false }
+            ];
+
+            // 1. 定義實體鍵盤按鍵與「音名」的對照表
+            const keyMap = {
+                'a': 'C4',
+                'w': 'C#4',
+                's': 'D4',
+                'e': 'D#4',
+                'd': 'E4',
+                'f': 'F4',
+                't': 'F#4',
+                'g': 'G4',
+                'y': 'G#4',
+                'h': 'A4',
+                'u': 'A#4',
+                'j': 'B4',
+                'k': 'C5',
+                'o': 'C#5',
+                'l': 'D5',
+                'p': 'D#5',
+                ';': 'E5',
+                '\'': 'F5',
+            };
+
+            // 記錄目前有哪些電腦按鍵「正被按著」，防止按住不放時瀏覽器重複觸發 keydown
+            const pressedKeys = new Set();
+
+            // 2. 監聽鍵盤按下事件
+            document.addEventListener('keydown', (e) => {
+                // 取得按下的按鍵名稱（轉成小寫）
+                const key = e.key.toLowerCase();
+
+                // 如果這個按鍵有對應的鋼琴鍵，且目前還沒被按著
+                if (keyMap[key] && !pressedKeys.has(key)) {
+                    pressedKeys.add(key);
+
+                    const noteName = keyMap[key];
+
+                    // 尋找畫面上對應音名的 DOM 琴鍵
+                    const keyBtn = Array.from(keyboardDiv.children).find(btn => btn.innerText === noteName);
+
+                    if (keyBtn) {
+                        initAudio(); // 確保 AudioContext 已啟動
+                        keyBtn.classList.add('active'); // 讓琴鍵發亮
+
+                        const freq = parseFloat(keyBtn.dataset.freq);
+                        playNESNote(freq); // 播放聲音
+                    }
+                }
+            });
+
+            // 3. 監聽鍵盤放開事件
+            document.addEventListener('keyup', (e) => {
+                const key = e.key.toLowerCase();
+
+                if (keyMap[key]) {
+                    pressedKeys.delete(key);
+
+                    const noteName = keyMap[key];
+                    const keyBtn = Array.from(keyboardDiv.children).find(btn => btn.innerText === noteName);
+
+                    if (keyBtn) {
+                        keyBtn.classList.remove('active'); // 熄滅琴鍵
+                        // 如果你有寫 stop 邏輯，要在這裡呼叫消音
+                    }
+                }
+            });
+
             // 4. 繪製鍵盤
             const keyboardDiv = document.getElementById('keyboard');
             if (!keyboardDiv) {
@@ -384,28 +502,168 @@
                 return;
             }
 
+            // 用來記錄目前「哪些琴鍵正在被按著」，避免重複觸發同一個音
+            const activeKeys = new Set();
+
             notes.forEach(note => {
                 const keyBtn = document.createElement('div');
                 keyBtn.className = `key ${note.black ? 'black' : ''}`;
                 keyBtn.innerText = note.name;
-                keyBtn.addEventListener('pointerdown', () => {
-                    // 在互動時建立 audioCtx 和 analyser
-                    if (!audioCtx) {
-                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-                        // --- C. 初始化分析器 ---
-                        analyser = audioCtx.createAnalyser();
-                        analyser.fftSize = 2048; // 資料長度
-                        bufferLength = analyser.frequencyBinCount;
-                        dataArray = new Uint8Array(bufferLength);
+                // 💡 將頻率資料藏在 DOM 節點上，方便等一下滑動時直接讀取
+                keyBtn.dataset.freq = note.freq;
 
-                        // 開始啟動分析器繪圖迴圈
-                        drawWaveform();
-                    }
-                    playNESNote(note.freq);
-                });
                 keyboardDiv.appendChild(keyBtn);
             });
+
+            // 統一初始化 Audio 的函式
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 2048;
+                    bufferLength = analyser.frequencyBinCount;
+                    dataArray = new Uint8Array(bufferLength);
+                    drawWaveform();
+                }
+            }
+
+            // 核心邏輯：根據當前畫面上所有「被壓住的元素」決定要響起哪些音
+            function handlePointerEvents(e) {
+                initAudio();
+
+                const currentActiveKeys = new Set();
+
+                // 處理多點觸控 (Touch)
+                if (e.touches && e.touches.length > 0) {
+                    for (let i = 0; i < e.touches.length; i++) {
+                        const touch = e.touches[i];
+
+                        // 💡 關鍵修正：完全不看 touch.target，直接拿當下的絕對座標 (clientX, clientY) 去戳網頁
+                        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                        if (element && element.classList.contains('key')) {
+                            currentActiveKeys.add(element);
+                        }
+                    }
+                } else {
+                    // 處理滑鼠 (Mouse)
+                    if (e.buttons === 1) {
+                        const element = document.elementFromPoint(e.clientX, e.clientY);
+                        if (element && element.classList.contains('key')) {
+                            currentActiveKeys.add(element);
+                        }
+                    }
+                }
+
+                // [以下步驟 2 和 3 保持完全不變]
+                // 2. 對比新舊狀態：新按下的發聲
+                currentActiveKeys.forEach(keyBtn => {
+                    if (!activeKeys.has(keyBtn)) {
+                        keyBtn.classList.add('active');
+                        const freq = parseFloat(keyBtn.dataset.freq);
+                        playNESNote(freq);
+                        activeKeys.add(keyBtn);
+                    }
+                });
+
+                // 3. 對比新舊狀態：離開的消音
+                activeKeys.forEach(keyBtn => {
+                    if (!currentActiveKeys.has(keyBtn)) {
+                        keyBtn.classList.remove('active');
+                        // 如果有寫 stop 邏輯在此呼叫
+                        activeKeys.delete(keyBtn);
+                    }
+                });
+            }
+            // function handlePointerEvents(e) {
+            //     initAudio(); // 確保每次互動都有激活 AudioContext
+
+            //     // 1. 收集「此時此刻」所有手指（和滑動滑鼠）所碰觸到的鋼琴鍵
+            //     const currentActiveKeys = new Set();
+
+            //     // 處理多點觸控 (Touch)：如果是手機觸控，會有 e.touches 陣列
+            //     if (e.touches) {
+            //         for (let i = 0; i < e.touches.length; i++) {
+            //             const touch = e.touches[i];
+            //             // 💡 關鍵：用座標去抓取此時此刻手指下方的 DOM 元素
+            //             const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            //             if (element && element.classList.contains('key')) {
+            //                 currentActiveKeys.add(element);
+            //             }
+            //         }
+            //     } else {
+            //         // 處理滑鼠 (Mouse)：如果滑鼠正按著左鍵
+            //         if (e.buttons === 1) {
+            //             const element = document.elementFromPoint(e.clientX, e.clientY);
+            //             if (element && element.classList.contains('key')) {
+            //                 currentActiveKeys.add(element);
+            //             }
+            //         }
+            //     }
+
+            //     // 2. 對比新舊狀態：哪些鍵是「新按下去」的？
+            //     currentActiveKeys.forEach(keyBtn => {
+            //         if (!activeKeys.has(keyBtn)) {
+            //             // 新增按下的視覺效果 (可自由在 CSS 加上 .active 樣式)
+            //             keyBtn.classList.add('active');
+
+            //             // 播放聲音
+            //             const freq = parseFloat(keyBtn.dataset.freq);
+            //             playNESNote(freq);
+
+            //             // 加入發聲清單
+            //             activeKeys.add(keyBtn);
+            //         }
+            //     });
+
+            //     // 3. 對比新舊狀態：哪些鍵「手指已經離開」了？
+            //     activeKeys.forEach(keyBtn => {
+            //         if (!currentActiveKeys.has(keyBtn)) {
+            //             keyBtn.classList.remove('active');
+
+            //             // 如果你的 playNESNote 需要停止音效，要在這裡呼叫 stop 邏輯
+            //             // 例如：stopNESNote(keyBtn.dataset.freq); 
+
+            //             activeKeys.delete(keyBtn);
+            //         }
+            //     });
+            // }
+
+            // 3. 將事件全部綁在父容器（或 document）上，全盤掌控滑動與多點
+            // 同時監聽滑鼠與觸控事件
+            ['pointerdown', 'pointermove', 'pointerup', 'touchstart', 'touchmove', 'touchend'].forEach(eventType => {
+                keyboardDiv.addEventListener(eventType, (e) => {
+                    // 如果是觸控事件，阻止預設行為避免畫面亂滾
+                    if (eventType.startsWith('touch')) {
+                        e.preventDefault();
+                    }
+                    handlePointerEvents(e);
+                }, { passive: false });
+            });
+
+            // notes.forEach(note => {
+            //     const keyBtn = document.createElement('div');
+            //     keyBtn.className = `key ${note.black ? 'black' : ''}`;
+            //     keyBtn.innerText = note.name;
+            //     keyBtn.addEventListener('pointerdown', () => {
+            //         // 在互動時建立 audioCtx 和 analyser
+            //         if (!audioCtx) {
+            //             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            //             // --- C. 初始化分析器 ---
+            //             analyser = audioCtx.createAnalyser();
+            //             analyser.fftSize = 2048; // 資料長度
+            //             bufferLength = analyser.frequencyBinCount;
+            //             dataArray = new Uint8Array(bufferLength);
+
+            //             // 開始啟動分析器繪圖迴圈
+            //             drawWaveform();
+            //         }
+            //         playNESNote(note.freq);
+            //     });
+            //     keyboardDiv.appendChild(keyBtn);
+            // });
 
             // --- D. 核心繪圖函式：即時示波器 ---
             function drawWaveform() {
@@ -453,7 +711,7 @@
             }
 
             // --- 監聽 UI 更新 (已簡化，保持上一題邏輯) ---
-            ['p1-decay'].forEach(id => {
+            ['p1-decay', 'p2-decay', 'tri-decay', 'noise-decay'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.addEventListener('input', (e) => {
