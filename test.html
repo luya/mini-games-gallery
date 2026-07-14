@@ -1,560 +1,344 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極簡像素小畫家</title>
-    <link rel="stylesheet" href="ayakit.css">
-    <style>
-        body {
-            background-color: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            color: #333;
-        }
+<style>
+/* 遊戲主選單按鈕 */
+.menu-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.menu-btn:hover { background-color: #34495e; }
 
-        h1 {
-            margin-bottom: 20px;
-        }
+/* Modal 背景遮罩 */
+.modal-overlay {
+  display: none; /* 預設隱藏 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px); /* 磨砂玻璃效果 */
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
 
-        .container {
-            display: flex;
-            gap: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+/* Modal 主視窗 */
+.modal-content {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  border: 2px solid #444;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  font-family: sans-serif;
+  animation: fadeIn 0.2s ease-out;
+}
 
-        .toolbox {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 200px;
-        }
+@keyframes fadeIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 
-        .tool-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+/* 標頭 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #444;
+}
+.modal-header h2 { margin: 0; font-size: 1.2rem; color: #fff; }
+.close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+.close-btn:hover { color: #fff; }
 
-        label {
-            font-weight: bold;
-            font-size: 14px;
-        }
+/* 內容區 */
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-        /* 調色盤 */
-        .palette {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 4px;
-        }
+/* 存檔欄位 Slot */
+.save-slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #252525;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+  padding: 12px 15px;
+  transition: border-color 0.2s;
+}
+.save-slot:hover { border-color: #555; }
 
-        .color-swatch {
-            width: 12px;
-            height: 12px;
-            border-radius: 4px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: transform 0.1s;
-            border-color: #bababa;
-        }
+/* 存檔資訊 */
+.slot-info { display: flex; align-items: center; gap: 15px; }
+.slot-number {
+  font-size: 0.8rem;
+  font-weight: bold;
+  background-color: #444;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.slot-details p { margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 500; }
+.slot-date { font-size: 0.75rem; color: #888; }
 
-        .color-swatch:hover {
-            border-color: #ff0066;
-            transform: scale(1.1);
-        }
+/* 操作按鈕群 */
+.slot-actions { display: flex; gap: 8px; }
+.slot-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: opacity 0.2s;
+}
+.slot-actions button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
 
-        .color-swatch.active {
-            border-color: #8d6aff;
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-        }
+/* 各別按鈕顏色定義 */
+.btn-save { background-color: #27ae60; color: white; }
+.btn-save:hover:not(:disabled) { background-color: #2ecc71; }
 
-        input[type="color"] {
-            width: 100%;
-            height: 40px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+.btn-load { background-color: #2980b9; color: white; }
+.btn-load:hover:not(:disabled) { background-color: #3498db; }
 
-        /* 讓外層容器可以隨視窗縮放 */
-        .container {
-            display: flex;
-            gap: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            /* 寬度隨視窗縮放 */
-            max-width: 900px;
-            /* 設定最大寬度，避免寬螢幕下太大 */
-        }
-
-        canvas {
-            flex: 1;
-            /* 讓 Canvas 自動填滿容器剩餘空間 */
-            min-width: 250px;
-            /* 限制最小寬度，避免手機版縮太小 */
-            aspect-ratio: 1 / 1;
-            /* 強制保持 1:1 完美正方形 */
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            cursor: crosshair;
-            background-color: #fff;
-
-            /* 關鍵屬性：放大時不模糊，保持乾淨的像素邊緣 */
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-    </style>
+.btn-delete {
+  background-color: #c0392b;
+  color: white;
+  padding: 6px 8px !important; /* 讓刪除的叉叉按鈕窄一點 */
+}
+.btn-delete:hover:not(:disabled) { background-color: #e74c3c; }
+</style>
 </head>
-
 <body>
+<h1>My First JavaScript</h1>
 
-    <h1>像素小畫家 🎨</h1>
+<!-- 觸發按鈕（可以放在你的遊戲選單中） -->
+<button onclick="openSaveModal()" class="menu-btn">系統選單（存/讀檔）</button>
 
-    <div class="container">
-        <!-- 工具箱 -->
-        <div class="toolbox">
-            <div class="tool-group">
-                <label>自訂顏色</label>
-                <input type="color" id="customColor" value="#2e222f">
-            </div>
-
-            <div class="tool-group">
-                <label>經典調色盤</label>
-                <select id="palettes" class="select-base">
-                    <option value="Resurrect64">Resurrect 64</option>
-                    <option value="AAP64">AAP 64</option>
-                    <option value="Endesga64">Endesga 64</option>
-                    <option value="Journey64">Journey 64</option>
-                    <option value="Gameboy">Gameboy</option>
-                    <option value="BW">1Bit</option>
-
-                </select>
-                <div class="palette" id="palette"></div>
-            </div>
-
-            <div class="tool-group">
-                <label>網格大小 (解析度)</label>
-                <select id="gridSize" class="select-base">
-                    <option value="8">8 x 8</option>
-                    <option value="16">16 x 16</option>
-                    <option value="32" selected>32 x 32</option>
-                    <option value="64">64 x 64</option>
-                    <option value="128">128 x 128</option>
-                    <option value="256">256 x 256</option>
-                    <option value="512">512 x 512</option>
-                </select>
-            </div>
-
-            <div class="tool-group">
-                <label>設定</label>
-                <button id="toggleGrid" class="button-base">隱藏網格線</button>
-                <button id="clearBtn" class="button-base">全部清除</button>
-                
-            </div>
-
-            <div class="tool-group">
-                <label>畫布顏色</label>
-                <input type="color" id="customBG" value="#FFFFFF">
-            </div>
-            <div class="tool-group">
-                <label>匯出作品</label>
-                <button id="downloadPngBtn" class="button-base">下載
-                    PNG</button>
-            </div>
-
-        </div>
-
-        <!-- 畫布 -->
-        <canvas id="paintCanvas" style="background-color: #ffffff;"></canvas>
+<!-- 存讀檔 Modal 視窗 -->
+<div id="saveModal" class="modal-overlay" onclick="closeSaveModalOutside(event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>系統存檔 / 讀檔</h2>
+      <button onclick="closeSaveModal()" class="close-btn">&times;</button>
     </div>
+    
+    <div class="modal-body">
+      <!-- 存檔欄位 1 -->
+      <div class="save-slot" id="slot-1">
+        <div class="slot-info">
+          <span class="slot-number">SLOT 01</span>
+          <div class="slot-details">
+            <p class="slot-status">尚無存檔資料</p>
+            <span class="slot-date">--/--/-- --:--</span>
+          </div>
+        </div>
+        <div class="slot-actions">
+          <button class="btn-save" onclick="handleSave(1)">寫入</button>
+          <button class="btn-load" onclick="handleLoad(1)" disabled>讀取</button>
+          <button class="btn-delete" onclick="handleDelete(1)" disabled>&times;</button>
+        </div>
+      </div>
 
-    <script>
-        // 1. 初始化 DOM 元素
-        const canvas = document.getElementById('paintCanvas');
-        const ctx = canvas.getContext('2d');
-        const customColorInput = document.getElementById('customColor');
-        const paletteSelector = document.getElementById('palettes');
-        const paletteContainer = document.getElementById('palette');
-        const customBG = document.getElementById('customBG');
-        const gridSizeSelect = document.getElementById('gridSize');
-        const toggleGridBtn = document.getElementById('toggleGrid');
-        const clearBtn = document.getElementById('clearBtn');
+      <!-- 存檔欄位 2 -->
+      <div class="save-slot" id="slot-2">
+        <div class="slot-info">
+          <span class="slot-number">SLOT 02</span>
+          <div class="slot-details">
+            <p class="slot-status">尚無存檔資料</p>
+            <span class="slot-date">--/--/-- --:--</span>
+          </div>
+        </div>
+        <div class="slot-actions">
+          <button class="btn-save" onclick="handleSave(2)">寫入</button>
+          <button class="btn-load" onclick="handleLoad(2)" disabled>讀取</button>
+          <button class="btn-delete" onclick="handleDelete(2)" disabled>&times;</button>
+        </div>
+      </div>
 
-        // 2. 預設參數與狀態
-        const palettes = {
-            Resurrect64: [
-                '#2e222f', '#3e3546', '#625565', '#966c6c', '#ab947a', '#694f62',
-                '#7f708a', '#9babb2', '#c7dcd0', '#ffffff', '#6e2727', '#b33831',
-                '#ea4f36', '#f57d4a', '#ae2334', '#e83b3b', '#fb6b1d', '#f79617',
-                '#f9c22b', '#7a3045', '#9e4539', '#cd683d', '#e6904e', '#fbb954',
-                '#4c3e24', '#676633', '#a2a947', '#d5e04b', '#fbff86', '#165a4c',
-                '#239063', '#1ebc73', '#91db69', '#cddf6c', '#313638', '#374e4a',
-                '#547e64', '#92a984', '#b2ba90', '#0b5e65', '#0b8a8f', '#0eaf9b',
-                '#30e1b9', '#8ff8e2', '#323353', '#484a77', '#4d65b4', '#4d9be6',
-                '#8fd3ff', '#45293f', '#6b3e75', '#905ea9', '#a884f3', '#eaaded',
-                '#753c54', '#a24b6f', '#cf657f', '#ed8099', '#831c5d', '#c32454',
-                '#f04f78', '#f68181', '#fca790', '#fdcbb0'
-            ],
-            AAP64: [
-                '#060608', '#141013', '#3b1725', '#73172d', '#b4202a', '#df3e23',
-                '#fa6a0a', '#f9a31b', '#ffd541', '#fffc40', '#d6f264', '#9cdb43',
-                '#59c135', '#14a02e', '#1a7a3e', '#24523b', '#122020', '#143464',
-                '#285cc4', '#249fde', '#20d6c7', '#a6fcdb', '#ffffff', '#fef3c0',
-                '#fad6b8', '#f5a097', '#e86a73', '#bc4a9b', '#793a80', '#403353',
-                '#242234', '#221c1a', '#322b28', '#71413b', '#bb7547', '#dba463',
-                '#f4d29c', '#dae0ea', '#b3b9d1', '#8b93af', '#6d758d', '#4a5462',
-                '#333941', '#422433', '#5b3138', '#8e5252', '#ba756a', '#e9b5a3',
-                '#e3e6ff', '#b9bffb', '#849be4', '#588dbe', '#477d85', '#23674e',
-                '#328464', '#5daf8d', '#92dcba', '#cdf7e2', '#e4d2aa', '#c7b08b',
-                '#a08662', '#796755', '#5a4e44', '#423934'
-            ],
-            Endesga64: [
-                '#ff0040', '#131313', '#1b1b1b', '#272727', '#3d3d3d', '#5d5d5d',
-                '#858585', '#b4b4b4', '#ffffff', '#c7cfdd', '#92a1b9', '#657392',
-                '#424c6e', '#2a2f4e', '#1a1932', '#0e071b', '#1c121c', '#391f21',
-                '#5d2c28', '#8a4836', '#bf6f4a', '#e69c69', '#f6ca9f', '#f9e6cf',
-                '#edab50', '#e07438', '#c64524', '#8e251d', '#ff5000', '#ed7614',
-                '#ffa214', '#ffc825', '#ffeb57', '#d3fc7e', '#99e65f', '#5ac54f',
-                '#33984b', '#1e6f50', '#134c4c', '#0c2e44', '#00396d', '#0069aa',
-                '#0098dc', '#00cdf9', '#0cf1ff', '#94fdff', '#fdd2ed', '#f389f5',
-                '#db3ffd', '#7a09fa', '#3003d9', '#0c0293', '#03193f', '#3b1443',
-                '#622461', '#93388f', '#ca52c9', '#c85086', '#f68187', '#f5555d',
-                '#ea323c', '#c42430', '#891e2b', '#571c27'
-            ],
-            Journey64: [
-                '#050914', '#110524', '#3b063a', '#691749', '#9c3247', '#d46453',
-                '#f5a15d', '#ffcf8e', '#ff7a7d', '#ff417d', '#d61a88', '#94007a',
-                '#42004e', '#220029', '#100726', '#25082c', '#3d1132', '#73263d',
-                '#bd4035', '#ed7b39', '#ffb84a', '#fff540', '#c6d831', '#77b02a',
-                '#429058', '#2c645e', '#153c4a', '#052137', '#0e0421', '#0c0b42',
-                '#032769', '#144491', '#488bd4', '#78d7ff', '#b0fff1', '#faffff',
-                '#c7d4e1', '#928fb8', '#5b537d', '#392946', '#24142c', '#0e0f2c',
-                '#132243', '#1a466b', '#10908e', '#28c074', '#3dff6e', '#f8ffb8',
-                '#f0c297', '#cf968c', '#8f5765', '#52294b', '#0f022e', '#35003b',
-                '#64004c', '#9b0e3e', '#d41e3c', '#ed4c40', '#ff9757', '#d4662f',
-                '#9c341a', '#691b22', '#450c28', '#2d002e'
-            ],
-            Gameboy: [
-                '#081820',
-                '#346856',
-                '#88c070',
-                '#e0f8d0'
-            ],
-            BW: [
-                '#000000',
-                '#FFFFFF'
-            ]
+      <!-- 存檔欄位 3 -->
+      <div class="save-slot" id="slot-3">
+        <div class="slot-info">
+          <span class="slot-number">SLOT 03</span>
+          <div class="slot-details">
+            <p class="slot-status">尚無存檔資料</p>
+            <span class="slot-date">--/--/-- --:--</span>
+          </div>
+        </div>
+        <div class="slot-actions">
+          <button class="btn-save" onclick="handleSave(3)">寫入</button>
+          <button class="btn-load" onclick="handleLoad(3)" disabled>讀取</button>
+          <button class="btn-delete" onclick="handleDelete(3)" disabled>&times;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// 你的預設遊戲狀態（從上一步繼承）
+const defaultGameState = {
+    location: "graveyard",
+    inventory: [],
+    hp: 100,
+    sanity: 100,
+    atk: 0,
+    def: 0,
+    coin: 0,
+    fame: 0,
+    flags: {
+        metWorld: false,
+        unlockGuardHouse: false,
+        metBug: false,
+        metAlys: false,
+        hasAlys: false,
+        metShade: false,
+        hasKeyItem: false,
+        bargainedWithShade: false,
+        angeredShade: false,
+        sacrificedBlood: false
+    },
+    ended: false,
+    inspecting: null
+};
 
+// 模擬當前遊戲中的活動狀態（實際運行中這會是你的全域變數）
+let currentGameState = { ...defaultGameState };
 
-        };
-        let presetColors = palettes['Resurrect64'];
+// --- Modal 顯示/隱藏控制 ---
+function openSaveModal() {
+    updateSlotsUI(); // 開啟時先刷新介面
+    document.getElementById("saveModal").style.display = "flex";
+}
 
-        let currentColor = '#2e222f';
-        let gridSize = parseInt(gridSizeSelect.value);
-        let showGrid = true;
-        let isDrawing = false;
-        let lastCol = null;
-        let lastRow = null;
-        let currentStrokePixels = new Set(); // 記錄當前這一筆畫過的所有座標字串，例如 "row,col"
-        customColorInput.value = currentColor;
+function closeSaveModal() {
+    document.getElementById("saveModal").style.display = "none";
+}
 
-        // 用來儲存畫布狀態的 2D 陣列 (避免每次重新調整網格大小或隱藏格線時畫面消失)
-        let pixelData = [];
+// 點擊視窗外部可以關閉
+function closeSaveModalOutside(event) {
+    if (event.target.id === "saveModal") {
+        closeSaveModal();
+    }
+}
 
-        // 3. 初始化像素資料陣列
-        function initPixelData() {
-            pixelData = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
-        }
+// --- 存/讀檔核心邏輯 ---
 
-        // 4. 初始化畫布的內建模擬解析度（這代表畫布內部的畫質，與 CSS 顯示大小無關）
-        // 為了讓繪製出來的線條最細緻，這裡可以設固定值（例如 800），其餘交給 CSS 去縮放
-        canvas.width = 1024;
-        canvas.height = 1024;
+// 1. 儲存檔案
+function handleSave(slotId) {
+    // 儲存前先將 inspecting 清空（避免卡在檢視畫面）
+    const stateToSave = { ...currentGameState, inspecting: null, lastSaved: Date.now() };
+    
+    try {
+        localStorage.setItem(`game_save_slot_${slotId}`, JSON.stringify(stateToSave));
+        alert(`Slot ${slotId} 存檔成功！`);
+        updateSlotsUI(); // 重新整理 UI
+    } catch (e) {
+        alert("存檔失敗，空間不足！");
+    }
+}
 
-        // 5. 重新調整繪圖（draw）邏輯
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const cellSize = canvas.width / gridSize; // 依據 800 解析度來算格尺寸
+// 2. 讀取檔案
+function handleLoad(slotId) {
+    const rawData = localStorage.getItem(`game_save_slot_${slotId}`);
+    if (!rawData) return;
 
-            // 繪製像素
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    if (pixelData[r][c]) {
-                        ctx.fillStyle = pixelData[r][c];
-                        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-                    }
-                }
+    try {
+        const loadedData = JSON.parse(rawData);
+        // 合併預設值以防遊戲版本更新缺欄位
+        currentGameState = { ...defaultGameState, ...loadedData };
+        
+        alert(`Slot ${slotId} 讀檔成功！`);
+        closeSaveModal();
+        
+        // 這裡可以觸發你的遊戲重繪 UI 函式，例如：renderGameScene();
+        console.log("當前遊戲狀態已更新：", currentGameState);
+    } catch (e) {
+        alert("存檔檔案損毀，無法載入！");
+    }
+}
+
+// 3. 刪除檔案
+function handleDelete(slotId) {
+    if (confirm(`確定要刪除 Slot ${slotId} 的存檔嗎？此動作無法復原。`)) {
+        localStorage.removeItem(`game_save_slot_${slotId}`);
+        updateSlotsUI();
+    }
+}
+
+// --- 動態更新 UI 畫面 ---
+function updateSlotsUI() {
+    for (let i = 1; i <= 3; i++) {
+        const rawData = localStorage.getItem(`game_save_slot_${i}`);
+        const slotEl = document.getElementById(`slot-${i}`);
+        
+        const statusEl = slotEl.querySelector(".slot-status");
+        const dateEl = slotEl.querySelector(".slot-date");
+        const loadBtn = slotEl.querySelector(".btn-load");
+        const deleteBtn = slotEl.querySelector(".btn-delete");
+
+        if (rawData) {
+            try {
+                const saveData = JSON.parse(rawData);
+                // 格式化顯示玩家當前的狀態資訊
+                statusEl.textContent = `地點：${translateLocation(saveData.location)} (HP: ${saveData.hp} / SAN: ${saveData.sanity})`;
+                
+                // 格式化時間
+                const date = new Date(saveData.lastSaved);
+                dateEl.textContent = date.toLocaleString();
+                
+                // 啟用讀取和刪除按鈕
+                loadBtn.disabled = false;
+                deleteBtn.disabled = false;
+            } catch (e) {
+                statusEl.textContent = "⚠️ 存檔損毀";
+                dateEl.textContent = "--/--/-- --:--";
+                loadBtn.disabled = true;
+                deleteBtn.disabled = false; // 依然允許刪除損毀的檔案
             }
-
-            // 繪製網格線
-            if (showGrid) {
-                ctx.strokeStyle = '#e8e8e8';
-                // 為了不讓網格線隨畫布變大而變粗，設定一個合適的比例
-                ctx.lineWidth = canvas.width / 500;
-                for (let i = 0; i <= gridSize; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(i * cellSize, 0);
-                    ctx.lineTo(i * cellSize, canvas.height);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.moveTo(0, i * cellSize);
-                    ctx.lineTo(canvas.width, i * cellSize);
-                    ctx.stroke();
-                }
-            }
+        } else {
+            // 沒有存檔時的預設狀態
+            statusEl.textContent = "尚無存檔資料";
+            dateEl.textContent = "--/--/-- --:--";
+            loadBtn.disabled = true;
+            deleteBtn.disabled = true;
         }
+    }
+}
 
-        // 6. 關鍵：點擊填色邏輯（完美支援任意縮放的畫布！）
-        function paint(e) {
-            const rect = canvas.getBoundingClientRect();
-
-            // 1. 取得滑鼠相對於 Canvas「網頁實際顯示大小 (clientWidth)」的座標
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            // 2. 計算目前網頁上，每一個格子的「實際物理寬度」
-            const actualCellSize = canvas.clientWidth / gridSize;
-
-            // 3. 計算點擊到哪一個網格（除以實際物理格寬，並無條件捨去）
-            const col = Math.floor(clickX / actualCellSize);
-            const row = Math.floor(clickY / actualCellSize);
-
-            // 安全機制：確保沒超出陣列邊界
-            if (col >= 0 && col < gridSize && row >= 0 && row < gridSize) {
-                pixelData[row][col] = e.buttons === 2 ? null : currentColor;
-                draw();
-            }
-        }
-
-        // 6a. 當瀏覽器視窗縮放時，自動重繪網格（保持畫面正確比例）
-        window.addEventListener('resize', draw);
-
-        // 7. 動態產生調色盤        
-        paletteSelector.addEventListener('change', (e) => {
-            presetColors = palettes[e.target.value];
-            buildPalette();
-        });
-        // 7a. 動態產生調色盤
-        function buildPalette() {
-            paletteContainer.innerHTML = '';
-            presetColors.forEach(color => {
-                const swatch = document.createElement('div');
-                swatch.classList.add('color-swatch');
-                swatch.style.backgroundColor = color;
-                if (color === currentColor) swatch.classList.add('active');
-
-                swatch.addEventListener('click', () => {
-                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-                    swatch.classList.add('active');
-                    currentColor = color;
-                    customColorInput.value = color;
-                });
-                paletteContainer.appendChild(swatch);
-            });
-        }
-
-        // 7. 綁定事件監聽器
-        canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            const { col, row } = getGridCoords(e);
-
-            lastCol = col;
-            lastRow = row;
-            currentStrokePixels.clear(); // 新的一筆畫開始，清空紀錄
-
-            const drawColor = e.buttons === 2 ? null : currentColor;
-            drawLine(row, col, row, col, drawColor); // 畫下第一點
-            draw();
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const { col, row } = getGridCoords(e);
-
-            // 座標沒變就不重複計算
-            if (col === lastCol && row === lastRow) return;
-
-            const drawColor = e.buttons === 2 ? null : currentColor;
-
-            // 連接上一點與當前點，內部會自動進行 8 格過濾
-            drawLine(lastRow, lastCol, row, col, drawColor);
-
-            lastCol = col;
-            lastRow = row;
-            draw();
-        });
-
-        window.addEventListener('mouseup', () => {
-            isDrawing = false;
-            currentStrokePixels.clear();
-        });
-
-        // 阻擋畫布上的右鍵選單，方便用右鍵當橡皮擦
-        canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-        // 自訂顏色選擇器變更
-        customColorInput.addEventListener('input', (e) => {
-            currentColor = e.target.value;
-            // 取消調色盤中其他按鈕的 active 狀態
-            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-        });
-
-        customBG.addEventListener('input', (e) => {
-            const canvasBGColor = e.target.value;
-            canvas.style.backgroundColor = canvasBGColor;
-            draw();
-        });
-
-        // 解析度切換
-        gridSizeSelect.addEventListener('change', (e) => {
-            if (confirm('切換網格大小會清空目前畫面，確定要切換嗎？')) {
-                gridSize = parseInt(e.target.value);
-                initPixelData();
-                draw();
-            } else {
-                gridSizeSelect.value = gridSize; // 恢復原值
-            }
-        });
-
-        // 網格線開關
-        toggleGridBtn.addEventListener('click', () => {
-            showGrid = !showGrid;
-            toggleGridBtn.textContent = showGrid ? '隱藏網格線' : '顯示網格線';
-            draw();
-        });
-
-        // 清空畫布
-        clearBtn.addEventListener('click', () => {
-            if (confirm('確定要清空畫布嗎？')) {
-                initPixelData();
-                draw();
-            }
-        });
-
-        // 8. 啟動小畫家
-        initPixelData();
-        buildPalette();
-        draw();
-
-        // 取得下載按鈕元素
-        const downloadPngBtn = document.getElementById('downloadPngBtn');
-
-        downloadPngBtn.addEventListener('click', () => {
-            // 1. 動態在記憶體中建立一個「隱藏的 Canvas」
-            const offscreenCanvas = document.createElement('canvas');
-            const offscreenCtx = offscreenCanvas.getContext('2d');
-
-            // 2. 將這個小畫布的尺寸設為「剛好等於網格大小」（例如 32x32）
-            offscreenCanvas.width = gridSize;
-            offscreenCanvas.height = gridSize;
-
-            // 3. 將 pixelData 的顏色資料 1:1 畫到小畫布上
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    if (pixelData[r][c]) {
-                        offscreenCtx.fillStyle = pixelData[r][c];
-                        // 每個像素格的大小剛好是 1x1 像素
-                        offscreenCtx.fillRect(c, r, 1, 1);
-                    }
-                }
-            }
-
-            // 4. 從這個「像素原寸」的畫布匯出圖片
-            const dataURL = offscreenCanvas.toDataURL('image/png');
-
-            // 5. 觸發下載
-            const link = document.createElement('a');
-            link.download = `pixel-art-${gridSize}x${gridSize}.png`;
-            link.href = dataURL;
-            link.click();
-        });
-
-        // 將座標轉換為 Set 的 Key 值（格式如 "5,12"）
-        const getCoordKey = (r, c) => `${r},${c}`;
-
-        // 核心：偵測周圍 8 格來判斷是否為「轉角贅肉」
-        function isDoublePixel(r, c) {
-            // 定義與目前這格相鄰的 4 個正向格（上下左右）
-            const orthos = [
-                { r: r - 1, c: c }, // 上
-                { r: r + 1, c: c }, // 下
-                { r: r, c: c - 1 }, // 左
-                { r: r, c: c + 1 }  // 右
-            ];
-
-            // 定義與目前這格相鄰的 4 個對角格
-            const diagonals = [
-                { r: r - 1, c: c - 1 }, // 左上
-                { r: r - 1, c: c + 1 }, // 右上
-                { r: r + 1, c: c - 1 }, // 左下
-                { r: r + 1, c: c + 1 }  // 右下
-            ];
-
-            // 1. 檢查正向格（上下左右）是否有任何一格是剛剛才畫過的
-            const hasOrthoNeighbor = orthos.some(p => currentStrokePixels.has(getCoordKey(p.r, p.c)));
-
-            // 2. 檢查對角格是否有任何一格是剛剛才畫過的
-            const hasDiagNeighbor = diagonals.some(p => currentStrokePixels.has(getCoordKey(p.r, p.c)));
-
-            // 如果正向和斜向都有相鄰的「同筆畫像素」，就代表這格在轉角處，是贅肉！
-            return hasOrthoNeighbor && hasDiagNeighbor;
-        }
-
-        // Bresenham 直線連線演算法（保持簡單連線，防漏格）
-        function drawLine(r0, c0, r1, c1, color) {
-            const dr = Math.abs(r1 - r0);
-            const dc = Math.abs(c1 - c0);
-            const sr = r0 < r1 ? 1 : -1;
-            const sc = c0 < c1 ? 1 : -1;
-            let err = (dc > dr ? dc : -dr) / 2;
-
-            let r = r0;
-            let c = c0;
-
-            while (true) {
-                const key = getCoordKey(r, c);
-
-                if (color === null) {
-                    // 橡皮擦模式：直接擦除
-                    pixelData[r][c] = null;
-                } else {
-                    // 畫筆模式：
-                    // 1. 如果這一格是這一筆劃的起點，直接畫
-                    // 2. 如果不是起點，則偵測周圍 8 格，如果不是贅肉才畫
-                    if (currentStrokePixels.size === 0 || !isDoublePixel(r, c)) {
-                        pixelData[r][c] = color;
-                        currentStrokePixels.add(key); // 紀錄這個點已經被畫過
-                    }
-                }
-
-                if (r === r1 && c === c1) break;
-                const e2 = err;
-                if (e2 > -dc) { err -= dr; c += sc; }
-                if (e2 < dr) { err += dc; r += sr; }
-            }
-        }
-        function getGridCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-            const actualCellSize = canvas.clientWidth / gridSize;
-
-            return {
-                col: Math.floor(clickX / actualCellSize),
-                row: Math.floor(clickY / actualCellSize)
-            };
-        }
-    </script>
+// 輔助函式：將程式碼地名轉換成中文顯示
+function translateLocation(loc) {
+    const maps = {
+        "graveyard": "荒涼墓園",
+        "guardhouse": "守衛室",
+        "forest": "迷霧森林"
+    };
+    return maps[loc] || loc;
+}
+</script>
 </body>
-
-</html>
+</html> 

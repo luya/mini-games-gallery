@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💾</text></svg>">
+    <title>JS LocalStorage 遊戲存檔 Demo</title>
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        /* --- 基礎版面樣式 --- */
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* 左右並排的主配置區 */
+        .container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+            flex-wrap: wrap;
+        }
+
+        /* 左側：遊戲模擬控制與存檔按鈕 */
+        .game-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 右側：JSON 交叉驗證區 */
+        .debug-panel {
+            flex: 1;
+            min-width: 300px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .debug-panel h3 {
+            margin-top: 0;
+            color: #00bcd4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .state-textarea {
+            width: 100%;
+            height: 300px;
+            background-color: #151515;
+            color: #a6e22e;
+            /* 經典程式碼螢光綠 */
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        /* --- 互動按鈕樣式 --- */
+        .btn {
+            padding: 10px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3498db;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-success:hover {
+            background-color: #2ecc71;
+        }
+
+        .btn-warn {
+            background-color: #e67e22;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-warn:hover {
+            background-color: #f39c12;
+        }
+
+        /* 遊戲數值快速微調按鈕 */
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #252525;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .control-row span {
+            font-weight: bold;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #444;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-sm:hover {
+            background-color: #555;
+        }
+
+        /* --- Modal 存讀檔視窗樣式 --- */
+        .modal-overlay {
+            display: none;
+            /* 預設隱藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            border: 2px solid #444;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #2d2d2d;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 存檔欄位 Slot */
+        .save-slot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #252525;
+            border: 1px solid #3d3d3d;
+            border-radius: 6px;
+            padding: 12px 15px;
+            transition: border-color 0.2s;
+        }
+
+        .save-slot:hover {
+            border-color: #555;
+        }
+
+        .slot-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slot-number {
+            font-size: 0.8rem;
+            font-weight: bold;
+            background-color: #444;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .slot-details p {
+            margin: 0 0 4px 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .slot-date {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .slot-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .slot-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .slot-actions button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-slot-save {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-slot-save:hover:not(:disabled) {
+            background-color: #2ecc71;
+        }
+
+        .btn-slot-load {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        .btn-slot-load:hover:not(:disabled) {
+            background-color: #3498db;
+        }
+
+        .btn-slot-delete {
+            background-color: #c0392b;
+            color: white;
+            padding: 6px 8px !important;
+        }
+
+        .btn-slot-delete:hover:not(:disabled) {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+
+<a id="backBtn" href="index.html">🏠</a>
+    <h1>LocalStorage 遊戲存檔 Demo</h1>
+    <div class="subtitle">測試當前遊戲數值變動，並點擊下方按鈕開啟存讀檔視窗。右側 Textarea 可以讓你即時驗證與修改遊戲狀態！</div>
+
+    <div class="container">
+
+        <!-- 左側：模擬遊戲操作 -->
+        <div class="game-panel">
+            <h3>🎮 模擬遊戲操作（調整狀態）</h3>
+
+            <div class="control-row">
+                <span>目前位置 (location):</span>
+                <select id="select-location" onchange="updateStateFromUI()">
+                    <option value="graveyard">荒涼墓園 (graveyard)</option>
+                    <option value="guardhouse">守衛室 (guardhouse)</option>
+                    <option value="forest">迷霧森林 (forest)</option>
+                </select>
+            </div>
+
+            <div class="control-row">
+                <span>生命值 (hp): <span id="val-hp">100</span></span>
+                <div>
+                    <button class="btn-sm" onclick="adjustValue('hp', -10)">-10</button>
+                    <button class="btn-sm" onclick="adjustValue('hp', 10)">+10</button>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>理智值 (sanity): <span id="val-sanity">100</span></span>
+                <div>
+                    <button class="btn-sm" onclick="adjustValue('sanity', -10)">-10</button>
+                    <button class="btn-sm" onclick="adjustValue('sanity', 10)">+10</button>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>金幣 (coin): <span id="val-coin">0</span></span>
+                <div>
+                    <button class="btn-sm" onclick="adjustValue('coin', -5)">-5</button>
+                    <button class="btn-sm" onclick="adjustValue('coin', 5)">+5</button>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>解鎖守衛室 (unlockGuardHouse):</span>
+                <input type="checkbox" id="chk-guardhouse" onchange="updateStateFromUI()">
+            </div>
+
+            <div class="control-row">
+                <span>獲得艾莉絲 (hasAlys):</span>
+                <input type="checkbox" id="chk-alys" onchange="updateStateFromUI()">
+            </div>
+
+            <button class="btn btn-primary" style="margin-top: 15px;" onclick="openSaveModal()">
+                📂 開啟 存/讀檔 選單
+            </button>
+        </div>
+
+        <!-- 右側：交叉驗證 Debug 面板 -->
+        <div class="debug-panel">
+            <h3>
+                <span>🔍 Live Game State (JSON)</span>
+                <span style="font-size: 0.8rem; color: #aaa;">即時與程式碼中的 state 同步</span>
+            </h3>
+            <p style="font-size: 0.85rem; color: #aaa; margin: 0 0 10px 0;">
+                你可以直接在下方修改 JSON 數值，然後點選「套用修改」直接灌入遊戲狀態中：
+            </p>
+            <textarea id="stateTextarea" class="state-textarea"></textarea>
+            <button class="btn btn-success" style="margin-top: 15px;" onclick="applyJsonToState()">
+                💾 套用 Textarea 修改至遊戲中
+            </button>
+        </div>
+
+    </div>
+
+    <!-- --- 彈出視窗（Modal） --- -->
+    <div id="saveModal" class="modal-overlay" onclick="closeSaveModalOutside(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>系統存檔 / 讀檔</h2>
+                <button onclick="closeSaveModal()" class="close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Slot 1 -->
+                <div class="save-slot" id="slot-1">
+                    <div class="slot-info">
+                        <span class="slot-number">SLOT 01</span>
+                        <div class="slot-details">
+                            <p class="slot-status">尚無存檔資料</p>
+                            <span class="slot-date">--/--/-- --:--</span>
+                        </div>
+                    </div>
+                    <div class="slot-actions">
+                        <button class="btn-slot-save" onclick="handleSave(1)">寫入</button>
+                        <button class="btn-slot-load" onclick="handleLoad(1)" disabled>讀取</button>
+                        <button class="btn-slot-delete" onclick="handleDelete(1)" disabled>&times;</button>
+                    </div>
+                </div>
+
+                <!-- Slot 2 -->
+                <div class="save-slot" id="slot-2">
+                    <div class="slot-info">
+                        <span class="slot-number">SLOT 02</span>
+                        <div class="slot-details">
+                            <p class="slot-status">尚無存檔資料</p>
+                            <span class="slot-date">--/--/-- --:--</span>
+                        </div>
+                    </div>
+                    <div class="slot-actions">
+                        <button class="btn-slot-save" onclick="handleSave(2)">寫入</button>
+                        <button class="btn-slot-load" onclick="handleLoad(2)" disabled>讀取</button>
+                        <button class="btn-slot-delete" onclick="handleDelete(2)" disabled>&times;</button>
+                    </div>
+                </div>
+
+                <!-- Slot 3 -->
+                <div class="save-slot" id="slot-3">
+                    <div class="slot-info">
+                        <span class="slot-number">SLOT 03</span>
+                        <div class="slot-details">
+                            <p class="slot-status">尚無存檔資料</p>
+                            <span class="slot-date">--/--/-- --:--</span>
+                        </div>
+                    </div>
+                    <div class="slot-actions">
+                        <button class="btn-slot-save" onclick="handleSave(3)">寫入</button>
+                        <button class="btn-slot-load" onclick="handleLoad(3)" disabled>讀取</button>
+                        <button class="btn-slot-delete" onclick="handleDelete(3)" disabled>&times;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 宣告預設遊戲狀態 (Data Schema)
+        const defaultGameState = {
+            location: "graveyard",
+            inventory: [],
+            hp: 100,
+            sanity: 100,
+            atk: 0,
+            def: 0,
+            coin: 0,
+            fame: 0,
+            flags: {
+                metWorld: false,
+                unlockGuardHouse: false,
+                metBug: false,
+                metAlys: false,
+                hasAlys: false,
+                metShade: false,
+                hasKeyItem: false,
+                bargainedWithShade: false,
+                angeredShade: false,
+                sacrificedBlood: false
+            },
+            ended: false,
+            inspecting: null
+        };
+
+        // 2. 當前遊戲運作中的狀態物件
+        let currentGameState = { ...defaultGameState };
+
+        // 初始化頁面
+        window.onload = function () {
+            syncStateToUI();
+        };
+
+        // --- 核心同步機制 ---
+
+        // A. 將 JavaScript 中的 state 同步反映到網頁 UI 上 (包含 Textarea)
+        function syncStateToUI() {
+            // 更新左側的控制項數值
+            document.getElementById("select-location").value = currentGameState.location;
+            document.getElementById("val-hp").textContent = currentGameState.hp;
+            document.getElementById("val-sanity").textContent = currentGameState.sanity;
+            document.getElementById("val-coin").textContent = currentGameState.coin;
+            document.getElementById("chk-guardhouse").checked = currentGameState.flags.unlockGuardHouse;
+            document.getElementById("chk-alys").checked = currentGameState.flags.hasAlys;
+
+            // 同步更新右側 Textarea 裡的 JSON 字串
+            document.getElementById("stateTextarea").value = JSON.stringify(currentGameState, null, 4);
+        }
+
+        // B. 當玩家在左側網頁點擊調整按鈕或勾選時，將 UI 數值塞回 state 中，並更新 Textarea
+        function updateStateFromUI() {
+            currentGameState.location = document.getElementById("select-location").value;
+            currentGameState.flags.unlockGuardHouse = document.getElementById("chk-guardhouse").checked;
+            currentGameState.flags.hasAlys = document.getElementById("chk-alys").checked;
+
+            // 同步更新 Textarea
+            document.getElementById("stateTextarea").value = JSON.stringify(currentGameState, null, 4);
+        }
+
+        // C. 數值微調輔助函式
+        function adjustValue(field, amount) {
+            currentGameState[field] = Math.max(0, currentGameState[field] + amount); // 限制不低於 0
+            syncStateToUI();
+        }
+
+        // D. 交叉驗證：讀取 Textarea 裡的 JSON 並強制套用回遊戲 state 中
+        function applyJsonToState() {
+            const textareaVal = document.getElementById("stateTextarea").value;
+            try {
+                const parsed = JSON.parse(textareaVal);
+                // 合併預設值防呆
+                currentGameState = { ...defaultGameState, ...parsed };
+                syncStateToUI();
+                alert("✅ 成功手動套用 JSON 狀態！");
+            } catch (e) {
+                alert("❌ JSON 格式錯誤，無法解析！請檢查標點符號或括號是否有漏。");
+            }
+        }
+
+        // --- Modal 存/讀檔選單控制 ---
+
+        function openSaveModal() {
+            updateSlotsUI(); // 開啟時先刷新介面
+            document.getElementById("saveModal").style.display = "flex";
+        }
+
+        function closeSaveModal() {
+            document.getElementById("saveModal").style.display = "none";
+        }
+
+        function closeSaveModalOutside(event) {
+            if (event.target.id === "saveModal") {
+                closeSaveModal();
+            }
+        }
+
+        // --- LocalStorage 存取與刪除核心邏輯 ---
+
+        // 儲存存檔
+        function handleSave(slotId) {
+            // 確保存檔時 inspecting 被重設，並注入當前時間戳
+            const stateToSave = {
+                ...currentGameState,
+                inspecting: null,
+                lastSaved: Date.now()
+            };
+
+            try {
+                localStorage.setItem(`demo_save_slot_${slotId}`, JSON.stringify(stateToSave));
+                alert(`[Slot ${slotId}] 寫入成功！`);
+                updateSlotsUI();
+            } catch (e) {
+                alert("儲存失敗，可能空間已滿！");
+            }
+        }
+
+        // 讀取存檔
+        function handleLoad(slotId) {
+            const rawData = localStorage.getItem(`demo_save_slot_${slotId}`);
+            if (!rawData) return;
+
+            try {
+                const loadedData = JSON.parse(rawData);
+                // 合併預設值（Migration 機制）
+                currentGameState = { ...defaultGameState, ...loadedData };
+
+                // 同步回網頁 UI 與 Textarea
+                syncStateToUI();
+
+                alert(`[Slot ${slotId}] 讀取載入成功！`);
+                closeSaveModal();
+            } catch (e) {
+                alert("讀檔失敗，存檔可能已毀損！");
+            }
+        }
+
+        // 刪除存檔
+        function handleDelete(slotId) {
+            if (confirm(`確定要刪除 [Slot ${slotId}] 的存檔嗎？此動作將無法還原。`)) {
+                localStorage.removeItem(`demo_save_slot_${slotId}`);
+                updateSlotsUI();
+            }
+        }
+
+        // 刷新彈出視窗內 Slot 的狀態與時間
+        function updateSlotsUI() {
+            for (let i = 1; i <= 3; i++) {
+                const rawData = localStorage.getItem(`demo_save_slot_${i}`);
+                const slotEl = document.getElementById(`slot-${i}`);
+
+                const statusEl = slotEl.querySelector(".slot-status");
+                const dateEl = slotEl.querySelector(".slot-date");
+                const loadBtn = slotEl.querySelector(".btn-slot-load");
+                const deleteBtn = slotEl.querySelector(".btn-slot-delete");
+
+                if (rawData) {
+                    try {
+                        const saveData = JSON.parse(rawData);
+                        // 顯示地點、HP、SAN
+                        statusEl.textContent = `地點：${translateLocation(saveData.location)} (HP: ${saveData.hp} / SAN: ${saveData.sanity})`;
+
+                        // 顯示時間
+                        const date = new Date(saveData.lastSaved);
+                        dateEl.textContent = date.toLocaleString();
+
+                        // 啟用按鈕
+                        loadBtn.disabled = false;
+                        deleteBtn.disabled = false;
+                    } catch (e) {
+                        statusEl.textContent = "⚠️ 存檔損毀 (無法解析)";
+                        dateEl.textContent = "--/--/-- --:--";
+                        loadBtn.disabled = true;
+                        deleteBtn.disabled = false; // 允許刪除損毀檔
+                    }
+                } else {
+                    statusEl.textContent = "尚無存檔資料";
+                    dateEl.textContent = "--/--/-- --:--";
+                    loadBtn.disabled = true;
+                    deleteBtn.disabled = true;
+                }
+            }
+        }
+
+        // 地名轉換中文化
+        function translateLocation(loc) {
+            const maps = {
+                "graveyard": "荒涼墓園 🪦",
+                "guardhouse": "皇家守衛室 🛡️",
+                "forest": "迷霧森林 🌲"
+            };
+            return maps[loc] || loc;
+        }
+    </script>
+</body>
+
+</html>

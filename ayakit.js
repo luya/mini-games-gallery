@@ -8,6 +8,33 @@ AyaKits.detectTouchDevice = function () {
         (navigator.msMaxTouchPoints > 0);
 }
 
+AyaKits.saveGame = function(state, slotname = "my_game_save_slot_1") {
+  try {
+    state.lastSaved = Date.now(); // 記錄存檔時間
+    const jsonString = JSON.stringify(state);
+    localStorage.setItem(slotname, jsonString);
+    console.log("存檔成功！");
+  } catch (error) {
+    // 如果超過 5MB，會觸發 QuotaExceededError
+    console.error("存檔失敗，空間可能不足：", error);
+  }
+}
+
+AyaKits.loadGame = function (slotname = "my_game_save_slot_1") {
+  const jsonString = localStorage.getItem(slotname);
+  if (!jsonString) {
+    return { ...defaultGameState }; // 沒存檔就給初始值
+  }
+  try {
+    const loadedState = JSON.parse(jsonString);
+    // 建議與預設值合併，防止遊戲更新後，舊存檔缺少新欄位而報錯
+    return { ...defaultGameState, ...loadedState };
+  } catch (error) {
+    console.error("存檔損毀，無法讀取：", error);
+    return { ...defaultGameState };
+  }
+}
+
 
 AyaKits.createToast = function (toastC, message, type = 'success') {
     // 1. 動態建立 div 元素
