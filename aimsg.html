@@ -16,42 +16,87 @@
         html {
             background: #ffffff;
         }
-        body {
-            font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
-            background: #ffffff;
-            color: #000000;
-            padding: 20px;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: auto;
-        }
 
-        textarea {
-            width: 100%;
-            height: 250px;
-            margin: 10px 0;
+        body {
+            display: flex;
+            border-radius: 8px;
+            background: #eaeaea;
+            color: #000000;
             padding: 10px;
-            box-sizing: border-box;
+            line-height: 1.6;
+            min-width: 480px;
+            min-height: 480px;
+            margin: 20px;
+            flex-direction: column;
         }
 
         .section {
-            background: #f4f4f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        select {
-            width: 100%;
+            background: #b9b9d8;
             padding: 10px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            margin: 10px;
+            justify-content: flex-start;
+            align-items: flex-start;
+            width: 100%;
+            height: 100%;
         }
 
-        button {
-            padding: 10px 15px;
-            margin-right: 5px;
-            cursor: pointer;
+        .section.top {
+            display: flex;
+            flex-direction: column;
         }
+
+        .select-base.cmd,
+        .button-base.cmd {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            color: #000000;
+            font-size: 0.9rem;
+        }
+
+        .button-base.r {
+            background-color: #ff4747;
+        }
+        
+        .button-base.g {
+            background-color: #66ff8c;
+        }
+        
+        .button-base.b {
+            background-color: #668aff;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .button-base:hover {
+                color: #352b42;
+                background: #68c2d3;
+            }
+        }
+
+        .button-base:active {
+            color: #352b42;
+            background: #ca4bc8;
+        }
+
+        .section.center {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .textarea-base {
+             /* flex: 1;  */
+            min-width: 95%;
+            min-height: 480px;
+            padding: 5px;
+            margin: 5px;
+            font-size: 1rem;
+            /* 🚀 核心：強迫文字不自動換行，保留空格與手動換行 */
+            white-space: pre; 
+            
+            /* 選擇性加上：確保當文字超出時，會出現水平捲軸 */
+            overflow-x: auto;
+        }
+        
         .toast {
             position: fixed;
             bottom: 20px;
@@ -76,9 +121,12 @@
 
 <body>
     <a id="backBtn" href="index.html">🏠</a>
-    <div class="section">
-        <h3>1. 選擇並加入指令</h3>
-        <select id="actionSelect">
+    <div class="section top">
+        <label style="font-weight: bold;">1. 選擇並加入指令</label>
+        <select id="actionSelect" class="select-base cmd">
+            <option value="請幫補上某些function缺失的正規JSDOC描述，還有盡量補上函式內容註解，完成後輸出程式碼讓我複製，不用產生任何檔案。">
+                請幫補上某些function缺失的正規JSDOC描述…
+            </option>
             <option value="請幫忙把以下程式碼檢查文法有無錯誤。">請幫我把以下程式碼檢查文法有無錯誤。</option>
             <option value="請幫忙把以下程式碼最佳化。">請幫我把以下程式碼最佳化。</option>
             <option value="請幫忙把以下程式碼加上詳細註解。">請幫我把以下程式碼加上詳細註解。</option>
@@ -89,60 +137,89 @@
             <option value="請幫忙將以下文本作延伸N個新段落，風格隨意直白。">請幫我將以下文本作延伸N個新段落，風格隨意直白。</option>
             <option value="請幫忙將以下文本作重點鍵字整理，風格極簡。">請幫我將以下文本作重點鍵字整理，風格極簡。</option>
         </select>
-        <button onclick="addInstruction()">加入指令</button>
+        <button onclick="addInstruction()" class="button-base cmd">加入指令</button>
+    </div>
+
+    <div class="section center">
+        <label style="font-weight: bold;">2. 文本或程式碼區域</label>
+        <textarea id="inputText" class="textarea-base" placeholder="請先在此貼上您的內容...然後用上方的常用提示或是自訂輸入..."></textarea>
     </div>
 
     <div class="section">
-        <h3>2. 文本或程式碼區域</h3>
-        <textarea id="inputText" placeholder="請先在此貼上您的內容...然後用上方的常用提示或是自訂輸入..."></textarea>
-    </div>
-
-    <div class="section">
-        <button onclick="clearText()" style="background-color: #ffcccc;">清除內容</button>
-        <button onclick="copyToClipboard()" style="background-color: #ccffcc;">複製全部內容</button>
+        <button onclick="clearText()" class="button-base cmd r">清除全部內容</button>
+        <button onclick="copyToClipboard()" class="button-base cmd g">複製全部內容</button>
+        <button onclick="pasteFromClipboard()" class="button-base cmd b">貼上</button>
         <div class="toast" id="toast">已成功複製到剪貼簿！</div>
     </div>
 
     <script>
+        const editor = document.getElementById('inputText');
+        const toast = document.getElementById('toast');
+
         function addInstruction() {
             const action = document.getElementById('actionSelect').value;
             const textArea = document.getElementById('inputText');
             // 將指令插入到文字區塊的最上方
-            if (!checkWordExists(textArea.value, "::==>>")){
+            if (!checkWordExists(textArea.value, "::==>>")) {
                 textArea.value = `${action}\n::==>>\n` + textArea.value;
             } else {
                 textArea.value = `${action}\n` + textArea.value;
             }
-            
+
         }
 
         function clearText() {
-            document.getElementById('inputText').value = "";
+            const confirmClear = confirm('確定要清空目前所有內容嗎？此動作無法復原喔！');
+            if (confirmClear) {
+                editor.value = "";
+                toast.innerText = "已成功清空目前所有內容！"
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1500);
+            }            
         }
 
-        function copyToClipboard() {
-            const textArea = document.getElementById('inputText');
-            navigator.clipboard.writeText(textArea.value).then(() => {
+        function copyToClipboard() {            
+            navigator.clipboard.writeText(editor.value).then(() => {
+                toast.innerText = "已成功複製到剪貼簿！"
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 1500);
             });
-            // if (isPlaying) stopDoomFantasyMusic();
-            // else playDoomFantasyMusic();
-            // alert("已複製到剪貼簿！");
+        }
+
+        function insertTextAtCursor(text) {
+            const startPos = editor.selectionStart;
+            const endPos = editor.selectionEnd;
+            const originalText = editor.value;
+
+            editor.value = originalText.substring(0, startPos) + text + originalText.substring(endPos);
+
+            const newCursorPos = startPos + text.length;
+            editor.selectionStart = newCursorPos;
+            editor.selectionEnd = newCursorPos;
+            editor.focus();
+        }
+
+        function pasteFromClipboard() {
+            navigator.clipboard.readText().then((clipText) => {
+                insertTextAtCursor(clipText);
+                toast.innerText = "已成功貼上剪貼簿內容！"
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1500);
+            });
         }
 
         function checkWordExists(targetcontent, targetWord) {
             const text = targetcontent;
 
-            if (text.includes(targetWord)){
+            if (text.includes(targetWord)) {
                 return true;
             }
-            
+
             // 使用正規表達式，'i' 代表忽略大小寫 (case-insensitive)
             // \b 代表單字邊界，確保只匹配完整的單字
             // \b 只對「字母、數字、底線」組成的單字有效
             const regex = new RegExp(`\\b${targetWord}\\b`, 'i');
-            
+
             if (regex.test(text)) {
                 // alert(`找到了！文本中包含 "${targetWord}"`);
                 return true;
@@ -159,9 +236,9 @@
             const gainNode = context.createGain();
 
             // 設定音效類型 (sine, square, sawtooth, triangle)
-            oscillator.type = 'square'; 
+            oscillator.type = 'square';
             oscillator.frequency.setValueAtTime(440, context.currentTime); // 頻率 440Hz (A4音)
-            
+
             // 設定音量變化 (快速淡出)
             gainNode.gain.setValueAtTime(1.0, context.currentTime); // 音量大小
             gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.1);
@@ -169,7 +246,7 @@
             // 連接並播放
             oscillator.connect(gainNode);
             gainNode.connect(context.destination);
-            
+
             oscillator.start();
             oscillator.stop(context.currentTime + 2.0); // 0.1秒後停止
         }
@@ -182,7 +259,7 @@
             if (isPlaying) return; // 防止重複點擊導致多重循環
             isPlaying = true;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
+
             // 簡單的旋律陣列 (頻率)
             const melody = [261.63, 329.63, 392.00, 523.25]; // C E G C
             let index = 0;
@@ -190,23 +267,23 @@
             function playNote() {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
+
                 osc.type = 'triangle'; // 柔和的波形，適合當背景
                 osc.frequency.setValueAtTime(melody[index % melody.length], audioCtx.currentTime);
-                
+
                 gain.gain.setValueAtTime(1.0, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-                
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
+
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.5);
-                
+
                 index++;
                 nextNoteTimeout = setTimeout(playNote, 500); // 每 0.5 秒播放下一個音
             }
-            
+
             playNote();
         }
 
@@ -221,42 +298,42 @@
             if (isPlaying) return; // 防止重複點擊導致多重循環
             isPlaying = true;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
+
             // 奇幻末日音階：使用較為沈重與不穩定的頻率 (以 D 小調為基底)
             // 這些頻率組成一種不安與空靈的感覺
-            const doomMelody = [146.83, 174.61, 220.00, 261.63, 164.81, 130.81]; 
+            const doomMelody = [146.83, 174.61, 220.00, 261.63, 164.81, 130.81];
             let index = 0;
 
             function playNote() {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
+
                 // 使用 'sawtooth' (鋸齒波) 模擬破敗的機械音，或者 'triangle' 模擬空靈感
-                osc.type = 'triangle'; 
-                
+                osc.type = 'triangle';
+
                 // 隨機微調頻率，創造出一種「老舊設備運轉」的聲音不穩定感
-                const detune = (Math.random() - 0.5) * 20; 
+                const detune = (Math.random() - 0.5) * 20;
                 osc.frequency.setValueAtTime(doomMelody[index % doomMelody.length] + detune, audioCtx.currentTime);
-                
+
                 // 慢速淡入淡出，營造遼闊感
                 gain.gain.setValueAtTime(0.0, audioCtx.currentTime);
-                gain.gain.linearRampToValueAtTime(Math.random()/2, audioCtx.currentTime + 1.0); // 慢速增強
+                gain.gain.linearRampToValueAtTime(Math.random() / 2, audioCtx.currentTime + 1.0); // 慢速增強
                 gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3.0);    // 慢速衰減
-                
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
+
                 osc.start();
                 osc.stop(audioCtx.currentTime + 3.0);
-                
+
                 index++;
                 // 循環時間拉長，變成一種緩慢的背景環境音
-                nextNoteTimeout = setTimeout(playNote, 2500 + Math.random() * 1000); 
+                nextNoteTimeout = setTimeout(playNote, 2500 + Math.random() * 1000);
             }
-            
+
             playNote();
         }
-    
+
     </script>
 
 </body>

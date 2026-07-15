@@ -10,9 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <title>黑暗深淵：遺忘之都</title>
-    <link rel="stylesheet" href="textadv.css">
+    <title>深淵國度：墮落者</title>
     <link rel="stylesheet" href="ayakit.css">
+    <link rel="stylesheet" href="textadv.css">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
     <div class="game">
         <div class="header">
             <div class="header-top">
-                <div class="title">黑暗深淵：遺忘之都</div>
+                <div class="title">深淵國度：墮落者</div>
             </div>
             <div class="inventory-container">
                 <div class="inventory" id="inventory"></div>
@@ -102,7 +102,7 @@
 
         // 遊戲狀態
         const state = {
-            location: "graveyard",
+            location: "graveyard_center",
             inventory: [],
             hp: 100,
             sanity: 100,
@@ -113,6 +113,8 @@
             flags: {
                 metWorld: false,
                 unlockGuardHouse: false,
+                firstKnock: false,
+                welcomeToCathedral: false,
                 metBug: false,
                 metAlys: false,        // 夥伴：盜賊艾莉絲
                 hasAlys: false,        // 夥伴：盜賊艾莉絲
@@ -126,91 +128,106 @@
             inspecting: null // 當前正在檢視的道具 Key 或 'Alys'，為 null 表示在正常場景
         };
 
-        // 20 個場景設定
+        //場景設定
         const locations = {
-            // 1. 起點
-            graveyard: {
-                name: "⚰️ 無名墓園",
+            // 無名墓園>中央區域
+            graveyard_center: {
+                name: "⚰️ 無名墓園 中央區域",
                 text: () => {
-                    let base = "夜色濃得像墨，破碎的墓碑在霧中歪斜。";
+                    let base = "霧色濃得像一塊巨大的紗布。";
+                    base += "\n地上佈滿破碎的墓碑，四周有著多處的莫名的土堆以及凹洞。";
                     if (!state.flags.metWorld) {
-                        base += "\n你在一座無名墓前醒來，指尖沾著冷硬的泥土。\n遠處的鐘聲在黑暗中迴盪——每一聲都像在為你倒數。";
+                        base += "\n你在一個土坑中爬出來，指尖沾著冷硬的泥土。";
+                        base += "\n遠處的鐘聲在黑暗中迴盪，每一聲都像在為你倒數。";
                         state.flags.metWorld = true;
-                    }
-                    if (!state.inventory.includes(ITEMS.SHIELD) && state.sanity >= 80) {
-                        base += "\n你感覺到附近可能會有些有用的東西。";
                     }
                     return base;
                 },
                 options: () => {
                     let opts = [
-                        { text: "前往墓園守衛室 🏚️", next: "guardhouse" },
-                        { text: "沿著小徑前往枯萎森林 🌲", next: "forest" }
+                        { text: "往東前進 ⚰️", next: "graveyard_east" },
+                        { text: "走向西邊 ⚰️", next: "graveyard_west" }
                     ];
-                    opts.unshift({
-                        text: "環顧四週，到處調查 👁️‍🗨️",
-                        next: "graveyard",
-                        action: () => {
-                            const stext = [
-                                "你身處在一個墓園，大門出口旁邊有個守衛室 🏚️，更遠處有個小徑，通往一片森林 🌲。",
-                                "看來這個墓園，應該都是埋葬無名屍，每個坑都已經被弄到凌亂不堪 🕳️。",
-                                "當望向遠方的時候，白霧幾乎擋住所有的視線 🌫️。",
-                                "你在搜索的時候，踢到一個盾牌 🛡️。"
-                            ];
-                            let sindex = Math.floor(Math.random() * stext.length)
-                            if (state.inventory.includes(ITEMS.SHIELD)) {
-                                if (sindex == 3) sindex = 0;
-                            }
-                            setStatus(stext[sindex]);
-                            if (sindex == 3) addItem(ITEMS.SHIELD);
-                        }
-                    });
-                    if (!state.inventory.includes(ITEMS.TORCH)) {
-                        opts.unshift({
-                            text: "翻找無名墓，看看有沒有遺物 🦴",
-                            next: "graveyard",
-                            action: () => { addItem(ITEMS.TORCH); setStatus("你找到一支幾乎熄滅的火把。它仍微微發熱。 🔥"); }
-                        });
-                    }
+                    
+                    // opts.unshift({
+                    //     text: "環顧四週，到處調查 👁️‍🗨️",
+                    //     next: "graveyard",
+                    //     action: () => {
+                    //         const stext = [
+                    //             "你身處在一個墓園，大門出口旁邊有個守衛室 🏚️，更遠處有個小徑，通往一片森林 🌲。",
+                    //             "看來這個墓園，應該都是埋葬無名屍，每個坑都已經被弄到凌亂不堪 🕳️。",
+                    //             "當望向遠方的時候，白霧幾乎擋住所有的視線 🌫️。",
+                    //             "你在搜索的時候，踢到一個盾牌 🛡️。"
+                    //         ];
+                    //         let sindex = Math.floor(Math.random() * stext.length)
+                    //         if (state.inventory.includes(ITEMS.SHIELD)) {
+                    //             if (sindex == 3) sindex = 0;
+                    //         }
+                    //         setStatus(stext[sindex]);
+                    //         if (sindex == 3) addItem(ITEMS.SHIELD);
+                    //     }
+                    // });
+                    // if (!state.inventory.includes(ITEMS.TORCH)) {
+                    //     opts.unshift({
+                    //         text: "翻找無名墓，看看有沒有遺物 🦴",
+                    //         next: "graveyard",
+                    //         action: () => { addItem(ITEMS.TORCH); setStatus("你找到一支幾乎熄滅的火把。它仍微微發熱。 🔥"); }
+                    //     });
+                    // }
                     return opts;
                 }
             },
-            // 2. 守衛室
-            guardhouse: {
-                name: "🏚️ 墓園守衛室",
+            // 無名墓園>東方區域
+            graveyard_east: {
+                name: "⚰️ 無名墓園 東方區域",
                 text: () => {
-                    let baseText = "已經沒有任何居住痕跡的小屋。\n屋內牆角有一群散發異味盲眼蟲在蠕動。"
-                    if (!state.flags.unlockGuardHouse) baseText = "守衛室的小門異常的結實。\n四周也看不到窗戶以及其他入口。"
+                    let base = "這裡是墓園的東方區域，可以看到出口處旁邊有一間小屋。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "走向墓園小屋 🏚️", next: "guardhouse" },
+                        { text: "漫步到墓園中心點 ⚰️", next: "graveyard_center" }
+                    ];
+                    return opts;
+                }
+            },
+            // 墓園小屋>門口
+            guardhouse: {
+                name: "🏚️ 墓園小屋",
+                text: () => {
+                    let baseText = "已經沒有任何居住痕跡的小屋。";
+                    baseText += "\n屋內牆角有一群散發異味盲眼蟲在蠕動。"; 
+                    if (!state.flags.unlockGuardHouse) {
+                        baseText = "小屋的門異常的結實。"
+                        baseText += "\n四周也看不到窗戶以及其他入口。"
+                    }
                     return baseText;
                 },
                 options: () => {
                     const opts = [
-                        { text: "往無名墓園 ⚰️", next: "graveyard" },
-                        { text: "朝出口處的破敗教堂前進 ⛪", next: "cathedral" }
+                        { text: "朝東邊的教堂前進 ⛪", next: "cathedral_entry" },
+                        { text: "向西前進 ⚰️", next: "graveyard_east" }
                     ];
-                    if (!state.flags.unlockGuardHouse) {
+                    if (!state.inventory.includes(ITEMS.TORCH)) {
                         opts.unshift({
-                            text: "環顧四週，到處調查👁️‍🗨️",
+                            text: "拿走在牆上的火把 🔥",
                             next: "guardhouse",
-                            action: () => {
-                                const stext = [
-                                    "你試著撞開門，但是沒有效果。 💪",
-                                    "守衛室的外牆也十分堅固。🧱",
-                                    "地面下也沒有任何密道🕳️。",
-                                    "你在搜索的時候，踢到一隻散發異味盲眼蟲。 🐛"
-                                ];
-                                let sindex = Math.floor(Math.random() * stext.length)
-                                if (sindex == 3) {
-                                    if (!state.flags.metBug) {
-                                        state.sanity -= 5;
-                                        state.flags.metBug = true;
-                                    }
-                                    else sindex = 0;
-                                }
-                                setStatus(stext[sindex]);
-
-                            }
+                            action: () => { addItem(ITEMS.TORCH); setStatus("你找到一支幾乎熄滅的火把。它仍微微發熱。 🔥"); }
                         });
+                    }
+                    if (!state.flags.unlockGuardHouse) {
+                        if (!state.firstKnock){
+                            opts.unshift({
+                                text: "試著撞開門 💥",//💪
+                                next: "guardhouse",
+                                action: () => {
+                                    state.hp -= 1;
+                                    setStatus("沒有任何效果，只有疼痛。 🩸");
+                                    state.firstKnock = true;
+                                }
+                            });
+                        }
                         if (state.flags.hasAlys) {
                             opts.unshift({
                                 text: "請艾莉絲開鎖 🗝️",
@@ -232,6 +249,51 @@
                             });
                         }
                     }
+                    return opts;
+                }
+            },
+            // 教堂>入口區域
+            cathedral_entry: {
+                name: "⛪ 教堂 入口區域",
+                text: () => {
+                    let baseText = "一座散發出莊嚴氣息的大教堂。";
+                    baseText += "\n外觀看起來實非古老，好像被戰火摧殘過。"; 
+                    baseText += "\n北邊有一條向下的道路。";
+                    baseText += "\n南方有條小徑。";
+                    return baseText;
+                },
+                options: () => {
+                    const opts = [
+                        { text: "朝北方的道路前進 ⤴️", next: "cathedral_entry" },
+                        { text: "走向小徑 ⤵️", next: "cathedral_well" },
+                        //💧
+                        { text: "探索墓園小屋 🏚️", next: "guardhouse" }
+                    ];
+                    
+                    if (!state.flags.welcomeToCathedral) {
+                        opts.unshift({
+                            text: "敲門 ✊",
+                            next: "cathedral_entry",
+                            action: () => { 
+                                setStatus("沒有人應門，你目前也不敢隨意闖進去。"); 
+                            }
+                        });
+                    }
+                    return opts;
+                }
+            },
+            // 教堂>取水區域
+            cathedral_well: {
+                name: "💧 教堂 取水區域",
+                text: () => {
+                    let base = "這裡有一口水井。";//🤏👄
+                    base += "\n看起來還可以使用。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "回到教堂入口區域 ⛪", next: "cathedral_entry" },
+                    ];
                     return opts;
                 }
             },
@@ -821,7 +883,7 @@
             const loc = locations[state.location];
             locationNameEl.textContent = loc.name;
             dialogTextEl.textContent = loc.text();
-            sceneIconEl.textContent = "🔍";
+            sceneIconEl.textContent = "💀";
 
             if (state.hp <= 12) dialogTextEl.textContent += "\n(😓你覺得身體不適。)";
             if (state.sanity <= 12) dialogTextEl.textContent += "\n(🤪你覺得非常恐慌。)";

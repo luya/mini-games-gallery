@@ -15,14 +15,18 @@
 }
 
 html {
-    font-size: 18px;
+    font-size: 24px;
 }
 
 body {
-    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
     padding: 0;
     width: auto;
     height: auto;
+    line-height: 1.6;
     background-color: #000000;
     color: #ffffff;
     font-family: "Noto Sans TC", "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Apple LiGothic Medium", "Microsoft JhengHei", sans-serif;
@@ -62,12 +66,12 @@ canvas {
     background-color: #0f172a;
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 10px 14px;
+    padding: 5px;
+    margin: 5px;
     border-radius: 6px;
     cursor: pointer;
-    width: 100%;
+    /* width: 100%; */
     font-size: 1rem;
-    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
 }
