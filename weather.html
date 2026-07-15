@@ -1,0 +1,645 @@
+:Interactive Weather Particle Playground:index.html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☔</text></svg>">
+    <title>極致互動粒子氣象站 | Interactive Particle Playground</title>
+    <!-- 引入 Google Fonts 提升 UI 質感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="ayakit.css">
+    <style>
+        /* 基礎樣式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #05070c;
+            font-family: 'Noto Sans TC', 'Comfortaa', sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* 磨砂玻璃控制面板 */
+        .control-panel {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            z-index: 10;
+            width: 340px;
+            background: rgba(10, 15, 30, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 25px;
+            border-radius: 20px;
+            color: #ffffff;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #60a5fa;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+        }
+
+        h2 i {
+            font-size: 20px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.4);
+            margin: 15px 0 10px 0;
+        }
+
+        /* 天氣切換網格 */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .preset-grid button {
+            grid-column: span 1;
+        }
+        
+        /* 讓霧氣按鈕橫跨兩欄 */
+        #btn-fog {
+            grid-column: span 2;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-color: #60a5fa;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            font-weight: 700;
+        }
+
+        /* 滑桿控制組 */
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 8px;
+        }
+
+        .control-value {
+            font-family: 'Comfortaa', monospace;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.15);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* 提示資訊區 */
+        .info-box {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.5;
+            border-left: 3px solid #60a5fa;
+        }
+
+        /* 滑鼠感應環 */
+        #mouse-ring {
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border: 1px dashed rgba(96, 165, 250, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.2s ease-out, opacity 0.2s ease;
+            z-index: 2;
+            opacity: 0;
+            box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.03);
+        }
+    </style>
+</head>
+<body>
+<a id="backBtn" href="index.html">🏠</a>
+    <!-- 滑鼠感應輔助環 -->
+    <div id="mouse-ring"></div>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- 玻璃感 UI 面板 -->
+    <div class="control-panel">
+        <h2><i class="fa-solid fa-wand-magic-sparkles"></i> 粒子特效主控台</h2>
+        
+        <div class="section-title">天氣模式</div>
+        <div class="preset-grid">
+            <button onclick="changePreset('rain')" id="btn-rain"><i class="fa-solid fa-cloud-sun-rain"></i> 小雨</button>
+            <button onclick="changePreset('heavy-rain')" id="btn-heavy-rain"><i class="fa-solid fa-cloud-showers-heavy"></i> 暴雨</button>
+            <button onclick="changePreset('snow')" id="btn-snow"><i class="fa-solid fa-snowflake"></i> 雪花</button>
+            <button onclick="changePreset('leaves')" id="btn-leaves" class="active"><i class="fa-solid fa-leaf"></i> 落葉</button>
+            <button onclick="changePreset('fog')" id="btn-fog"><i class="fa-solid fa-smog"></i> 霧氣 (實時漫延)</button>
+        </div>
+
+        <div class="section-title">物理微調</div>
+        
+        <!-- 風力控制 -->
+        <div class="control-group">
+            <div class="control-label">
+                <span>風向風力</span>
+                <span id="wind-val" class="control-value">0.0</span>
+            </div>
+            <input type="range" id="slider-wind" min="-10" max="10" step="0.5" value="0" oninput="updateWind(this.value)">
+        </div>
+
+        <!-- 密度控制 -->
+        <div class="control-group">
+            <div class="control-label">
+                <span>粒子密度</span>
+                <span id="density-val" class="control-value">1.0x</span>
+            </div>
+            <input type="range" id="slider-density" min="0.2" max="2.5" step="0.1" value="1.0" oninput="updateDensity(this.value)">
+        </div>
+
+        <div class="info-box">
+            <i class="fa-solid fa-circle-info"></i> <b>物理互動：</b>在螢幕上滑動滑鼠，粒子將會被無形的磁場震開。在暴雨模式下，能看到雨水在底部濺起的漣漪。
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        const mouseRing = document.getElementById('mouse-ring');
+
+        // 全域物理參數
+        let currentPreset = 'leaves';
+        let windForce = 0;
+        let densityScale = 1.0;
+        const particles = [];
+        const splashes = []; // 暴雨專用的地面漣漪濺射陣列
+
+        // 滑鼠力場參數設定
+        const mouse = {
+            x: null,
+            y: null,
+            radius: 120, // 避讓半徑
+            active: false
+        };
+
+        // 事件監聽：滑鼠移動與進出
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.active = true;
+
+            // 讓輔助環跟隨滑鼠並展開
+            mouseRing.style.left = `${mouse.x}px`;
+            mouseRing.style.top = `${mouse.y}px`;
+            mouseRing.style.transform = 'translate(-50%, -50%) scale(1)';
+            mouseRing.style.opacity = '1';
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+            mouse.active = false;
+            mouseRing.style.transform = 'translate(-50%, -50%) scale(0)';
+            mouseRing.style.opacity = '0';
+        });
+
+        // 觸控螢幕支援 (手機/平板)
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+                mouse.active = true;
+                mouseRing.style.left = `${mouse.x}px`;
+                mouseRing.style.top = `${mouse.y}px`;
+                mouseRing.style.transform = 'translate(-50%, -50%) scale(1)';
+                mouseRing.style.opacity = '1';
+            }
+        }, {passive: true});
+
+        window.addEventListener('touchend', () => {
+            mouse.x = null;
+            mouse.y = null;
+            mouse.active = false;
+            mouseRing.style.transform = 'translate(-50%, -50%) scale(0)';
+            mouseRing.style.opacity = '0';
+        });
+
+        // 調整畫布大小
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // 當視窗縮放時，重新調整粒子位置，避免卡在外邊緣
+            particles.forEach(p => {
+                if(p.x > canvas.width) p.x = Math.random() * canvas.width;
+                if(p.y > canvas.height) p.y = Math.random() * canvas.height;
+            });
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 各天氣對應的基準粒子數量
+        const presetBaseCounts = {
+            'rain': 180,
+            'heavy-rain': 380,
+            'snow': 160,
+            'leaves': 80,
+            'fog': 45
+        };
+
+        // 萬用粒子物件類別
+        class Particle {
+            constructor() {
+                this.reset(true); // 首次初始化在畫面上隨機散佈
+            }
+
+            reset(isFirstSpawn = false) {
+                this.x = Math.random() * canvas.width;
+                // 如果是首次生成，隨機分佈在整個畫面 y 軸上；否則從畫布上方邊緣外生成
+                this.y = isFirstSpawn ? Math.random() * canvas.height : Math.random() * -100 - 10;
+                
+                // 根據當前選擇的天氣類型配置物理特性
+                switch(currentPreset) {
+                    case 'rain':
+                        this.size = Math.random() * 1.2 + 0.6; // 雨絲寬度
+                        this.length = Math.random() * 15 + 10; // 雨絲長度
+                        this.speedY = Math.random() * 8 + 7;
+                        this.speedX = -1; // 預設微風向左
+                        this.color = 'rgba(156, 195, 230, 0.45)';
+                        break;
+
+                    case 'heavy-rain':
+                        this.size = Math.random() * 1.8 + 1.0;
+                        this.length = Math.random() * 25 + 15;
+                        this.speedY = Math.random() * 13 + 10; // 速度更快
+                        this.speedX = -2;
+                        this.color = 'rgba(174, 212, 245, 0.6)';
+                        break;
+
+                    case 'snow':
+                        this.size = Math.random() * 3.5 + 1.2;
+                        this.speedY = Math.random() * 1.2 + 0.6;
+                        this.speedX = Math.random() * 0.4 - 0.2;
+                        this.color = 'rgba(255, 255, 255, 0.85)';
+                        this.swingSpeed = Math.random() * 0.02 + 0.008; // 擺動頻率
+                        this.swingRange = Math.random() * 1.2 + 0.4;   // 擺動幅度
+                        this.angle = Math.random() * Math.PI * 2;
+                        break;
+
+                    case 'leaves':
+                        this.size = Math.random() * 8 + 6;
+                        this.speedY = Math.random() * 1.2 + 0.8;
+                        this.speedX = Math.random() * 0.8 - 0.4;
+                        // 暖秋落葉色系
+                        const leafColors = [
+                            'rgba(215, 80, 45, 0.85)',  // 楓紅
+                            'rgba(228, 142, 45, 0.85)', // 澄黃
+                            'rgba(141, 155, 42, 0.8)'   // 枯綠
+                        ];
+                        this.color = leafColors[Math.floor(Math.random() * leafColors.length)];
+                        this.rotation = Math.random() * 360;
+                        this.rotationSpeed = Math.random() * 2.5 - 1.25;
+                        this.swingSpeed = Math.random() * 0.015 + 0.005;
+                        this.angle = Math.random() * Math.PI * 2;
+                        break;
+
+                    case 'fog':
+                        // 霧氣是由超大、高透明度的羽化圓形組成
+                        this.size = Math.random() * 160 + 120;
+                        this.speedY = Math.random() * 0.15 - 0.075; // 幾乎不在垂直移動
+                        this.speedX = Math.random() * 0.2 + 0.1;   // 微弱地橫向飄移
+                        this.color = 'rgba(210, 218, 230, 0.028)'; // 極淡的霧白
+                        this.opacity = Math.random() * 0.3 + 0.1;
+                        this.fadeSpeed = Math.random() * 0.001 + 0.0005; // 隨機漸隱漸顯速度
+                        this.fadeDirection = Math.random() > 0.5 ? 1 : -1;
+                        break;
+                }
+            }
+
+            update() {
+                // 基礎物理位移與風力加成
+                if (currentPreset === 'snow') {
+                    this.angle += this.swingSpeed;
+                    this.x += this.speedX + windForce + Math.sin(this.angle) * this.swingRange;
+                    this.y += this.speedY;
+                } else if (currentPreset === 'leaves') {
+                    this.angle += this.swingSpeed;
+                    this.x += this.speedX + windForce + Math.sin(this.angle) * 0.8;
+                    this.y += this.speedY;
+                    this.rotation += this.rotationSpeed;
+                } else if (currentPreset === 'fog') {
+                    // 霧氣飄移
+                    this.x += this.speedX + windForce * 0.15;
+                    this.y += this.speedY;
+                    
+                    // 霧氣動態漸顯/漸隱
+                    this.opacity += this.fadeSpeed * this.fadeDirection;
+                    if (this.opacity > 0.45) {
+                        this.fadeDirection = -1;
+                    } else if (this.opacity < 0.05) {
+                        this.fadeDirection = 1;
+                    }
+                } else { // 小雨 & 暴雨
+                    this.x += this.speedX + windForce;
+                    this.y += this.speedY;
+                }
+
+                // 核心：滑鼠引力/斥力場計算
+                if (mouse.active) {
+                    const dx = this.x - mouse.x;
+                    const dy = this.y - mouse.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < mouse.radius) {
+                        const force = (mouse.radius - distance) / mouse.radius; // 距離越近推力越大
+                        const angle = Math.atan2(dy, dx);
+                        
+                        // 根據天氣不同，避讓阻尼不同 (雨滴重、避開快；雪花霧氣輕盈隨風散)
+                        let pushMultiplier = 5;
+                        if (currentPreset === 'fog') pushMultiplier = 2; // 霧氣被推動較為緩慢
+                        if (currentPreset === 'snow') pushMultiplier = 6.5;
+
+                        this.x += Math.cos(angle) * force * pushMultiplier;
+                        this.y += Math.sin(angle) * force * pushMultiplier;
+                    }
+                }
+
+                // 邊界溢出重新循環檢測
+                if (currentPreset === 'fog') {
+                    // 霧氣邊界處理：超出左右橫向循環
+                    if (this.x > canvas.width + this.size) {
+                        this.x = -this.size;
+                    } else if (this.x < -this.size) {
+                        this.x = canvas.width + this.size;
+                    }
+                    if (this.y > canvas.height + this.size || this.y < -this.size) {
+                        this.reset(false);
+                    }
+                } else {
+                    // 暴雨落地濺起水花判定
+                    if (currentPreset === 'heavy-rain' && this.y >= canvas.height - 15) {
+                        if (Math.random() > 0.45) { // 高機率觸發水花
+                            createSplash(this.x, canvas.height - 3);
+                        }
+                    }
+
+                    // 其它粒子的溢出重置
+                    if (this.y > canvas.height + 20 || this.x < -100 || this.x > canvas.width + 100) {
+                        this.reset(false);
+                    }
+                }
+            }
+
+            draw() {
+                ctx.save();
+
+                if (currentPreset === 'snow') {
+                    // 繪製雪花
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                } else if (currentPreset === 'rain' || currentPreset === 'heavy-rain') {
+                    // 繪製傾斜動態雨絲
+                    ctx.beginPath();
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = this.size;
+                    ctx.lineCap = 'round';
+                    ctx.moveTo(this.x, this.y);
+                    // 結合風力，讓雨滴產生視覺傾角
+                    const angleOffset = (this.speedX + windForce) * 2;
+                    ctx.lineTo(this.x + angleOffset, this.y + this.length);
+                    ctx.stroke();
+                } else if (currentPreset === 'leaves') {
+                    // 繪製自轉葉片
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation * Math.PI / 180);
+                    ctx.beginPath();
+                    // 利用雙貝茲曲線雕刻葉面
+                    ctx.moveTo(0, -this.size);
+                    ctx.quadraticCurveTo(this.size * 0.65, -this.size * 0.1, 0, this.size);
+                    ctx.quadraticCurveTo(-this.size * 0.65, -this.size * 0.1, 0, -this.size);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                } else if (currentPreset === 'fog') {
+                    // 繪製羽化漫延迷霧 (使用放射狀漸層讓邊緣極度柔和)
+                    const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                    grad.addColorStop(0, `rgba(220, 228, 240, ${this.opacity})`);
+                    grad.addColorStop(0.5, `rgba(220, 228, 240, ${this.opacity * 0.4})`);
+                    grad.addColorStop(1, 'rgba(220, 228, 240, 0)');
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // 建立地面雨滴漣漪濺射 (Splash)
+        function createSplash(x, y) {
+            splashes.push({
+                x: x,
+                y: y,
+                radius: Math.random() * 2 + 1,
+                maxRadius: Math.random() * 15 + 10,
+                opacity: 0.8,
+                speed: Math.random() * 0.8 + 0.6
+            });
+        }
+
+        // 更新與繪製暴雨地面的濺起漣漪
+        function updateAndDrawSplashes() {
+            for (let i = splashes.length - 1; i >= 0; i--) {
+                const s = splashes[i];
+                s.radius += s.speed;
+                s.opacity -= 0.045; // 快速消逝
+
+                if (s.opacity <= 0 || s.radius >= s.maxRadius) {
+                    splashes.splice(i, 1);
+                } else {
+                    ctx.beginPath();
+                    // 繪製寬扁橢圓形漣漪
+                    ctx.ellipse(s.x, s.y, s.radius * 1.5, s.radius * 0.4, 0, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(174, 212, 245, ${s.opacity})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // 初始化/重新產生粒子群組
+        function initParticles() {
+            particles.length = 0;
+            splashes.length = 0;
+            
+            const targetCount = Math.floor(presetBaseCounts[currentPreset] * densityScale);
+            for (let i = 0; i < targetCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // 介面控制觸發器：風力滑桿
+        window.updateWind = function(val) {
+            windForce = parseFloat(val);
+            document.getElementById('wind-val').innerText = (windForce > 0 ? '+' : '') + windForce.toFixed(1);
+        };
+
+        // 介面控制觸發器：密度滑桿
+        window.updateDensity = function(val) {
+            densityScale = parseFloat(val);
+            document.getElementById('density-val').innerText = densityScale.toFixed(1) + 'x';
+            initParticles(); // 即時重組粒子陣列
+        };
+
+        // 介面控制觸發器：切換預設天氣
+        window.changePreset = function(preset) {
+            currentPreset = preset;
+            
+            // 更新 UI 按鈕啟動狀態
+            document.querySelectorAll('.preset-grid button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`btn-${preset}`).classList.add('active');
+            
+            initParticles();
+        };
+
+        // 系統啟動初始化
+        initParticles();
+
+        // 核心渲染主迴圈 (Animation Loop)
+        function animate() {
+            // 背景清理色：小雨/暴雨時畫面要陰沉，落葉/雪花時要帶點深冬感
+            let bgClearColor = 'rgba(11, 15, 25, 0.28)'; // 預設黑夜
+            
+            if (currentPreset === 'heavy-rain') {
+                bgClearColor = 'rgba(5, 7, 12, 0.33)'; // 暴雨偏暗黑，略帶微風拖尾
+            } else if (currentPreset === 'fog') {
+                bgClearColor = 'rgba(15, 20, 28, 0.15)'; // 霧氣需要慢速消融感，拖尾較重
+            }
+
+            ctx.fillStyle = bgClearColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 更新並描繪所有常規粒子
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+
+            // 2. 更新並描繪暴雨地面漣漪水花
+            if (currentPreset === 'heavy-rain') {
+                updateAndDrawSplashes();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // 展開動畫生命之旅
+        animate();
+    </script>
+</body>
+</html>
+```eof
+
+### 🌟 這套互動主控台的四大升級重點
+
+1. **極致 UI 設計**：
+   我們使用了毛玻璃面板（Glassmorphism）與精心調配的漸層色彩，搭配 UI 專用的 Lucide/FontAwesome 風格天氣圖示，讓畫面看起來就像一塊高科技氣象儀。
+2. **多維度的物理控制**：
+   * **風向風力**：拉動滑桿可以即時為所有的粒子在 X 軸上施加水平外力。雪花會被吹斜，落葉會飄得更遠，雨滴也會產生動態斜角。
+   * **粒子密度**：使用數值係數縮放（$0.2\times$ 至 $2.5\times$），當拉高密度時，暴雨粒子可以瞬間增長至近 $1,000$ 根，極具視覺衝擊。
+3. **更細緻的天氣物理特徵**：
+   * **暴雨地面漣漪**：程式碼中加入了一個獨立的 `splashes` 濺射陣列。每當暴雨雨絲落到畫布底部，就會高機率產生一個由大變扁、快速消褪的橫向橢圓漣漪。
+   * **真實霧氣漫延**：使用淡雅的放射狀漸層（Radial Gradient），並給予大尺寸與隨機淡入/淡出，製造出極致寫實、會呼吸的漫延霧霾效果。
+4. **精準滑鼠排斥圈**：
+   在畫面上游動滑鼠時，會生成一圈散發幽光的虛線定位環。所有的粒子進入該區間，都會觸發力場計算，順著力線迅速彈開，形成宛如「隱形雨傘」或「超能力斥力盾」的完美體驗！
