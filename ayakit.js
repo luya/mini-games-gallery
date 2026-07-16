@@ -105,31 +105,58 @@ AyaKits.saveGame = function (state, slotname = "my_game_save_slot_1") {
     }
 }
 
+/**
+ * 深層合併兩個物件（Deep Merge）。
+ * 使用 `structuredClone` 確保回傳全新獨立的物件，不會污染原始的 target 或 source。
+ * 
+ * @function deepMerge
+ * @memberof AyaKits
+ * @param {Object} target - 基礎物件（目標物件）
+ * @param {Object} source - 要合併進去的物件（來源物件）
+ * @returns {Object} 合併後全新的深拷貝物件
+ */
 AyaKits.deepMerge = function (target, source) {
-    // 建立一個深拷貝的 target 作為基礎
+    // 建立一個深拷貝的 target 作為基礎，避免改動到原始傳入的 target 物件
     const output = structuredClone(target);
 
+    // 確保 target 與 source 兩者皆為有效的純物件才執行合併
     if (AyaKits.isObject(target) && AyaKits.isObject(source)) {
+        // 疊代 source 物件的所有屬性鍵名
         Object.keys(source).forEach(key => {
+            // 檢查當前 source 的屬性值是否也為純物件
             if (AyaKits.isObject(source[key])) {
+                // 如果 target 當中完全沒有這個屬性
                 if (!(key in target)) {
-                    // 如果預設值沒有這個物件，直接整坨複製過來
+                    // 直接將 source 的該物件屬性進行深拷貝並賦值給 output
                     output[key] = structuredClone(source[key]);
                 } else {
-                    // 如果兩邊都有這個物件，遞迴進去繼續合併
+                    // 如果兩邊都擁有該物件屬性，則遞迴呼叫 deepMerge 進行深層合併
                     output[key] = AyaKits.deepMerge(target[key], source[key]);
                 }
             } else {
-                // 如果是一般值（字串、數字、布林），直接覆蓋
+                // 如果是一般型別值（字串、數字、布林、或 null/undefined），則直接覆蓋基礎值
                 output[key] = source[key];
             }
         });
     }
+    
+    // 回傳合併完成後的全新物件
     return output;
 }
 
-// 輔助函式：判斷是不是純物件
+/**
+ * 檢查傳入的變數是否為純物件（Plain Object）。
+ * 排除掉 null、undefined 以及陣列（Array）。
+ * 
+ * @function isObject
+ * @memberof AyaKits
+ * @param {*} item - 欲檢查的任意變數
+ * @returns {boolean} 若為純物件則回傳 true，否則回傳 false
+ */
 AyaKits.isObject = function (item) {
+    // 1. item 必須存在（排除 null 與 undefined）
+    // 2. typeof 必須為 'object'
+    // 3. 排除 JavaScript 預設 typeof 也算 object 的陣列型別
     return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
