@@ -43,10 +43,12 @@
         </div>
     </div>
 
+    <script src="ayakit.js"></script>
     <script>
         // 10 個道具的完整鍵值與說明資料
         const ITEM_DATA = {
-            TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp: 5, sanity: 5, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat: true },
+            TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp: 1, sanity: 5, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat: true },
+            ALYS: { name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』", atk: 10, def:5, hp: 5, sanity: 10, repeat: true, result: "艾莉絲：『讓我幫你包紮一下。』"},
             SHIELD: { name: "青銅盾牌 🛡️", desc: "充滿使用痕跡的盾牌，冒險中帶著似乎也不是什壞事。", def: 3 },
             MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 25, sanity: 25 },
             BBQ: { name: "烤排骨肉 🍖", desc: "帶骨的火炙強身大餐。", hp: 50, sanity: 50 },
@@ -64,6 +66,7 @@
 
         const ITEMS = {
             TORCH: "TORCH",
+            ALYS: "ALYS",
             SHIELD: "SHIELD",
             DAGGER: "DAGGER",
             LANTERN: "LANTERN",
@@ -76,34 +79,17 @@
             HOURGLASS: "HOURGLASS"
         };
 
-        // 夥伴隨「不同場景」變更的動態對話庫
+        // 夥伴隨「不同場景」或是「關鍵場景」變更的動態對話庫
         const PARTNER_DIALOGUE = {
-            graveyard: "艾莉絲環顧四周：『‧‧‧，噁心的地方。。』",
-            village: "艾莉絲：『這裡是一切的原點。』",
-            guardhouse: "艾莉絲：『該不會衝出殭屍吧？媽阿，噁心的地方。』",
-            alley: "陰暗的後巷中，蘿絲警惕地看著四周：『小心，這條巷子以前常有黑幫處理不聽話的叛徒。』",
-            parking: "在地下停車場，蘿絲指著防彈車：『這輛車的後車廂有密倉，他平時習慣把最值錢或最危險的文件藏在那。』",
-            slum: "回到她差點被圍堵的紅燈區，蘿絲冷笑：『這地方就是這座城市的膿包，每個人都活得像地老鼠一樣。』",
-            club: "歌舞廳門前，蘿絲拉低了風衣領口，低聲說：『門口那兩個蠢貨我認識，等一下看我手勢，我過去引開他們。』",
-            vip: "在VIP賭廳裡，蘿絲眼神複雜：『以前我總陪坐在這裡，看著那些高官一邊數著不義之財一邊談笑風生。真讓人作嘔。』",
-            square: "看著大螢幕上的市長競選演講，蘿絲吐了一口唾沫：『聽聽那些滿口仁義道德的謊言。我們得撕爛他的面具。』",
-            archives: "檔案館的陰影裡，蘿絲拍了拍保險櫃：『這裡面鎖著黑幫教父當年的家底，要是能撬開，保證有驚喜。』",
-            dock: "碼頭狂風大作，蘿絲大聲喊道：『13號倉庫是他們走私的大本營！看守很嚴，得想個辦法混過去！』",
-            subway: "漆黑的地鐵隧道中，蘿絲緊緊抓著你的手臂：『聽，有腳步聲⋯別點燈，跟緊我，我知道這裡的暗號。』",
-            lab: "在暗紅色的沖印室，蘿絲看著洗出來的照片：『沒錯⋯就是這些照片。這就是他們犯罪的鐵證！』",
-            police: "警局檔案室內，蘿絲低聲警告：『快一點，巡邏的警員每隔十分鐘會經過這裡。被抓到我們就完了。』",
-            cityhall: "站在市政廳門前，蘿絲深吸了一口氣：『這棟樓裡裝滿了魔鬼。偵探，你準備好跟他們攤牌了嗎？』",
-            confrontation: "市長辦公室頂樓，蘿絲看著夜景，眼神無比冰冷：『這就是從最頂端看下來的風景啊⋯真是骯髒。』",
-            helipad: "直升機螺旋槳的狂風吹亂了她的長髮，蘿絲掏出藏在懷裡的小刀：『他們想跑？沒那麼容易！』",
-            vault: "金庫錢堆前，蘿絲咬牙切齒：『這麼多血汗錢⋯偵探，別答應他的條件，用你的槍給他應有的審判！』",
-            roseSecret: "（你們正在深入交談她的過去⋯）",
-            broadcasting: "廣播塔頂，雷電交加。蘿絲幫你擋在門口：『按下去，偵探！把真相播出去！後面的追兵交給我！』"
+            graveyard_west: "艾莉絲環顧四周：『‧‧‧，噁心的地方。。』",
+            graveyard_center: "艾莉絲：『這裡是一切的原點。』",
+            graveyard_east: "艾莉絲：『該不會衝出殭屍吧？媽阿，噁心的地方。』",
         };
 
         // 遊戲狀態
-        const state = {
+        const state_default = {
             location: "graveyard_center",
-            inventory: [],
+            inventory: ["ALYS"],
             hp: 100,
             sanity: 100,
             atk: 0,
@@ -112,21 +98,36 @@
             fame: 0,
             flags: {
                 metWorld: false,
+                unlockGraveyardWestGate: false,
                 unlockGuardHouse: false,
                 firstKnock: false,
                 welcomeToCathedral: false,
-                metBug: false,
-                metAlys: false,        // 夥伴：盜賊艾莉絲
-                hasAlys: false,        // 夥伴：盜賊艾莉絲
-                metShade: false,
-                hasKeyItem: false,
-                bargainedWithShade: false,
-                angeredShade: false,
-                sacrificedBlood: false
+                metAlys: false,
+                battle: false,
+                // metShade: false,
+                // hasKeyItem: false,
+                // bargainedWithShade: false,
+                // angeredShade: false,
+                // sacrificedBlood: false
             },
             ended: false,
             inspecting: null // 當前正在檢視的道具 Key 或 'Alys'，為 null 表示在正常場景
         };
+
+        const mob_state = {
+            hp: 100,
+            sanity: 100,
+            atk: 0,
+            def: 0,
+            coin: 0,
+            fame: 0,
+        };
+
+        let state = structuredClone(state_default);//不能有function
+
+        let autosavename = "Abyss_Nation_Fallen_Survivors_Auto.sav";
+
+        state = AyaKits.loadGame(structuredClone(state_default), autosavename);
 
         //場景設定
         const locations = {
@@ -148,7 +149,7 @@
                         { text: "往東前進 ⚰️", next: "graveyard_east" },
                         { text: "走向西邊 ⚰️", next: "graveyard_west" }
                     ];
-                    
+
                     // opts.unshift({
                     //     text: "環顧四週，到處調查 👁️‍🗨️",
                     //     next: "graveyard",
@@ -177,6 +178,34 @@
                     return opts;
                 }
             },
+            // 無名墓園>西方區域
+            graveyard_west: {
+                name: "⚰️ 無名墓園 西方區域",
+                text: () => {
+                    let base = "這裡是墓園的深處，西方有個小出口通往森林地區。";
+                    if (!state.flags.unlockGraveyardWestGate){
+                        base += "\n不過這個出口的金屬門被上鎖了。";
+                    }
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "漫步到墓園中心點 ⚰️", next: "graveyard_center" }
+                    ];
+                    
+                    if (!state.flags.unlockGraveyardWestGate){
+                        opts.unshift({
+                            text: "試著扯下大鎖 💪",//🔒
+                            next: "graveyard_west",
+                            action: () => {
+                                state.hp -= 1;
+                                setStatus("沒有任何效果，鎖與鍊條都很結實 💦");
+                            }
+                        });
+                    }
+                    return opts;
+                }
+            },
             // 無名墓園>東方區域
             graveyard_east: {
                 name: "⚰️ 無名墓園 東方區域",
@@ -197,7 +226,7 @@
                 name: "🏚️ 墓園小屋",
                 text: () => {
                     let baseText = "已經沒有任何居住痕跡的小屋。";
-                    baseText += "\n屋內牆角有一群散發異味盲眼蟲在蠕動。"; 
+                    baseText += "\n屋內牆角有一群散發異味盲眼蟲在蠕動。";
                     if (!state.flags.unlockGuardHouse) {
                         baseText = "小屋的門異常的結實。"
                         baseText += "\n四周也看不到窗戶以及其他入口。"
@@ -217,13 +246,13 @@
                         });
                     }
                     if (!state.flags.unlockGuardHouse) {
-                        if (!state.firstKnock){
+                        if (!state.firstKnock) {
                             opts.unshift({
                                 text: "試著撞開門 💥",//💪
                                 next: "guardhouse",
                                 action: () => {
-                                    state.hp -= 1;
-                                    setStatus("沒有任何效果，只有疼痛。 🩸");
+                                    state.hp -= 2;
+                                    setStatus("沒有任何效果，只有疼痛 🩸");
                                     state.firstKnock = true;
                                 }
                             });
@@ -257,25 +286,25 @@
                 name: "⛪ 教堂 入口區域",
                 text: () => {
                     let baseText = "一座散發出莊嚴氣息的大教堂。";
-                    baseText += "\n外觀看起來實非古老，好像被戰火摧殘過。"; 
+                    baseText += "\n外觀看起來實非古老，好像被戰火摧殘過。";
                     baseText += "\n北邊有一條向下的道路。";
                     baseText += "\n南方有條小徑。";
                     return baseText;
                 },
                 options: () => {
                     const opts = [
-                        { text: "朝北方的道路前進 ⤴️", next: "cathedral_entry" },
+                        { text: "朝北方的道路前進 ⤴️", next: "cathedral_ramp" },
                         { text: "走向小徑 ⤵️", next: "cathedral_well" },
                         //💧
                         { text: "探索墓園小屋 🏚️", next: "guardhouse" }
                     ];
-                    
+
                     if (!state.flags.welcomeToCathedral) {
                         opts.unshift({
                             text: "敲門 ✊",
                             next: "cathedral_entry",
-                            action: () => { 
-                                setStatus("沒有人應門，你目前也不敢隨意闖進去。"); 
+                            action: () => {
+                                setStatus("沒有人應門，你目前也不敢隨意闖進去。");
                             }
                         });
                     }
@@ -286,13 +315,159 @@
             cathedral_well: {
                 name: "💧 教堂 取水區域",
                 text: () => {
-                    let base = "這裡有一口水井。";//🤏👄
+                    let base = "這裡有一口水井。";//🤏👄🧊
                     base += "\n看起來還可以使用。";
                     return base;
                 },
                 options: () => {
                     let opts = [
+                        { 
+                            text: "使用水井 🤏", next: "cathedral_well", 
+                            action: () => {
+                                setStatus("水質好像還可以？"); 
+                                state.hp +=1;
+                                state.sanity +=2;
+                            }
+                        },
+                        { 
+                            text: "對著水井講話 👄", next: "cathedral_well", 
+                            action: () => {setStatus("好像有回聲產生？"); }
+                        },
                         { text: "回到教堂入口區域 ⛪", next: "cathedral_entry" },
+                    ];
+                    return opts;
+                }
+            },
+            // 教堂坡道
+            cathedral_ramp: {
+                name: "↗️ 教堂坡道",
+                text: () => {
+                    let base = "這是可以通往教堂的坡道。教堂就位在坡道上方，北方的小路可以通往村莊。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "向北方邁進 🍀", next: "village_path_3" },
+                        { text: "拜訪教堂 ⛪", next: "cathedral_entry" },
+                    ];
+                    return opts;
+                }
+            },
+            // 村莊小路 3
+            village_path_3: {
+                name: "🍀 一般道路",
+                text: () => {
+                    let base = "一個普通的道路。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "往北邊行走 🏘️", next: "village_path_2" },
+                        { text: "向南方前進 ⛪", next: "cathedral_ramp" },
+                    ];
+                    return opts;
+                }
+            },
+            // 村莊小路 2
+            village_path_2: {
+                name: "☘️ 一般道路",
+                text: () => {
+                    let base = "一個普通的道路。";
+                     if (!state.flags.metAlys){
+                        base = "一個穿著黑袍的刺客向你靠近，你也注意到黑暗處有人在注視著你們。";
+                     }
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "往北邊行走 🏘️", next: "village_path_1" },
+                        { text: "向南方前進 ⛪", next: "village_path_3" },
+                    ];
+                    if (!state.flags.metAlys){
+                        opts = [
+                            { text: "👁️", next: "first_battle" },
+                        ];
+                    }
+                    
+                    return opts;
+                }
+            },
+            // 首次作戰💬🔥💪
+            first_battle: {
+                name: "⚔️ 首次作戰",
+                text: () => {
+                    let base = "首次作戰開始。";
+                    return base;
+                },
+                options: () => {
+                    if (!state.flags.battle){
+                        mob_state.hp = 25;
+                        mob_state.sanity = 25;
+                        mob_state.atk = 1;
+                        mob_state.def = 0;
+                        mob_state.fame = 3;
+                        mob_state.coin = 50;
+                        state.flags.battle = true
+                    } 
+                    let opts = [
+                        { text: "👁️", next: "first_battle" },
+                        { text: "💪", next: "first_battle" },
+                        { text: "💬", next: "first_battle" },
+                        { text: "👣", next: "first_battle" },
+                    ];
+
+                     if (state.flags.battle && (mob_state.hp <= 0 || mob_state.sanity <= 0)){
+                        state.flags.battle = false;
+                    } 
+                    
+                    return opts;
+                }
+            },
+            // 村莊小路 1
+            village_path_1: {
+                name: "🍀 一般道路",
+                text: () => {
+                    let base = "一個普通的道路。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "往北邊行走 🏘️", next: "village_south_gate" },
+                        { text: "向南方前進 ⛪", next: "village_path_2" },
+                    ];
+                    return opts;
+                }
+            },
+            // 村莊南門
+            village_south_gate: {
+                name: "🏘️ 村莊南門",
+                text: () => {
+                    let base = "村莊南門出入區域。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "進入村莊 🏘️", next: "village_square" },
+                        { text: "向南方前進 ⛪", next: "village_path_1" },
+                    ];
+                    return opts;
+                }
+            },
+            // 村莊廣場🧼❄️♨️🍽️🛎️📚📜💰🍻🍖🌿⚔️🛡️🗡️🏹🪓⛏️⚒️➶ 
+            // 😴 💤🛏️🥪🌮🌯🍅🍎🍊🍇
+            //🧤🥾👢🩰👡👠🥿👗👙💎💍📿🎶📓📃📙📘📗📕📔📖🪔🕯️🗝️🪑
+            //💬👁️‍🗨️💭🌙☀️🌫️⛈️🌨️🌧️🌈❄️⛰️🏰🗝️🪑🧾✉️📄💰
+            village_square: {
+                name: "🏵️ 村莊廣場",
+                text: () => {
+                    let base = "人潮很勉強，感覺不是很多。";
+                    return base;
+                },
+                options: () => {
+                    let opts = [
+                        { text: "🌿 雜貨", next: "village_square" },
+                        { text: "🍻 買醉", next: "village_square" },
+                        { text: "🍖 用餐", next: "village_square" },
                     ];
                     return opts;
                 }
@@ -776,21 +951,20 @@
         // 渲染上方可點擊的道具與夥伴列表
         function renderInventory() {
             inventoryEl.innerHTML = "道具：";
-
-            // 如果有夥伴，生成對話按鈕
-            if (state.flags.hasAlys) {
+            // 如果有夥伴
+            if (state.inventory.includes(ITEMS.ALYS)) {
                 inventoryEl.innerHTML = "隊員以及道具：";
-                const btn = document.createElement("button");
-                btn.className = "inv-btn partner";
-                btn.textContent = "夥伴：艾莉絲 👩🏻‍🦳";
-                btn.addEventListener("click", () => inspectSomething("Alys"));
-                inventoryEl.appendChild(btn);
             }
 
             // 生成獲得的道具按鈕
             state.inventory.forEach((itemKey) => {
                 const btn = document.createElement("button");
+
                 btn.className = "inv-btn";
+                if (itemKey == "ALYS") {
+                    btn.className = "inv-btn partner";
+                }
+
                 btn.textContent = ITEM_DATA[itemKey].name;
                 btn.addEventListener("click", () => inspectSomething(itemKey));
                 inventoryEl.appendChild(btn);
@@ -834,38 +1008,39 @@
 
             // 情況 A：正在進行道具調查或夥伴交談
             if (state.inspecting !== null) {
-                if (state.inspecting === "Alys") {
-                    // 夥伴對話
-                    locationNameEl.textContent = "💬 與艾莉絲交談中";
+                
+                // 道具調查
+                const item = ITEM_DATA[state.inspecting];
+                locationNameEl.textContent = `🔍 調查中：${item.name}`;
+                sceneIconEl.textContent = "🧩";
+                dialogTextEl.textContent = item.desc;
+                if (state.inspecting === "ALYS"){
+                    locationNameEl.textContent = `💬 與隊員互動中：${item.name}`;
                     sceneIconEl.textContent = "🌹";
-                    // 根據當前所在位置獲取動態台詞
-                    const currentLocKey = state.location;
-                    const dialogue = PARTNER_DIALOGUE[currentLocKey] || "『我們得快點，時間不多了。』";
-                    dialogTextEl.textContent = dialogue;
-                } else {
-                    // 道具調查
-                    const item = ITEM_DATA[state.inspecting];
-                    locationNameEl.textContent = `🔍 調查中：${item.name}`;
-                    sceneIconEl.textContent = "🧩";
-                    dialogTextEl.textContent = item.desc;
-                    // console.log(item.hp);
-                    if (item.hp) {
-                        const useBtn = document.createElement("button");
-                        useBtn.className = "option-btn";
-                        useBtn.innerHTML = `<span>使用道具 🤏</span><span class="option-key">選項</span>`;
-                        useBtn.addEventListener("click", () => {
-                            setStatus(item.result);
-                            if (item.hp) state.hp += item.hp;
-                            if (state.hp > 100) state.hp = 100;
-                            if (item.sanity) state.sanity += item.sanity
-                            if (state.sanity > 100) state.sanity = 100;
-                            if (!item.repeat) removeItem(state.inspecting);
-                            state.inspecting = null;
-                            render();
-                        });
-                        optionsEl.appendChild(useBtn);
-                    }
+                    dialogTextEl.textContent = PARTNER_DIALOGUE[state.location] || item.desc;
                 }
+                
+                // console.log(item.hp);
+                if ((item.hp && state.hp < 100)  || (item.sanity && state.sanity < 100)) {
+                    const useBtn = document.createElement("button");
+                    useBtn.className = "option-btn";
+                    useBtn.innerHTML = `<span>使用道具 🤏</span><span class="option-key">選項</span>`;
+                    if (state.inspecting === "ALYS"){
+                        useBtn.innerHTML = `<span>簡易醫療處理 🤍</span><span class="option-key">技能</span>`;
+                    }
+                    useBtn.addEventListener("click", () => {
+                        setStatus(item.result);
+                        if (item.hp) state.hp += item.hp;
+                        if (state.hp > 100) state.hp = 100;
+                        if (item.sanity) state.sanity += item.sanity
+                        if (state.sanity > 100) state.sanity = 100;
+                        if (!item.repeat) removeItem(state.inspecting);
+                        state.inspecting = null;
+                        render();
+                    });
+                    optionsEl.appendChild(useBtn);
+                }
+                
 
                 // 生成返回現場的按鈕
                 const returnBtn = document.createElement("button");
@@ -910,24 +1085,11 @@
                 });
                 optionsEl.appendChild(btn);
             });
+            AyaKits.saveGame(state, autosavename);
         }
 
         function restartGame() {
-            state.location = "graveyard";
-            state.inventory = [];
-            state.flags = {
-                metWorld: false,
-                unlockGuardHouse: false,
-                metBug: false,
-                hasAlys: false,        // 夥伴：盜賊艾莉絲
-                metShade: false,
-                hasKeyItem: false,
-                bargainedWithShade: false,
-                angeredShade: false,
-                sacrificedBlood: false
-            };
-            state.ended = false;
-            state.inspecting = null;
+            state = structuredClone(state_default);
             setStatus("開始選擇你的命運⋯");
             render();
         }

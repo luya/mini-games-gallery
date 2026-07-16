@@ -213,7 +213,7 @@
             if (isGameOver) return;
             if (gamepadState && !isGameOver) {
                 if (gamepadState.joystick.active) {
-                    console.log(gamepadState.joystick.dir)
+                    // console.log(gamepadState.joystick.dir)
                     player.x += player.speed * gamepadState.joystick.x;
                     player.y += player.speed * gamepadState.joystick.y;
                 }

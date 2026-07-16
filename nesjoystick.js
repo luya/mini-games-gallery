@@ -28,10 +28,10 @@
     let startX = 0;
     let startY = 0;
     const maxRadius = 50; // 搖桿移動的最大半徑(像素)
-    console.log(joyZone);
+    // console.log(joyZone);
     // ------------------ 1. 左側不固定位置搖桿邏輯 ------------------
     joyZone.addEventListener('touchstart', (e) => {
-        console.log('touchstart');
+        // console.log('touchstart');
         // 如果已經有搖桿在被操控，忽略其他左側觸控
         if (joyTouchId !== null) return;
 

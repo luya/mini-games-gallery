@@ -98,11 +98,39 @@ AyaKits.saveGame = function (state, slotname = "my_game_save_slot_1") {
 
         // 寫入瀏覽器的 localStorage 中
         localStorage.setItem(slotname, jsonString);
-        console.log("存檔成功！");
+        // console.log("存檔成功！");
     } catch (error) {
         // 當儲存空間超過瀏覽器限制（通常為 5MB）時，會觸發 QuotaExceededError
         console.error("存檔失敗，空間可能不足：", error);
     }
+}
+
+AyaKits.deepMerge = function (target, source) {
+    // 建立一個深拷貝的 target 作為基礎
+    const output = structuredClone(target);
+
+    if (AyaKits.isObject(target) && AyaKits.isObject(source)) {
+        Object.keys(source).forEach(key => {
+            if (AyaKits.isObject(source[key])) {
+                if (!(key in target)) {
+                    // 如果預設值沒有這個物件，直接整坨複製過來
+                    output[key] = structuredClone(source[key]);
+                } else {
+                    // 如果兩邊都有這個物件，遞迴進去繼續合併
+                    output[key] = AyaKits.deepMerge(target[key], source[key]);
+                }
+            } else {
+                // 如果是一般值（字串、數字、布林），直接覆蓋
+                output[key] = source[key];
+            }
+        });
+    }
+    return output;
+}
+
+// 輔助函式：判斷是不是純物件
+AyaKits.isObject = function (item) {
+    return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
 /**
@@ -110,13 +138,13 @@ AyaKits.saveGame = function (state, slotname = "my_game_save_slot_1") {
  * @param {string} [slotname="my_game_save_slot_1"] - 讀取存檔的 Key 值（存檔欄位名稱）
  * @returns {Object} 載入成功回傳合併後的狀態物件，失敗或無存檔則回傳初始預設狀態
  */
-AyaKits.loadGame = function (slotname = "my_game_save_slot_1") {
+AyaKits.loadGame = function (defaultGameState, slotname = "my_game_save_slot_1") {
     // 從 localStorage 取得 JSON 字串
     const jsonString = localStorage.getItem(slotname);
 
     // 如果找不到存檔，直接複製並回傳預設遊戲狀態
     if (!jsonString) {
-        return { ...defaultGameState };
+        return defaultGameState;
     }
 
     try {
@@ -125,11 +153,12 @@ AyaKits.loadGame = function (slotname = "my_game_save_slot_1") {
 
         // 將讀取的存檔與預設值進行合併（以讀取值為主覆蓋預設值）
         // 這樣可防止未來遊戲版本更新、增加新欄位時，舊存檔缺少新欄位而導致錯誤
-        return { ...defaultGameState, ...loadedState };
+        return AyaKits.deepMerge(defaultGameState, loadedState);
+        // return { ...defaultGameState, ...loadedState };
     } catch (error) {
         // 解析 JSON 失敗時，代表存檔可能損毀，回傳預設狀態
         console.error("存檔損毀，無法讀取：", error);
-        return { ...defaultGameState };
+        return defaultGameState;
     }
 }
 
