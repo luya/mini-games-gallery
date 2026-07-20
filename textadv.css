@@ -164,14 +164,26 @@ body {
     color: #f2f0e5bb;
 }
 
+.footer_start {
+    padding: 8px 16px 10px;
+    font-size: 1.0rem;
+    color: #b8b5b9;
+    border-top: 1px solid #646365;
+    display: flex;
+    flex-direction: column;
+    justify-content:flex-start;
+    align-items: flex-start;    
+    white-space: pre-line;
+}
+
 .footer_end {
     padding: 8px 16px 10px;
     font-size: 1.0rem;
     color: #b8b5b9;
     border-top: 1px solid #646365;
     display: flex;
-    justify-content:end;
-    align-items: end;    
+    justify-content:flex-end;
+    align-items: flex-end;    
     white-space: pre-line;
 }
 

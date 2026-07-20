@@ -13,6 +13,20 @@
     <title>深淵國度：墮落者</title>
     <link rel="stylesheet" href="ayakit.css">
     <link rel="stylesheet" href="textadv.css">
+    <style>
+        div {
+            /* 1. 防止長按 Emoji 或按鈕時，跳出手機系統的「複製、選取」選單 */
+            user-select: text;
+            /* -webkit-user-select: none; */
+            /* -webkit-touch-callout: none; */
+
+            /* 2. 點擊按鈕時，有些手機會出現一個醜醜的「藍色半透明點擊高亮框」，這行可以把它關掉 */
+            /* -webkit-tap-highlight-color: transparent; */
+
+            /* 3. 告訴瀏覽器這塊區域不要觸發手機預設的手勢（如滑動重整、上一頁下一頁） */
+            /* touch-action: none; */
+        }
+    </style>
 </head>
 
 <body>
@@ -36,7 +50,14 @@
         <div class="options" id="options"></div>
 
         <div class="footer">
-            <span id="statusText">開始選擇你的命運⋯</span>
+            <span id="statusText" style="white-space: pre-wrap;">開始選擇你的命運⋯</span>
+        </div>
+        <div class="footer_start">
+            <span style="white-space: pre-wrap;">HP ❤️: <span id="HP">???/???</span></span>
+            <span style="white-space: pre-wrap;">SA 🧠: <span id="SANITY">???/???</span></span>
+            <span style="white-space: pre-wrap;">CO 💰: <span id="COIN">?</span></span>
+            <span style="white-space: pre-wrap;">FA 🎭: <span id="FAME">?</span></span>
+            <span style="white-space: pre-wrap;">DO 🧿: <span id="DOOM">?</span></span>
         </div>
         <div class="footer_end">
             <button class="restart-btn" id="restartBtn">重新開始旅程 🔁</button>
@@ -47,11 +68,11 @@
     <script>
         // 10 個道具的完整鍵值與說明資料
         const ITEM_DATA = {
-            TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp: 1, sanity: 5, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat: true },
-            ALYS: { name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』", atk: 10, def:5, hp: 5, sanity: 10, repeat: true, result: "艾莉絲：『讓我幫你包紮一下。』"},
+            TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp: 1, sanity: 5, doom: 1, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat: true },
+            ALYS: { name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』", atk: 10, def: 5, hp: 5, sanity: 10, doom: 1, repeat: true, result: "艾莉絲：『讓我幫你包紮一下。』" },
             SHIELD: { name: "青銅盾牌 🛡️", desc: "充滿使用痕跡的盾牌，冒險中帶著似乎也不是什壞事。", def: 3 },
-            MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 25, sanity: 25 },
-            BBQ: { name: "烤排骨肉 🍖", desc: "帶骨的火炙強身大餐。", hp: 50, sanity: 50 },
+            MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 25, sanity: 25 , doom: 1},
+            BBQ: { name: "烤排骨肉 🍖", desc: "帶骨的火炙強身大餐。", hp: 50, sanity: 50 , doom: 1},
             DAGGER: { name: "鏽蝕匕首 🗡️", desc: "復古的雕飾，經過歲月的摧殘，還算堪用的武器，雖然可能只能劃開皮膚而已。", atk: 1 },
             GUARDKEY: { name: "無名鑰匙 🗝️", desc: "鑰匙上方有著類似老鷹個符號。" },
             LANTERN: { name: "守墓人提燈 🪔", desc: "裏面尚有些許燃料，也許有著意外的功用。" },
@@ -89,13 +110,17 @@
         // 遊戲狀態
         const state_default = {
             location: "graveyard_center",
-            inventory: ["ALYS"],
+            location_save: "graveyard_center",
+            inventory: [],
             hp: 100,
             sanity: 100,
             atk: 0,
             def: 0,
             coin: 0,
             fame: 0,
+            doom: 0,
+            ended: false,
+            inspecting: null, // 當前正在檢視的道具 Key 或 'Alys'，為 null 表示在正常場景
             flags: {
                 metWorld: false,
                 unlockGraveyardWestGate: false,
@@ -104,23 +129,22 @@
                 welcomeToCathedral: false,
                 metAlys: false,
                 battle: false,
+                battleForAlys: false,
                 // metShade: false,
                 // hasKeyItem: false,
                 // bargainedWithShade: false,
                 // angeredShade: false,
                 // sacrificedBlood: false
             },
-            ended: false,
-            inspecting: null // 當前正在檢視的道具 Key 或 'Alys'，為 null 表示在正常場景
-        };
-
-        const mob_state = {
-            hp: 100,
-            sanity: 100,
-            atk: 0,
-            def: 0,
-            coin: 0,
-            fame: 0,
+            mob_state : {
+                hp: 100,
+                sanity: 100,
+                atk: 0,
+                def: 0,
+                coin: 0,
+                fame: 0,
+                doom: 0,
+            }
         };
 
         let state = structuredClone(state_default);//不能有function
@@ -183,7 +207,7 @@
                 name: "⚰️ 無名墓園 西方區域",
                 text: () => {
                     let base = "這裡是墓園的深處，西方有個小出口通往森林地區。";
-                    if (!state.flags.unlockGraveyardWestGate){
+                    if (!state.flags.unlockGraveyardWestGate) {
                         base += "\n不過這個出口的金屬門被上鎖了。";
                     }
                     return base;
@@ -192,8 +216,8 @@
                     let opts = [
                         { text: "漫步到墓園中心點 ⚰️", next: "graveyard_center" }
                     ];
-                    
-                    if (!state.flags.unlockGraveyardWestGate){
+
+                    if (!state.flags.unlockGraveyardWestGate) {
                         opts.unshift({
                             text: "試著扯下大鎖 💪",//🔒
                             next: "graveyard_west",
@@ -321,17 +345,17 @@
                 },
                 options: () => {
                     let opts = [
-                        { 
-                            text: "使用水井 🤏", next: "cathedral_well", 
+                        {
+                            text: "使用水井 🤏", next: "cathedral_well",
                             action: () => {
-                                setStatus("水質好像還可以？"); 
-                                state.hp +=1;
-                                state.sanity +=2;
+                                setStatus("水質好像還可以？");
+                                state.hp += 1;
+                                state.sanity += 2;
                             }
                         },
-                        { 
-                            text: "對著水井講話 👄", next: "cathedral_well", 
-                            action: () => {setStatus("好像有回聲產生？"); }
+                        {
+                            text: "對著水井講話 👄", next: "cathedral_well",
+                            action: () => { setStatus("好像有回聲產生？"); }
                         },
                         { text: "回到教堂入口區域 ⛪", next: "cathedral_entry" },
                     ];
@@ -373,9 +397,13 @@
                 name: "☘️ 一般道路",
                 text: () => {
                     let base = "一個普通的道路。";
-                     if (!state.flags.metAlys){
+                    if (!state.flags.metAlys) {
                         base = "一個穿著黑袍的刺客向你靠近，你也注意到黑暗處有人在注視著你們。";
-                     }
+                    }
+                    if (state.flags.metAlys && !state.inventory.includes(ITEMS.ALYS)){
+                        base = "黑暗處的黑影並沒有離開。";
+                    }
+
                     return base;
                 },
                 options: () => {
@@ -383,43 +411,112 @@
                         { text: "往北邊行走 🏘️", next: "village_path_1" },
                         { text: "向南方前進 ⛪", next: "village_path_3" },
                     ];
-                    if (!state.flags.metAlys){
+                    if (!state.flags.metAlys) {
                         opts = [
-                            { text: "👁️", next: "first_battle" },
+                            { 
+                                text: "⚔️ 進入作戰", next: "random_battle",
+                                action: ()=>{
+                                    state.flags.battleForAlys = true;
+                                    state.location_save = state.location;
+                                }
+                            },
                         ];
                     }
-                    
+                    if (state.flags.metAlys && !state.inventory.includes(ITEMS.ALYS)){
+                        opts = [
+                            { text: "💬 與黑影對話", next: state.location },
+                        ];
+                    }
+
                     return opts;
                 }
             },
             // 首次作戰💬🔥💪
-            first_battle: {
-                name: "⚔️ 首次作戰",
+            random_battle: {
+                name: "⚔️ 作戰中",
                 text: () => {
-                    let base = "首次作戰開始。";
+                    if (!state.flags.battle) {
+                        state.mob_state.hp = 25;
+                        state.mob_state.sanity = 25;
+                        state.mob_state.atk = 1;
+                        state.mob_state.def = 0;
+                        state.mob_state.coin = 50;
+                        state.mob_state.fame = 3;
+                        state.mob_state.doom = -1;
+                        if (state.flags.battleForAlys){
+                            state.mob_state.hp = 25;
+                            state.mob_state.sanity = 25;
+                            state.mob_state.atk = 1;
+                            state.mob_state.def = 0;
+                            state.mob_state.coin = 50;
+                            state.mob_state.fame = 3;
+                            state.mob_state.doom = -1;
+                        }
+                        state.flags.battle = true
+
+                    }
+                    let base = "黑袍刺客\n";
+                    if (state.flags.battleForAlys){
+                        base = "黑袍刺客\n";
+                    }
+                    base += `HP: ${state.mob_state.hp}`;
+                    
+                    if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
+                        base = "作戰勝利！";
+                    }
+
                     return base;
                 },
                 options: () => {
-                    if (!state.flags.battle){
-                        mob_state.hp = 25;
-                        mob_state.sanity = 25;
-                        mob_state.atk = 1;
-                        mob_state.def = 0;
-                        mob_state.fame = 3;
-                        mob_state.coin = 50;
-                        state.flags.battle = true
-                    } 
-                    let opts = [
-                        { text: "👁️", next: "first_battle" },
-                        { text: "💪", next: "first_battle" },
-                        { text: "💬", next: "first_battle" },
-                        { text: "👣", next: "first_battle" },
-                    ];
-
-                     if (state.flags.battle && (mob_state.hp <= 0 || mob_state.sanity <= 0)){
-                        state.flags.battle = false;
-                    } 
                     
+                    let opts = [
+                        { 
+                            text: "💪 攻擊", next: "random_battle",
+                            action: () => {
+                                setStatus("💪 攻擊");
+                                state.mob_state.hp -=10;
+                                state.mob_state.sanity -=1;
+                                state.hp -= state.mob_state.atk;
+                            }                        
+                        },
+                        { 
+                            text: "💬 戰吼", next: "random_battle",
+                            action: () => {
+                                setStatus("💬 戰吼");
+                                state.mob_state.hp -=1;
+                                state.mob_state.sanity -=10;
+                                state.hp -= state.mob_state.atk;
+                            }
+                        },
+                    ];
+                    if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
+                        opts = [
+                            { 
+                                text: "👁️ 收刮財物", next: "random_battle",                             
+                                action: () => {
+                                    if (state.mob_state.coin >0){
+                                        setStatus("👁️ 收刮財物成功");
+                                        state.coin += state.mob_state.coin;
+                                        state.mob_state.coin = 0;
+                                    } else {
+                                        setStatus("👁️ 收刮財物失敗");
+                                    }                                    
+                                }
+                            },
+                            { 
+                                text: "👣 離開戰場", next: state.location_save,                            
+                                action: () => {
+                                    state.fame += state.mob_state.fame;
+                                    state.mob_state.fame = 0;   
+                                    state.doom += state.mob_state.doom;
+                                    state.mob_state.doom = 0;    
+                                    state.flags.battle = false;
+                                    state.flags.battleForAlys = false;
+                                    state.flags.metAlys = true;                   
+                                }
+                            },
+                        ];
+                    }
                     return opts;
                 }
             },
@@ -917,6 +1014,10 @@
             dead: {
                 title: "結局七：肉體損壞 (壞結局二)",
                 text: "你沒能揭開這片土地的謎題。你過度使用身體導致受傷過於嚴重，你的身體與靈魂被漸漸化為純粹的黑暗粒子。\n世界上徹底抹消了你存在過的痕跡。沒有人記得你來過，連黑影也嫌棄地吹散了你的灰燼。"
+            },
+            doom: {
+                title: "結局八：末日降臨 (壞結局三)",
+                text: "你沒能揭開這片土地的謎題。你虛度太多時光導致毒霧遽增覆蓋了整個地區，所有人的身體與靈魂被漸漸化為純粹的黑暗粒子。\n世界上徹底抹消了你存在過的痕跡。沒有人記得你來過，連黑影也嫌棄地吹散了你的灰燼。"
             }
         };
 
@@ -928,6 +1029,11 @@
         const statusTextEl = document.getElementById("statusText");
         const restartBtn = document.getElementById("restartBtn");
         const sceneIconEl = document.getElementById("sceneIcon");
+        const HPEl = document.getElementById("HP");
+        const SAEl = document.getElementById("SANITY");
+        const COEl = document.getElementById("COIN");
+        const FAEl = document.getElementById("FAME");
+        const DOEl = document.getElementById("DOOM");
 
         function setStatus(text) {
             statusTextEl.textContent = text;
@@ -1008,28 +1114,29 @@
 
             // 情況 A：正在進行道具調查或夥伴交談
             if (state.inspecting !== null) {
-                
+
                 // 道具調查
                 const item = ITEM_DATA[state.inspecting];
                 locationNameEl.textContent = `🔍 調查中：${item.name}`;
                 sceneIconEl.textContent = "🧩";
                 dialogTextEl.textContent = item.desc;
-                if (state.inspecting === "ALYS"){
+                if (state.inspecting === "ALYS") {
                     locationNameEl.textContent = `💬 與隊員互動中：${item.name}`;
                     sceneIconEl.textContent = "🌹";
                     dialogTextEl.textContent = PARTNER_DIALOGUE[state.location] || item.desc;
                 }
-                
+
                 // console.log(item.hp);
-                if ((item.hp && state.hp < 100)  || (item.sanity && state.sanity < 100)) {
+                if ((item.hp && state.hp < 100) || (item.sanity && state.sanity < 100)) {
                     const useBtn = document.createElement("button");
                     useBtn.className = "option-btn";
                     useBtn.innerHTML = `<span>使用道具 🤏</span><span class="option-key">選項</span>`;
-                    if (state.inspecting === "ALYS"){
+                    if (state.inspecting === "ALYS") {
                         useBtn.innerHTML = `<span>簡易醫療處理 🤍</span><span class="option-key">技能</span>`;
                     }
                     useBtn.addEventListener("click", () => {
                         setStatus(item.result);
+                        if (item.doom) state.doom += item.doom;
                         if (item.hp) state.hp += item.hp;
                         if (state.hp > 100) state.hp = 100;
                         if (item.sanity) state.sanity += item.sanity
@@ -1040,7 +1147,7 @@
                     });
                     optionsEl.appendChild(useBtn);
                 }
-                
+
 
                 // 生成返回現場的按鈕
                 const returnBtn = document.createElement("button");
@@ -1077,14 +1184,28 @@
                     }
                     if (opt.next) {
                         state.location = opt.next;
+                        if (loc.random_battle_dice){
+                            let random_battle_dice = Math.random();
+                            console.log(random_battle_dice);
+                            if (random_battle_dice>=1-loc.random_battle_dice && state.location!="random_battle"){
+                                state.location_save = state.location;
+                                state.location = "random_battle";
+                            }
+                        }                        
                     }
                     if (state.hp <= 0) endGame("dead");
                     if (state.sanity <= 0) endGame("void");
+                    if (state.doom >= 100) endGame("doom");
 
                     render();
                 });
                 optionsEl.appendChild(btn);
             });
+            HPEl.textContent = `${state.hp}/100`;
+            SAEl.textContent = `${state.sanity}/100`;
+            COEl.textContent = `${state.coin}`;
+            FAEl.textContent = `${state.fame}`;
+            DOEl.textContent = `${state.doom}%`;
             AyaKits.saveGame(state, autosavename);
         }
 
