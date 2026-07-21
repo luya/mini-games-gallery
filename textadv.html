@@ -6,11 +6,11 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛓️</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌓</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <title>深淵國度：墮落者</title>
+    <title>Kingdom of Abyss</title>
     <link rel="stylesheet" href="ayakit.css">
     <link rel="stylesheet" href="textadv.css">
     <style>
@@ -34,7 +34,7 @@
     <div class="game">
         <div class="header">
             <div class="header-top">
-                <div class="title">深淵國度：墮落者</div>
+                <div class="title">邪神領域</div>
             </div>
             <div class="inventory-container">
                 <div class="inventory" id="inventory"></div>
@@ -52,13 +52,57 @@
         <div class="footer">
             <span id="statusText" style="white-space: pre-wrap;">開始選擇你的命運⋯</span>
         </div>
-        <div class="footer_start">
-            <span style="white-space: pre-wrap;">HP ❤️: <span id="HP">???/???</span></span>
-            <span style="white-space: pre-wrap;">SA 🧠: <span id="SANITY">???/???</span></span>
-            <span style="white-space: pre-wrap;">CO 💰: <span id="COIN">?</span></span>
-            <span style="white-space: pre-wrap;">FA 🎭: <span id="FAME">?</span></span>
-            <span style="white-space: pre-wrap;">DO 🧿: <span id="DOOM">?</span></span>
+        <div class="footer_status">
+            <div class="status_panel">
+                <div class="status_start">
+                    <span style="white-space: pre-wrap;">❤️ HP: </span>
+                    <span style="white-space: pre-wrap;">🧠 Sanity: </span>
+                    <span style="white-space: pre-wrap;">💰 Coin: </span>
+                    <span style="white-space: pre-wrap;">🎭 Fame: </span>
+                    <span style="white-space: pre-wrap;">🧿 Doom: </span>
+                </div>
+                <div class="status_end">
+                    <span id="HP">???/???</span>
+                    <span id="SANITY">???/???</span>
+                    <span id="COIN">?</span>
+                    <span id="FAME">?</span>
+                    <span id="DOOM">?</span>
+                </div>
+            </div>
+            <div class="status_panel">
+                <div class="status_start">
+                    <span style="white-space: pre-wrap;">⚡ Power: </span>
+                    <span style="white-space: pre-wrap;">📚 Knowledge: </span>
+                    <span style="white-space: pre-wrap;">✨ Charm: </span>
+                    <span style="white-space: pre-wrap;">🔓 Lock Picking: </span>
+                    <span style="white-space: pre-wrap;">⚒️ Creativity: </span>
+                </div>
+                <div class="status_end">
+                    <span id="POWER">?</span>
+                    <span id="KNOWLEDGE">?</span>
+                    <span id="CHARM">?</span>
+                    <span id="LOCK PICKING">?</span>
+                    <span id="CREATIVITY">?</span>
+                </div>
+            </div>
+            <div class="status_panel">
+                <div class="status_start">
+                    <span style="white-space: pre-wrap;">⚔️ Attack: </span>
+                    <span style="white-space: pre-wrap;">🛡️ Defense: </span>
+                    <span style="white-space: pre-wrap;">🔗 Logic: </span>
+                    <span style="white-space: pre-wrap;">⛓️ Deduction: </span>
+                    <span style="white-space: pre-wrap;">⭐ Concentration: </span>
+                </div>
+                <div class="status_end">
+                    <span id="ATTACK">?</span>
+                    <span id="DEFENSE">?</span>
+                    <span id="LOGIC">?</span>
+                    <span id="DEDUCTION">?</span>
+                    <span id="CONCENTRATION">?</span>
+                </div>
+            </div>
         </div>
+
         <div class="footer_end">
             <button class="restart-btn" id="restartBtn">重新開始旅程 🔁</button>
         </div>
@@ -66,14 +110,28 @@
 
     <script src="ayakit.js"></script>
     <script>
-        // 10 個道具的完整鍵值與說明資料
+        // 10 個道具的完整鍵值與說明資料🔓⚒️⚖️⛓️🔗⚔️🛡️⭐☀️🌙
         const ITEM_DATA = {
+            ALYS: { 
+                name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』", 
+                power:1, knowledge:2, charm:3, lock_picking:7, creativity: 5, 
+                atk: 7, def: 7, logic: 3, deduction:3, concentration:3,
+            },
+
+            SWORD: { name: "冒險長劍 🗡️", desc: "冒險者常用的防身武器，需要有耐心的保養。", atk: 5 , eq_slot: "weapon"},
+            SHIELD: { name: "冒險小盾 🛡️", desc: "專為方便攜帶而設計，並不是十分完善。", def: 3 , eq_slot: "shield"},
+            RATION: { name: "營養口糧 🍪", desc: "旅行者愛用的補給品。", hp: 25, sanity: 25, doom: -1 },
+            BACON: { name: "煙燻培根 🥓", desc: "香氣十足的便利食物。", hp: 40, sanity: 40, doom: 1 },
+            MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 50, sanity: 50, doom: -1 },
+            BBQ: { name: "炙烤骨肉 🍖", desc: "帶骨的強身大餐。", hp: 75, sanity: 75, doom: 2 },
+            
+
+
+
             TORCH: { name: "破舊火把 🔥", desc: "原本快熄滅的火把，不知為什在碰觸後，又開始點燃，可能還有些用途。", hp: 1, sanity: 5, doom: 1, result: "火把的能量忽然短暫增強，你感到安心不少。", repeat: true },
-            ALYS: { name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』", atk: 10, def: 5, hp: 5, sanity: 10, doom: 1, repeat: true, result: "艾莉絲：『讓我幫你包紮一下。』" },
-            SHIELD: { name: "青銅盾牌 🛡️", desc: "充滿使用痕跡的盾牌，冒險中帶著似乎也不是什壞事。", def: 3 },
-            MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 25, sanity: 25 , doom: 1},
-            BBQ: { name: "烤排骨肉 🍖", desc: "帶骨的火炙強身大餐。", hp: 50, sanity: 50 , doom: 1},
-            DAGGER: { name: "鏽蝕匕首 🗡️", desc: "復古的雕飾，經過歲月的摧殘，還算堪用的武器，雖然可能只能劃開皮膚而已。", atk: 1 },
+            
+            
+            DAGGER: { name: "鏽蝕匕首 🗡️", desc: "復古的雕飾，經過歲月的摧殘，還算堪用的武器，雖然可能只能劃開皮膚而已。", atk: 1, eq_slot: "weapon" },
             GUARDKEY: { name: "無名鑰匙 🗝️", desc: "鑰匙上方有著類似老鷹個符號。" },
             LANTERN: { name: "守墓人提燈 🪔", desc: "裏面尚有些許燃料，也許有著意外的功用。" },
             SKULL: { name: "野獸顱骨 ☠️", desc: "怪異的遺駭，感覺是一種祭品，原本可能是個巨大的野獸。" },
@@ -81,14 +139,20 @@
             POISON: { name: "鍊金術士的劇毒 🍾", desc: "試探了一下，一小滴就可以把植物融化，最好不要打破容器。" },
             PAGES: { name: "告解者殘頁 📜", desc: "奇特的頁面，上面的敘事有如詛咒，仔細閱讀就會暈眩。" },
             RING: { name: "裂隙指環 💍", desc: "【關鍵道具】未知且強大的物品，帶上的時候，內心會出現巨大的空洞感。" },
-            SWORD: { name: "審判者大劍 🗡️", desc: "【關鍵道具】有著精美的製作與附魔，大部分都還閃閃發亮，握在手上也十分輕盈。", atk: 10 },
+            // SWORD: { name: "審判者大劍 🗡️", desc: "【關鍵道具】有著精美的製作與附魔，大部分都還閃閃發亮，握在手上也十分輕盈。", atk: 10 },
             HOURGLASS: { name: "倒流沙漏 ⏳", desc: "【關鍵道具】散發神秘的氣息，不知道有什功用。" }
         };
 
         const ITEMS = {
+            SWORD: "SWORD",
+            SHIELD: "SHIELD",
+            RATION: "RATION", 
+            BACON: "BACON", 
+            MEAT: "MEAT",
+            BBQ: "BBQ",
+
             TORCH: "TORCH",
             ALYS: "ALYS",
-            SHIELD: "SHIELD",
             DAGGER: "DAGGER",
             LANTERN: "LANTERN",
             SKULL: "SKULL",
@@ -96,7 +160,6 @@
             POISON: "POISON",
             PAGES: "PAGES",
             RING: "RING",
-            SWORD: "SWORD",
             HOURGLASS: "HOURGLASS"
         };
 
@@ -107,18 +170,42 @@
             graveyard_east: "艾莉絲：『該不會衝出殭屍吧？媽阿，噁心的地方。』",
         };
 
+        const EqAllSlot = ["weapon", "shield", "armor"];
+        const EqAllSlotName = {weapon:"武器", shield:"盾牌", armor:"穿著"};
+        const AllSkill = [            
+            "hp", "sanity", "coin", "fame", "doom", 
+            "power", "knowledge", "charm", "lock_picking", "creativity", 
+            "atk", "def", "logic", "deduction", "concentration", 
+        ];
+        const AllSkillName = [            
+            "體力", "理智", "金錢", "名聲", "末日", 
+            "力量", "知識", "魅力", "開鎖", "創造", 
+            "攻擊", "防禦", "邏輯", "推理", "集中", 
+        ];
         // 遊戲狀態
         const state_default = {
             location: "graveyard_center",
             location_save: "graveyard_center",
-            inventory: [],
+            inventory: [ITEMS.SWORD, ITEMS.SHIELD, ITEMS.RATION, ITEMS.BACON],
+            parnter: [ITEMS.ALYS],
             hp: 100,
             sanity: 100,
-            atk: 0,
-            def: 0,
             coin: 0,
             fame: 0,
             doom: 0,
+            power: 6,
+            knowledge: 6,
+            charm: 6,
+            lock_picking: 2,
+            creativity: 3,
+            atk: 0,
+            def: 0,
+            logic: 5,
+            deduction: 6,
+            concentration: 4,
+            weapon: null,
+            shield: null,
+            armor: null,
             ended: false,
             inspecting: null, // 當前正在檢視的道具 Key 或 'Alys'，為 null 表示在正常場景
             flags: {
@@ -136,7 +223,7 @@
                 // angeredShade: false,
                 // sacrificedBlood: false
             },
-            mob_state : {
+            mob_state: {
                 hp: 100,
                 sanity: 100,
                 atk: 0,
@@ -400,7 +487,7 @@
                     if (!state.flags.metAlys) {
                         base = "一個穿著黑袍的刺客向你靠近，你也注意到黑暗處有人在注視著你們。";
                     }
-                    if (state.flags.metAlys && !state.inventory.includes(ITEMS.ALYS)){
+                    if (state.flags.metAlys && !state.inventory.includes(ITEMS.ALYS)) {
                         base = "黑暗處的黑影並沒有離開。";
                     }
 
@@ -413,16 +500,16 @@
                     ];
                     if (!state.flags.metAlys) {
                         opts = [
-                            { 
+                            {
                                 text: "⚔️ 進入作戰", next: "random_battle",
-                                action: ()=>{
+                                action: () => {
                                     state.flags.battleForAlys = true;
                                     state.location_save = state.location;
                                 }
                             },
                         ];
                     }
-                    if (state.flags.metAlys && !state.inventory.includes(ITEMS.ALYS)){
+                    if (state.flags.metAlys && !state.inventory.includes(ITEMS.ALYS)) {
                         opts = [
                             { text: "💬 與黑影對話", next: state.location },
                         ];
@@ -443,7 +530,7 @@
                         state.mob_state.coin = 50;
                         state.mob_state.fame = 3;
                         state.mob_state.doom = -1;
-                        if (state.flags.battleForAlys){
+                        if (state.flags.battleForAlys) {
                             state.mob_state.hp = 25;
                             state.mob_state.sanity = 25;
                             state.mob_state.atk = 1;
@@ -456,11 +543,12 @@
 
                     }
                     let base = "黑袍刺客\n";
-                    if (state.flags.battleForAlys){
+                    if (state.flags.battleForAlys) {
                         base = "黑袍刺客\n";
                     }
                     base += `HP: ${state.mob_state.hp}`;
-                    
+                    base += `\nSA: ${state.mob_state.sanity}`;
+
                     if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
                         base = "作戰勝利！";
                     }
@@ -468,51 +556,51 @@
                     return base;
                 },
                 options: () => {
-                    
+
                     let opts = [
-                        { 
-                            text: "💪 攻擊", next: "random_battle",
+                        {
+                            text: "💪 肉搏攻擊", next: "random_battle",
                             action: () => {
-                                setStatus("💪 攻擊");
-                                state.mob_state.hp -=10;
-                                state.mob_state.sanity -=1;
+                                setStatus("敵人被你猛力攻擊。");
+                                state.mob_state.hp -= 10;
+                                state.mob_state.sanity -= 1;
                                 state.hp -= state.mob_state.atk;
-                            }                        
+                            }
                         },
-                        { 
+                        {
                             text: "💬 戰吼", next: "random_battle",
                             action: () => {
-                                setStatus("💬 戰吼");
-                                state.mob_state.hp -=1;
-                                state.mob_state.sanity -=10;
+                                setStatus("敵人被你震攝。");
+                                state.mob_state.hp -= 1;
+                                state.mob_state.sanity -= 10;
                                 state.hp -= state.mob_state.atk;
                             }
                         },
                     ];
                     if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
                         opts = [
-                            { 
-                                text: "👁️ 收刮財物", next: "random_battle",                             
+                            {
+                                text: "👁️ 收刮財物", next: "random_battle",
                                 action: () => {
-                                    if (state.mob_state.coin >0){
+                                    if (state.mob_state.coin > 0) {
                                         setStatus("👁️ 收刮財物成功");
                                         state.coin += state.mob_state.coin;
                                         state.mob_state.coin = 0;
                                     } else {
                                         setStatus("👁️ 收刮財物失敗");
-                                    }                                    
+                                    }
                                 }
                             },
-                            { 
-                                text: "👣 離開戰場", next: state.location_save,                            
+                            {
+                                text: "👣 離開戰場", next: state.location_save,
                                 action: () => {
                                     state.fame += state.mob_state.fame;
-                                    state.mob_state.fame = 0;   
+                                    state.mob_state.fame = 0;
                                     state.doom += state.mob_state.doom;
-                                    state.mob_state.doom = 0;    
+                                    state.mob_state.doom = 0;
                                     state.flags.battle = false;
                                     state.flags.battleForAlys = false;
-                                    state.flags.metAlys = true;                   
+                                    state.flags.metAlys = true;
                                 }
                             },
                         ];
@@ -1035,56 +1123,93 @@
         const FAEl = document.getElementById("FAME");
         const DOEl = document.getElementById("DOOM");
 
+        const POEl = document.getElementById("POWER");
+        const KNEl = document.getElementById("KNOWLEDGE");
+        const CHEl = document.getElementById("CHARM");
+        const LPEl = document.getElementById("LOCK PICKING");
+        const CREl = document.getElementById("CREATIVITY");
+
+        const ATEl = document.getElementById("ATTACK");
+        const DFEl = document.getElementById("DEFENSE");
+        const LOEl = document.getElementById("LOGIC");
+        const DEEl = document.getElementById("DEDUCTION");
+        const CTEl = document.getElementById("CONCENTRATION");
+
         function setStatus(text) {
             statusTextEl.textContent = text;
         }
 
         function addItem(itemKey) {
-            if (!state.inventory.includes(itemKey)) {
-                state.inventory.push(itemKey);
-            }
+            state.inventory.push(itemKey);
             renderInventory();
         }
 
         function removeItem(itemKey) {
             if (state.inventory.includes(itemKey)) {
-                // console.log(itemKey)
-                state.inventory.pop(itemKey);
+                const index = state.inventory.indexOf(itemKey);
+
+                // 2. 確定有找到該元素（indexOf 找不到時會回傳 -1）
+                if (index !== -1) {
+                    // 從 index 位置開始刪除 1 個元素
+                    state.inventory.splice(index, 1); 
+                }
             }
             renderInventory();
         }
 
         // 渲染上方可點擊的道具與夥伴列表
         function renderInventory() {
-            inventoryEl.innerHTML = "道具：";
-            // 如果有夥伴
-            if (state.inventory.includes(ITEMS.ALYS)) {
-                inventoryEl.innerHTML = "隊員以及道具：";
+            inventoryEl.innerHTML = ""; // 觸發渲染前先清空是沒問題的
+
+            EqAllSlot.forEach((slotKey) => {
+                // 1. 如果有武器，建立標籤文字與按鈕
+                if (state[slotKey]) {
+                    // 使用 TextNode 加入文字，就不會破壞 DOM 結構
+                    inventoryEl.appendChild(document.createTextNode(`${EqAllSlotName[slotKey]}：`));
+
+                    const btn = document.createElement("button");
+                    btn.className = "inv-btn";
+                    btn.textContent = ITEM_DATA[state[slotKey]].name;
+                    btn.addEventListener("click", () => inspectSomething(state[slotKey], ITEM_DATA[state[slotKey]].eq_slot));
+                    inventoryEl.appendChild(btn);
+                }
+            });
+
+            if(state.parnter.length>0) {
+                inventoryEl.appendChild(document.createTextNode("隊員："));
             }
 
-            // 生成獲得的道具按鈕
-            state.inventory.forEach((itemKey) => {
+            // 3. 生成獲得的道具按鈕
+            state.parnter.forEach((itemKey) => {
                 const btn = document.createElement("button");
-
-                btn.className = "inv-btn";
-                if (itemKey == "ALYS") {
-                    btn.className = "inv-btn partner";
-                }
-
+                btn.className = "inv-btn partner";
                 btn.textContent = ITEM_DATA[itemKey].name;
                 btn.addEventListener("click", () => inspectSomething(itemKey));
                 inventoryEl.appendChild(btn);
             });
 
-            if (inventoryEl.children.length === 0) {
-                inventoryEl.textContent = "道具：無";
+            // 2. 判斷並加入標題文字
+            if(state.inventory.length>0) {
+                inventoryEl.appendChild(document.createTextNode("道具："));
+            } else {
+                inventoryEl.appendChild(document.createTextNode("道具：無"));
             }
+
+            // 3. 生成獲得的道具按鈕
+            state.inventory.forEach((itemKey) => {
+                const btn = document.createElement("button");
+                btn.className = "inv-btn";
+                btn.textContent = ITEM_DATA[itemKey].name;
+                btn.addEventListener("click", () => inspectSomething(itemKey));
+                inventoryEl.appendChild(btn);
+            });
         }
 
         // 進入調查/對話模式
-        function inspectSomething(target) {
+        function inspectSomething(target, eq_slot = null) {
             if (state.ended) return;
             state.inspecting = target;
+            state.inspecting_slot = eq_slot;
             render();
         }
 
@@ -1107,6 +1232,8 @@
 
         // 核心渲染邏輯：區分「現場探索」與「互動面板」
         function render() {
+            // 更新能力值
+            updateStats();
             renderInventory();
             optionsEl.innerHTML = "";
 
@@ -1120,10 +1247,23 @@
                 locationNameEl.textContent = `🔍 調查中：${item.name}`;
                 sceneIconEl.textContent = "🧩";
                 dialogTextEl.textContent = item.desc;
-                if (state.inspecting === "ALYS") {
+                let skillCounter=0;
+                let skillDesc = "";
+                AllSkill.forEach((skillKey) => {
+                    if (item[skillKey]){
+                        if(skillCounter>0) skillDesc += ", ";
+                        skillDesc += AllSkillName[AllSkill.indexOf(skillKey)] +`：${item[skillKey]}`;
+                        skillCounter +=1;
+                    }
+                });
+                if (skillCounter>0){
+                    dialogTextEl.textContent += "。\n修正值："+skillDesc;
+                }
+                
+
+                if (state.parnter.includes(state.inspecting)) {
                     locationNameEl.textContent = `💬 與隊員互動中：${item.name}`;
                     sceneIconEl.textContent = "🌹";
-                    dialogTextEl.textContent = PARTNER_DIALOGUE[state.location] || item.desc;
                 }
 
                 // console.log(item.hp);
@@ -1131,9 +1271,6 @@
                     const useBtn = document.createElement("button");
                     useBtn.className = "option-btn";
                     useBtn.innerHTML = `<span>使用道具 🤏</span><span class="option-key">選項</span>`;
-                    if (state.inspecting === "ALYS") {
-                        useBtn.innerHTML = `<span>簡易醫療處理 🤍</span><span class="option-key">技能</span>`;
-                    }
                     useBtn.addEventListener("click", () => {
                         setStatus(item.result);
                         if (item.doom) state.doom += item.doom;
@@ -1146,6 +1283,35 @@
                         render();
                     });
                     optionsEl.appendChild(useBtn);
+                }
+
+                if (item.eq_slot && !state.inspecting_slot) {
+                    const eqBtn = document.createElement("button");
+                    eqBtn.className = "option-btn";
+                    eqBtn.innerHTML = `<span>裝備 👌</span><span class="option-key">選項</span>`;
+                    eqBtn.addEventListener("click", () => {
+                        console.log(state.inventory);
+                        setStatus(`裝備了：${item.name}`);
+                        equipItem(state.inspecting);
+                        state.inspecting = null;
+                        render();
+                        console.log(state.inventory);
+                    });
+                    optionsEl.appendChild(eqBtn);
+                }
+
+                if (state.inspecting_slot) {
+                    const uneqBtn = document.createElement("button");
+                    uneqBtn.className = "option-btn";
+                    uneqBtn.innerHTML = `<span>卸下裝備 👌</span><span class="option-key">選項</span>`;
+                    uneqBtn.addEventListener("click", () => {
+                        setStatus(`卸下裝備了：${item.name}`);
+                        unequipItem(state.inspecting_slot);
+                        state.inspecting = null;
+                        state.inspecting_slot = null;
+                        render();
+                    });
+                    optionsEl.appendChild(uneqBtn);
                 }
 
 
@@ -1184,14 +1350,14 @@
                     }
                     if (opt.next) {
                         state.location = opt.next;
-                        if (loc.random_battle_dice){
+                        if (loc.random_battle_dice) {
                             let random_battle_dice = Math.random();
                             console.log(random_battle_dice);
-                            if (random_battle_dice>=1-loc.random_battle_dice && state.location!="random_battle"){
+                            if (random_battle_dice >= 1 - loc.random_battle_dice && state.location != "random_battle") {
                                 state.location_save = state.location;
                                 state.location = "random_battle";
                             }
-                        }                        
+                        }
                     }
                     if (state.hp <= 0) endGame("dead");
                     if (state.sanity <= 0) endGame("void");
@@ -1206,6 +1372,18 @@
             COEl.textContent = `${state.coin}`;
             FAEl.textContent = `${state.fame}`;
             DOEl.textContent = `${state.doom}%`;
+
+            POEl.textContent = `${state.power}`;
+            KNEl.textContent = `${state.knowledge}`;
+            CHEl.textContent = `${state.charm}`;
+            LPEl.textContent = `${state.lock_picking}`;
+            CREl.textContent = `${state.creativity}`;
+
+            ATEl.textContent = `${state.atk}`;
+            DFEl.textContent = `${state.def}`;
+            LOEl.textContent = `${state.logic}`;
+            DEEl.textContent = `${state.deduction}`;
+            CTEl.textContent = `${state.concentration}`;
             AyaKits.saveGame(state, autosavename);
         }
 
@@ -1213,6 +1391,67 @@
             state = structuredClone(state_default);
             setStatus("開始選擇你的命運⋯");
             render();
+        }
+
+        // 輔助函式：根據當前裝備重新計算角色屬性
+        function updateStats() {
+            //1. default
+            AllSkill.forEach((skillKey) => {
+                state[skillKey] = state_default[skillKey];
+            });
+
+            //2. eq
+            EqAllSlot.forEach((slotKey) => {
+                if (state[slotKey] && ITEM_DATA[state[slotKey]]) {
+                    AllSkill.forEach((skillKey) => {
+                        state[skillKey] += ITEM_DATA[state[slotKey]][skillKey] || 0
+                    });
+                }
+            });
+
+            state.parnter.forEach((member) => {
+                AllSkill.forEach((skillKey) => {
+                    state[skillKey] += ITEM_DATA[member][skillKey] || 0
+                });
+            });
+
+            state.atk += state.power + Math.floor(state.charm/2) + Math.floor(state.knowledge/4);
+            state.def += state.charm + Math.floor(state.power/2) + Math.floor(state.knowledge/4);
+        }
+
+        // 2. 穿上裝備
+        function equipItem(itemName) {
+            // console.log(itemName);
+            // console.log(state.inventory);
+            // 檢查背包是否有該道具
+            const item_data = ITEM_DATA[itemName];
+            const slot = item_data.eq_slot; // "weapon" 或 "armor"
+
+            // 從背包移除要裝備的道具
+            removeItem(itemName)
+            // console.log(state.inventory);
+            // 如果目標位置已有裝備，先卸下回到背包
+            if (state[slot]) {
+                addItem(state[slot]);
+            }
+
+            // 裝上新裝備並更新能力值
+            state[slot] = itemName;
+            // console.log(state.inventory);
+        }
+
+        // 3. 卸下裝備
+        function unequipItem(slot) {
+
+            console.log(state.inventory);
+            // 將裝備移回背包
+            const unequippedItem = state[slot];
+            addItem(unequippedItem);
+            state[slot] = null;
+
+            
+            
+            console.log(state.inventory);
         }
 
         restartBtn.addEventListener("click", restartGame);
