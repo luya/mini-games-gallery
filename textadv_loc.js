@@ -105,6 +105,444 @@ const tavern_single_events = {
             return opts;
         }
     },
+    Eye_On_Gallows: {
+        name: "👁️ 懸樑上的眼球",
+        text: () => {
+            return "酒館外舊絞刑架上掛著一個用麻繩繫住的玻璃罐。\n"+
+            "裡面有一顆仍在眨動的巨大眼球，正死死凝視著你。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.power + state.creativity;
+                        const event_lv = 12 * 2;
+                        return "試圖凝視玻璃罐 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.power + state.creativity;
+                        const event_lv = 12 * 2;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "眼球受到精神反嗜，裡面的黑血濺了一地，眼球化為灰燼。\n你從玻璃罐碎片中撿到了幾枚金幣。"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(20);
+                            state.sanity -= AyaKits.rollDice(3);
+                            state.fame += AyaKits.rollDice(2);
+                            state.doom -= AyaKits.rollDice(2);
+                        } else {  
+                            setStatus(
+                                "罐中的眼球向你發出尖銳的神經刺痛感！你痛苦地抱頭倒地。"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.hp -= AyaKits.rollDice(5);
+                            state.sanity -= AyaKits.rollDice(10);
+                            state.fame -= AyaKits.rollDice(2);
+                            state.doom += AyaKits.rollDice(2);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "移開視線離開 ❌", 
+                    action: () => { 
+                        setStatus("你快速轉過身去，強迫自己無視那股不安的視線。");
+                        state.sanity -= AyaKits.rollDice(2);
+                    }, 
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    },
+    Sacrifice_Sheet: {
+        name: "📜 唱詩班的皮紙",
+        text: () => {
+            return "巷口一名穿著破爛袍子的狂熱信徒正高聲吟誦。\n"+
+            "他手中握著羊皮紙，上面用異形文字記滿了不詳的符號。\n"+
+            "沒有人敢靠近他，或是匆忙的低頭經過。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.knowledge + state.charm;
+                        const event_lv = 9 * 2;
+                        return "辨識符號並斥責 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.knowledge + state.charm;
+                        const event_lv = 9 * 2;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "你指出了他咒文中的謬誤。信徒大驚失色，視你為賢者，拱手讓出了供奉的財物。"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(20);
+                            // state.knowledge += AyaKits.rollDice(2);
+                            state.fame += AyaKits.rollDice(4);
+                            state.doom -= AyaKits.rollDice(3);
+                        } else {  
+                            setStatus(
+                                "你試圖解析那些符號，某些不可名狀的聲音直衝腦海！你大口吐血。"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.hp -= AyaKits.rollDice(10);
+                            state.sanity -= AyaKits.rollDice(10);
+                            state.fame -= AyaKits.rollDice(3);
+                            state.doom += AyaKits.rollDice(3);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "快步通過 ❌", 
+                    action: () => { setStatus("你摀住耳朵，迅速離開了瘋狂的吟誦聲。"); }, 
+                    next: () => {
+                        state.sanity -= AyaKits.rollDice(3);
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    },
+    Whispering_Well: {
+        name: "🩸 井底的低語",
+        text: () => {
+            return "酒館附近的廢棄枯井傳出陣陣濕潤的喘息聲。\n"+
+            "井口周圍漫延著詭異的黑色黏液，似乎有某種古老存在正從底部甦醒。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const self_confidence = state.power + state.knowledge + state.charm + state.creativity;
+                        const event_lv = 13 * 4;
+                        return "凝視井底並且行動 ✔️ " + `成功率：${Math.min(100, Math.floor(self_confidence * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const self_confidence = state.power + state.knowledge + state.charm + state.creativity;
+                        const event_lv = 13 * 4;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + self_confidence) >= event_lv) {
+                            setStatus(
+                                "你克服了恐懼，用重石暫時壓制了井口。\n黏液貌似不甘心地鑽回去，消失無影。"+
+                                "視線變得清晰，你發現到不少金幣掉在地上。"+
+                                `\n檢定：${event_dice}+${self_confidence}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(80);
+                            state.sanity += AyaKits.rollDice(5);
+                            state.fame += AyaKits.rollDice(5);
+                            state.doom -= AyaKits.rollDice(4);
+                        } else {  
+                            setStatus(
+                                "井底伸出了黏稠的觸手！你受到驚嚇後勉強逃脫。"+
+                                `\n檢定：${event_dice}+${self_confidence}<${event_lv} 🎲`
+                            );
+                            state.hp -= AyaKits.rollDice(10);
+                            state.sanity -= AyaKits.rollDice(10);
+                            state.doom += AyaKits.rollDice(4);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "無視離開 ❌", 
+                    action: () => { setStatus("你假裝什麼都沒聽見，默默地遠離了枯井。"); }, 
+                    next: () => {
+                        state.sanity -= AyaKits.rollDice(3);
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    }, 
+    Midnight_Clock: {
+        name: "🕰️ 逆行的老時鐘",
+        text: () => {
+            return "酒館附近的小巷深處有一座停擺多年的廢棄老時鐘，當你靠近時，此刻指針竟開始急速逆轉。\n"+
+            "伴隨著刺耳的金屬摩擦聲，空氣中泛起一股令人窒息的腐敗氣味。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.power + state.logic + state.deduction;
+                        const event_lv = 9 * 3;
+                        return "推算齒輪規律與異像來源 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.logic + state.deduction;
+                        const event_lv = 9 * 3;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "你冷靜地透過指針跳動的頻率推算出了異象結界點的虛弱時刻，然後立刻破壞了時鐘。"+
+                                "\n現場遺留下了些許金幣。"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(30);
+                            state.sanity += AyaKits.rollDice(5);
+                            state.fame += AyaKits.rollDice(3);
+                            state.doom -= AyaKits.rollDice(3);
+                        } else {  
+                            setStatus(
+                                "逆轉的時針引發了短暫的時空錯亂，你的肉體被錯位的時間割傷，理智也差點完全斷線！"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.hp -= AyaKits.rollDice(10);
+                            state.sanity -= AyaKits.rollDice(10);
+                            state.doom += AyaKits.rollDice(3);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "避開鐘樓 ❌", 
+                    action: () => { setStatus("你按捺住好奇心，快速離開了刺耳的鐘樓響聲。"); }, 
+                    next: () => {
+                        state.sanity -= AyaKits.rollDice(3);
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    },
+    Locked_Iron_Casket: {
+        name: "🔒 纏鐵絲的黑木箱",
+        text: () => {
+            return "在酒館附近的一間無人使用的地下室的陰暗角落裡，擺著一個被粗鐵鏈與重鎖緊扣的黑木箱。\n"+
+            "箱子內部不斷發出微弱的指甲抓撓聲，彷彿裡面關著某種渴望逃脫的東西。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.lock_picking + state.concentration;
+                        const event_lv = 10 * 2;
+                        return "屏息撬開鐵鎖 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.lock_picking + state.concentration;
+                        const event_lv = 10 * 2;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "憑藉極高的專注與技巧，你成功解開了複雜的鎖扣。\n箱子裡只有一堆黑灰與前人遺留的豐厚財寶！"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(200);
+                            state.sanity += AyaKits.rollDice(5);
+                            state.fame += AyaKits.rollDice(3);
+                            state.doom -= AyaKits.rollDice(2);
+                        } else {  
+                            setStatus(
+                                "鎖頭喀嗒一聲斷裂，一股黑色的瘴氣從箱縫爆發噴向你的臉部！"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.hp -= AyaKits.rollDice(20);
+                            state.sanity -= AyaKits.rollDice(10);
+                            state.doom += AyaKits.rollDice(2);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "無視離開 ❌", 
+                    action: () => { setStatus("你退後幾步，決定不碰這個詭異的箱子。"); }, 
+                    next: () => {
+                        state.sanity -= AyaKits.rollDice(-3);
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    },
+    Cursed_Cultist: {
+        name: "🔪 突襲的畸形教徒",
+        text: () => {
+            return "一名全身長滿不規則眼球與腫塊的異教徒突然從小巷躍出！\n"+
+            "他手中揮舞著短刀，瘋狂地咆哮著怪異未知名字向你撲來！";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.power + state.charm + state.concentration;
+                        const event_lv = 8 * 3;
+                        return "正面反擊 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.power + state.atk;
+                        const event_lv = 8 * 3;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "你果斷出招將畸形教徒擊倒在地！他在哀嚎中化為一灘黑水。\n你從他的遺物中搜刮出了不少硬幣，並贏得了目擊者的讚許。"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(35);
+                            state.fame += AyaKits.rollDice(10);
+                            state.sanity += AyaKits.rollDice(5);
+                            state.doom -= AyaKits.rollDice(10);
+                        } else {  
+                            setStatus(
+                                "教徒的動作極其怪異，你躲避不及被短刀劃傷，對方後來臉色鐵青的逃跑了。"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.hp -= AyaKits.rollDice(10);
+                            state.sanity -= AyaKits.rollDice(5);
+                            state.fame -= AyaKits.rollDice(5);
+                            state.doom += AyaKits.rollDice(8);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "狼狽逃跑 ❌", 
+                    action: () => { 
+                        setStatus("你轉身狂奔才甩開了那名瘋子，但逃跑時不小心摔傷了。");
+                        state.hp -= AyaKits.rollDice(5);
+                        state.sanity -= AyaKits.rollDice(3);
+                    }, 
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    },
+    Faceless_Merchant: {
+        name: "🎭 無面者的密販",
+        text: () => {
+            return "廣場旁邊的密林角落裡坐著一位包裹在厚重斗篷下的神秘商販。\n"+
+            "當他抬起頭時，你發現他的兜帽下沒有五官，只有一片虛無的黑洞。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.charm + state.creativity;
+                        const event_lv = 10 * 2;
+                        return "試圖與之心理博弈並交涉 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.charm + state.creativity;
+                        const event_lv = 10 * 2;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "你的鎮定與談吐引起了無面者的興趣。他低聲吟誦後，贈予了些許金幣。"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(50);
+                            state.sanity += AyaKits.rollDice(5);
+                            state.fame += AyaKits.rollDice(5);
+                            state.doom -= AyaKits.rollDice(3);
+                        } else {  
+                            setStatus(
+                                "無面者看穿了你的虛張聲勢，黑洞中傳出刺耳的神經噪音，強行剝奪了你的理智！"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.sanity -= AyaKits.rollDice(12);
+                            state.doom += AyaKits.rollDice(3);
+
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "拒絕接觸 ❌", 
+                    action: () => {
+                        state.sanity -= AyaKits.rollDice(3);
+                        setStatus("你打了個冷顫，立刻遠離了那個令人不安的座位。"); 
+                    }, 
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    },
+    Portrait_In_Ash: {
+        name: "🖼️ 灰燼中的自畫像",
+        text: () => {
+            return "酒館外被焚毀的廢墟中，懸掛著一幅完好無損的油畫。\n"+
+            "畫中的人物輪廓正在不斷變化，最後竟然變成了你自己死狀慘烈的模樣！";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const check_val = state.concentration + state.knowledge;
+                        const event_lv = 11 * 2;
+                        return "強忍恐懼破解詛咒畫作 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const check_val = state.concentration + state.knowledge;
+                        const event_lv = 11 * 2;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice + check_val) >= event_lv) {
+                            setStatus(
+                                "你維持住高度的專注力，用秘術撕碎了畫作，破解了針對你的詛咒魔咒！\n畫框後方掉出了不少前人藏匿的金幣。"+
+                                `\n檢定：${event_dice}+${check_val}>=${event_lv} 🎲`
+                            );
+                            state.coin += AyaKits.rollDice(45);
+                            state.sanity += AyaKits.rollDice(10);
+                            state.fame += AyaKits.rollDice(5);
+                        } else {  
+                            setStatus(
+                                "油畫中自己的慘狀深深印入你的腦海，詛咒發作！你的精神遭受重創，末日預言進一步實現。"+
+                                `\n檢定：${event_dice}+${check_val}<${event_lv} 🎲`
+                            );
+                            state.sanity -= AyaKits.rollDice(15);
+                            state.doom += AyaKits.rollDice(3);
+                        }
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "閉眼焚毀 ❌", 
+                    action: () => { 
+                        setStatus("你閉上雙眼點火燒掉了畫作，雖然避開了精神衝擊，但被飛濺的火星燙傷。");
+                        state.hp -= AyaKits.rollDice(5);
+                        state.sanity -= AyaKits.rollDice(3);
+                    }, 
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                }
+            ];
+            return opts;
+        }
+    }
 };
 //場景設定
 const locations = {
@@ -122,6 +560,18 @@ const locations = {
         },
         options: () => {
             let opts = [
+                { 
+                    text: "休息 💤", 
+                    action: () => {
+                        setStatus("你不知不覺的睡著了。\n但是被惡夢驚醒，你無法記得夢裡的回憶。");
+                        state.hp +=100;
+                        state.sanity +=100;
+                        state.doom +=AyaKits.rollDice(4);
+                    } , 
+                    next: () => {
+                        return "Tavern_Room";
+                    }
+                },
                 { text: "離開房間，前往一樓 🍺", next: "Tavern" , action: () => {setStatus("你來到了綠石酒館。")}},
             ];
             return opts;

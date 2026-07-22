@@ -263,40 +263,25 @@ function render() {
         });
         optionsEl.appendChild(btn);
     });
-
     state.hp = Math.min(state.hp, 100);
+    state.hp = Math.max(state.hp, 0);
     state.sanity = Math.min(state.sanity, 100);
-    const setDiffStatus = (tag, oval, nval, otext) => {if(oval!=nval&&oval!=otext) setStatus(`\n${tag}: `+oval+"->"+nval, true)};
-    // setDiffStatus("HP", HPEl.textContent, `${state.hp}/100`, "???/???");
-    // HPEl.textContent = `${state.hp}/100`;
-    // setDiffStatus("Sanity", SAEl.textContent, `${state.sanity}/100`, "???/???");
-    // SAEl.textContent = `${state.sanity}/100`;
-    // setDiffStatus("Coin", COEl.textContent, `${state.coin}`, "?");
-    // COEl.textContent = `${state.coin}`;
-    // setDiffStatus("Fame", FAEl.textContent, `${state.fame}`, "?");
-    // FAEl.textContent = `${state.fame}`;
-    // setDiffStatus("Doom", DOEl.textContent, `${state.doom}%`, "?");
-    // DOEl.textContent = `${state.doom}%`;
+    state.sanity = Math.max(state.sanity, 0);
+    state.doom = Math.min(state.doom, 100);
+    state.doom = Math.max(state.doom, 0);
+    state.fame = Math.max(state.fame, 0);
+    const setDiffStatus = (tag, oval, nval, otext) => {if(oval!=nval&&oval!=otext) setStatus(`\n${tag}: `+oval+"➡️"+nval, true)};
     const AllSkillDOM = [HPEl, SAEl, COEl, FAEl, DOEl, POEl, KNEl, CHEl, LPEl, CREl, ATEl, DFEl, LOEl, DEEl, CTEl];
     AllSkill.forEach((v, i)=>{
-        setDiffStatus(v.toUpperCase(), AllSkillDOM[i].textContent, `${state[v]}`, "?");
+        if ("開始選擇你的命運⋯" != statusTextEl.textContent){
+            setDiffStatus(v.toUpperCase(), AllSkillDOM[i].textContent, `${state[v]}`, "?");
+        }
         AllSkillDOM[i].textContent=`${state[v]}`;
     });
-    // POEl.textContent = `${state.power}`;
-    // KNEl.textContent = `${state.knowledge}`;
-    // CHEl.textContent = `${state.charm}`;
-    // LPEl.textContent = `${state.lock_picking}`;
-    // CREl.textContent = `${state.creativity}`;
-
-    // ATEl.textContent = `${state.atk}`;
-    // DFEl.textContent = `${state.def}`;
-    // LOEl.textContent = `${state.logic}`;
-    // DEEl.textContent = `${state.deduction}`;
-    // CTEl.textContent = `${state.concentration}`;
+    if(!state.ended) AyaKits.saveGame(state, autosavename);
     if (state.hp <= 0) endGame("dead");
     if (state.sanity <= 0) endGame("void");
     if (state.doom >= 100) endGame("doom");
-    AyaKits.saveGame(state, autosavename);
 }
 
 function restartGame() {
