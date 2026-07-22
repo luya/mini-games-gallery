@@ -24,8 +24,13 @@ const LOEl = document.getElementById("LOGIC");
 const DEEl = document.getElementById("DEDUCTION");
 const CTEl = document.getElementById("CONCENTRATION");
 
-function setStatus(text) {
-    statusTextEl.textContent = text;
+function setStatus(text, append=false) {
+    if (!append){
+        statusTextEl.textContent = text;
+    } else {
+        statusTextEl.textContent += text;
+    }
+    
 }
 
 function addItem(itemKey) {
@@ -224,7 +229,7 @@ function render() {
     };
     const loc = finalLoc[state.location];
     locationNameEl.textContent = loc.name;
-    dialogTextEl.textContent = loc.text();
+    dialogTextEl.textContent = resolveValue(loc.text);
     sceneIconEl.textContent = "💀";
 
     if (state.hp <= 12) dialogTextEl.textContent += "\n(😓你覺得身體不適。)";
@@ -234,7 +239,8 @@ function render() {
     optionDefs.forEach((opt, index) => {
         const btn = document.createElement("button");
         btn.className = "option-btn";
-        btn.innerHTML = `<span>${opt.text}</span><span class="option-key">選項 ${index + 1}</span>`;
+        const opt_text = resolveValue(opt.text);
+        btn.innerHTML = `<span>${opt_text}</span><span class="option-key">選項 ${index + 1}</span>`;
 
         // 遊戲核心
         btn.addEventListener("click", () => {
@@ -253,31 +259,43 @@ function render() {
                     }
                 }
             }
-            if (state.hp <= 0) endGame("dead");
-            if (state.sanity <= 0) endGame("void");
-            if (state.doom >= 100) endGame("doom");
-
             render();
         });
         optionsEl.appendChild(btn);
     });
-    HPEl.textContent = `${state.hp}/100`;
-    SAEl.textContent = `${state.sanity}/100`;
-    COEl.textContent = `${state.coin}`;
-    FAEl.textContent = `${state.fame}`;
-    DOEl.textContent = `${state.doom}%`;
 
-    POEl.textContent = `${state.power}`;
-    KNEl.textContent = `${state.knowledge}`;
-    CHEl.textContent = `${state.charm}`;
-    LPEl.textContent = `${state.lock_picking}`;
-    CREl.textContent = `${state.creativity}`;
+    state.hp = Math.min(state.hp, 100);
+    state.sanity = Math.min(state.sanity, 100);
+    const setDiffStatus = (tag, oval, nval, otext) => {if(oval!=nval&&oval!=otext) setStatus(`\n${tag}: `+oval+"->"+nval, true)};
+    // setDiffStatus("HP", HPEl.textContent, `${state.hp}/100`, "???/???");
+    // HPEl.textContent = `${state.hp}/100`;
+    // setDiffStatus("Sanity", SAEl.textContent, `${state.sanity}/100`, "???/???");
+    // SAEl.textContent = `${state.sanity}/100`;
+    // setDiffStatus("Coin", COEl.textContent, `${state.coin}`, "?");
+    // COEl.textContent = `${state.coin}`;
+    // setDiffStatus("Fame", FAEl.textContent, `${state.fame}`, "?");
+    // FAEl.textContent = `${state.fame}`;
+    // setDiffStatus("Doom", DOEl.textContent, `${state.doom}%`, "?");
+    // DOEl.textContent = `${state.doom}%`;
+    const AllSkillDOM = [HPEl, SAEl, COEl, FAEl, DOEl, POEl, KNEl, CHEl, LPEl, CREl, ATEl, DFEl, LOEl, DEEl, CTEl];
+    AllSkill.forEach((v, i)=>{
+        setDiffStatus(v.toUpperCase(), AllSkillDOM[i].textContent, `${state[v]}`, "?");
+        AllSkillDOM[i].textContent=`${state[v]}`;
+    });
+    // POEl.textContent = `${state.power}`;
+    // KNEl.textContent = `${state.knowledge}`;
+    // CHEl.textContent = `${state.charm}`;
+    // LPEl.textContent = `${state.lock_picking}`;
+    // CREl.textContent = `${state.creativity}`;
 
-    ATEl.textContent = `${state.atk}`;
-    DFEl.textContent = `${state.def}`;
-    LOEl.textContent = `${state.logic}`;
-    DEEl.textContent = `${state.deduction}`;
-    CTEl.textContent = `${state.concentration}`;
+    // ATEl.textContent = `${state.atk}`;
+    // DFEl.textContent = `${state.def}`;
+    // LOEl.textContent = `${state.logic}`;
+    // DEEl.textContent = `${state.deduction}`;
+    // CTEl.textContent = `${state.concentration}`;
+    if (state.hp <= 0) endGame("dead");
+    if (state.sanity <= 0) endGame("void");
+    if (state.doom >= 100) endGame("doom");
     AyaKits.saveGame(state, autosavename);
 }
 

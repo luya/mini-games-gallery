@@ -171,10 +171,20 @@ body {
     color: #b8b5b9;
     border-top: 1px solid #646365;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;    
     white-space: pre-line;
+    flex-wrap: wrap;
 }
+
+/* 螢幕寬度小於或等於 900px 時套用 */
+/* @media (max-width: 1030px) {
+    .footer_status {
+        flex-wrap: wrap;
+        flex-direction: column; 
+        justify-content: center;
+    }
+} */
 
 .status_panel {
     display: flex;

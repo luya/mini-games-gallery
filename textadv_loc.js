@@ -9,16 +9,98 @@ function getRandomEvent(eventsObject) {
     };
 }
 const tavern_single_events = {
-    Meat_Problem: {
-        name: "🍖 大胃王比賽",
+    Apple_Problem: {
+        name: "🍎 水果攤的災難",
         text: () => {
-            let base = "酒館旁的餐廳，正在舉行比賽。";
-            return base;
+            return "廣場裡面有人打架，一旁的水果攤被撞翻。"+
+            "\n後來人群一封而散。";
         },
         options: () => {
             let opts = [
-                { text: "接受挑戰 ✔️", next: "Tavern" , action: () => {setStatus("你贏得了大胃王比賽。")}},
-                { text: "放棄 ❌", next: "Tavern" , action: () => {setStatus("你放棄大胃王比賽。")}},
+                { 
+                    text: () => {
+                        return "出手幫忙 ✔️ ";
+                    }, 
+                    action: () => {
+                            setStatus(
+                                "你幫忙整理散落的貨物。\n並且得到感謝。"
+                            );
+                            state.coin +=AyaKits.rollDice(10);
+                            state.hp -= AyaKits.rollDice(10);
+                            state.sanity += AyaKits.rollDice(2);
+                            state.fame +=AyaKits.rollDice(2);
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "冷眼旁觀 ❌", 
+                    action: () => {setStatus("你默默地離開了。")} , 
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+            ];
+            return opts;
+        }
+    },
+    Meat_Problem: {
+        name: "🍖 大胃王比賽",
+        text: () => {
+            return "酒館旁的餐廳，正在舉行比賽，你也被吸引過去湊熱鬧。"+
+            "\n獎品是老闆準備的神秘禮物。";
+        },
+        options: () => {
+            let opts = [
+                { 
+                    text: () => {
+                        const self_confidence = state.power+state.knowledge+state.charm+state.creativity;
+                        const event_lv = 12*4;
+                        return "接受挑戰 ✔️ "+`成功率：${Math.floor(self_confidence*100/(event_lv))}% 🎲`;
+                    }, 
+                    action: () => {
+                        const self_confidence = state.power+state.knowledge+state.charm+state.creativity;
+                        const event_lv = 12*4;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice+self_confidence)>=event_lv){
+                            setStatus(
+                                "你贏得了大胃王比賽。\n並且得到神秘禮物以及獎金。"+
+                                `檢定：${event_dice}+${self_confidence}>=${event_lv} 🎲`
+                            );
+                            addItem(ITEMS.BBQ);
+                            state.coin +=AyaKits.rollDice(100);
+                            state.hp -= AyaKits.rollDice(10);
+                            state.sanity += AyaKits.rollDice(5);
+                            state.fame +=AyaKits.rollDice(3);
+                        } else {  
+                            let result_text = "你挑戰失敗，並且吐了滿地，並請要支付參賽費用。";
+                            if (state.coin<10){
+                                result_text +="\n你身上金錢不夠，被迫勞動服務。";
+                                state.hp -= AyaKits.rollDice(10);
+                            } else {
+                                state.coin -=10;
+                            }
+                            setStatus(result_text+`檢定：${event_dice}+${self_confidence}<=${event_lv} 🎲`);
+                            state.hp -= AyaKits.rollDice(50);
+                            state.sanity -= AyaKits.rollDice(25);
+                            state.fame -=AyaKits.rollDice(3);
+                            state.doom -=AyaKits.rollDice(3);
+
+                        }
+                        
+                    },
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
+                { 
+                    text: "放棄 ❌", 
+                    action: () => {setStatus("你放棄大胃王比賽。")} , 
+                    next: () => {
+                        return `${state.location_save}`;
+                    }
+                },
             ];
             return opts;
         }
@@ -69,6 +151,7 @@ const locations = {
                     text: "探索四周 🎲", 
                     next: ()=>{
                         state.doom +=1;
+                        state.location_save = "Tavern";
                         return getRandomEvent(tavern_single_events).key
                     }
                 }

@@ -1,5 +1,16 @@
 var AyaKits = AyaKits || {};
 
+
+AyaKits.SecureRandom = function () {
+  // 建立一個存放 32 位元無符號整數（0 ~ 4,294,967,295）的陣列
+  const array = new Uint32Array(1);
+  
+  // 用作業系統的熵源填滿隨機數
+  crypto.getRandomValues(array);
+  
+  // 除以最大可能值 (2^32)，換算成 0 ~ 1 之間的浮點數
+  return array[0] / (0xFFFFFFFF + 1);
+}
 /**
  * 模擬擲骰子
  * @param {number|string} sides - 骰子的面數（例如：6 面骰、20 面骰）
@@ -19,7 +30,7 @@ AyaKits.rollDice = function (sides) {
     // 乘以面數後得到 [0, sides) 的值
     // 用 Math.floor 捨去小數點後得到 0 到 sides - 1 的整數
     // 最後 + 1 補回偏移量，得到 1 到 sides 的整數
-    return Math.floor(Math.random() * parsedSides) + 1;
+    return Math.floor(AyaKits.SecureRandom() * parsedSides) + 1;
 }
 
 /**
