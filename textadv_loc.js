@@ -1,14 +1,111 @@
-function getRandomEvent(eventsObject) {
-    const keys = Object.keys(eventsObject);
-    if (keys.length === 0) return null; // 避免物件是空的造成錯誤
-    
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    return {
-        key: randomKey,
-        event: eventsObject[randomKey]
-    };
-}
+
 const tavern_single_events = {
+    Abyss_Assassin: {
+        name: "⚔️ 黑袍刺客",
+        text: () => {
+            if (!state.flags.battle){
+                state.mob_state.hp = Math.max(10, AyaKits.rollDice(20));
+                state.mob_state.sanity = Math.max(10, AyaKits.rollDice(20));
+                state.mob_state.atk = Math.max(15, AyaKits.rollDice(25));
+                state.mob_state.def = Math.max(15, AyaKits.rollDice(25));
+                state.mob_state.coin = AyaKits.rollDice(50);
+                state.mob_state.fame = AyaKits.rollDice(3);
+                state.mob_state.doom = AyaKits.rollDice(3);
+                state.mob_state.traits.unshift("Human");
+                state.mob_state.skills.unshift("Pursuit");
+                state.flags.battle = true
+                // AyaKits.audio.changeTrack('fight.ogg', true, true);                
+            }
+            let base = "來至深淵的索命者，散發異常的殺氣。\n";
+            base += `HP: ${state.mob_state.hp}`;
+            base += ` SA: ${state.mob_state.sanity}`;
+            base += `\nAT: ${state.mob_state.atk}`;
+            base += ` DE: ${state.mob_state.def}`;
+
+            if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
+                base = "作戰勝利！";
+                if(state.mob_state.hp <= 0){
+                    base += `\n敵人傷重不治，已經死亡。`;
+                } else {
+                    base += `\n敵人失去理智，已經昏厥，並且瀕臨死亡。`;
+                }
+            }
+
+            return base;
+        },//⚔️🛡️
+        options: () => {
+            let opts = [
+                {
+                    text: "👊 攻擊", next: "Abyss_Assassin",
+                    action: () => {
+                        playerAttack();
+                    }
+                },
+                {
+                    text: "💢 怒吼", next: "Abyss_Assassin",
+                    action: () => {
+                       playerRoar();
+                    }
+                },
+                {
+                    text: () => {
+                        const self_confidence = state.power+state.knowledge+state.charm+state.concentration;
+                        const event_lv = 10*4;
+                        return "👣 逃跑 "+`成功率：${Math.floor(self_confidence*100/(event_lv))}% 🎲`;
+                    },  
+                    next: () => {
+                        const self_confidence = state.power+state.knowledge+state.charm+state.concentration;
+                        const event_lv = 10*4;
+                        const event_dice = AyaKits.rollDice(event_lv);
+                        if ((event_dice+self_confidence)>=event_lv){
+                            setStatus("成功！", true);
+                            AyaKits.audio.stop();
+                            return state.location_save;
+                        } else {
+                            setStatus("失敗！", true);
+                            enemyPursuit();
+                            return "Abyss_Assassin";
+                        }
+                    },
+                    action: () => {
+                        setStatus("你試圖逃跑…");
+                    }
+                },
+            ];
+            if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
+                opts = [
+                    {
+                        text: "👣 離開戰場", next: state.location_save,
+                        action: () => {
+                            state.fame += AyaKits.rollDice(state.mob_state.fame);
+                            state.mob_state.fame = 0;
+                            state.doom -= AyaKits.rollDice(state.mob_state.doom);
+                            state.mob_state.doom = 0;
+                            state.flags.battle = false;
+                            AyaKits.audio.stop();
+                            setStatus("👣 戰鬥結束");
+                        }
+                    },
+                ];
+                if (state.mob_state.coin != 0){
+                    opts.unshift({
+                        text: "👁️ 收刮財物", next: "Abyss_Assassin",
+                        action: () => {
+                            if (state.mob_state.coin > 0) {
+                                setStatus("👁️ 收刮財物成功");
+                                state.coin += state.mob_state.coin;
+                                state.mob_state.coin = 0;
+                            } else {
+                                setStatus("👁️ 收刮財物失敗");
+                            }
+                        }
+                    });
+                }
+                
+            }
+            return opts;
+        }
+    },
     Apple_Problem: {
         name: "🍎 水果攤的災難",
         text: () => {
@@ -285,7 +382,7 @@ const tavern_single_events = {
                         return "推算齒輪規律與異像來源 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
                     }, 
                     action: () => {
-                        const check_val = state.logic + state.deduction;
+                        const check_val = state.power + state.logic + state.deduction;
                         const event_lv = 9 * 3;
                         const event_dice = AyaKits.rollDice(event_lv);
                         if ((event_dice + check_val) >= event_lv) {
@@ -392,7 +489,7 @@ const tavern_single_events = {
                         return "正面反擊 ✔️ " + `成功率：${Math.min(100, Math.floor(check_val * 100 / event_lv))}% 🎲`;
                     }, 
                     action: () => {
-                        const check_val = state.power + state.atk;
+                        const check_val = state.power + state.charm + state.concentration;
                         const event_lv = 8 * 3;
                         const event_dice = AyaKits.rollDice(event_lv);
                         if ((event_dice + check_val) >= event_lv) {
@@ -556,6 +653,9 @@ const locations = {
                 base += "\n是時候該去冒險者公會接受任務，你必須在出門前做好準備。";
                 state.flags.metWorld = true;
             }
+            // if(!AyaKits.audio.isPlaying){
+            //     AyaKits.audio.changeTrack("wind_chimes.ogg", true, true);
+            // }
             return base;
         },
         options: () => {
@@ -602,7 +702,8 @@ const locations = {
                     next: ()=>{
                         state.doom +=1;
                         state.location_save = "Tavern";
-                        return getRandomEvent(tavern_single_events).key
+                        return AyaKits.getRandomEvent(tavern_single_events).key;
+                        // return "Abyss_Assassin";
                     }
                 }
             );
@@ -652,95 +753,7 @@ const locations = {
         }
     },
     // 首次作戰💬🔥💪
-    random_battle: {
-        name: "⚔️ 作戰中",
-        text: () => {
-            if (!state.flags.battle) {
-                state.mob_state.hp = 25;
-                state.mob_state.sanity = 25;
-                state.mob_state.atk = 1;
-                state.mob_state.def = 0;
-                state.mob_state.coin = 50;
-                state.mob_state.fame = 3;
-                state.mob_state.doom = -1;
-                if (state.flags.battleForAlys) {
-                    state.mob_state.hp = 25;
-                    state.mob_state.sanity = 25;
-                    state.mob_state.atk = 1;
-                    state.mob_state.def = 0;
-                    state.mob_state.coin = 50;
-                    state.mob_state.fame = 3;
-                    state.mob_state.doom = -1;
-                }
-                state.flags.battle = true
-
-            }
-            let base = "黑袍刺客\n";
-            if (state.flags.battleForAlys) {
-                base = "黑袍刺客\n";
-            }
-            base += `HP: ${state.mob_state.hp}`;
-            base += `\nSA: ${state.mob_state.sanity}`;
-
-            if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
-                base = "作戰勝利！";
-            }
-
-            return base;
-        },
-        options: () => {
-
-            let opts = [
-                {
-                    text: "💪 肉搏攻擊", next: "random_battle",
-                    action: () => {
-                        setStatus("敵人被你猛力攻擊。");
-                        state.mob_state.hp -= 10;
-                        state.mob_state.sanity -= 1;
-                        state.hp -= state.mob_state.atk;
-                    }
-                },
-                {
-                    text: "💬 戰吼", next: "random_battle",
-                    action: () => {
-                        setStatus("敵人被你震攝。");
-                        state.mob_state.hp -= 1;
-                        state.mob_state.sanity -= 10;
-                        state.hp -= state.mob_state.atk;
-                    }
-                },
-            ];
-            if (state.flags.battle && (state.mob_state.hp <= 0 || state.mob_state.sanity <= 0)) {
-                opts = [
-                    {
-                        text: "👁️ 收刮財物", next: "random_battle",
-                        action: () => {
-                            if (state.mob_state.coin > 0) {
-                                setStatus("👁️ 收刮財物成功");
-                                state.coin += state.mob_state.coin;
-                                state.mob_state.coin = 0;
-                            } else {
-                                setStatus("👁️ 收刮財物失敗");
-                            }
-                        }
-                    },
-                    {
-                        text: "👣 離開戰場", next: state.location_save,
-                        action: () => {
-                            state.fame += state.mob_state.fame;
-                            state.mob_state.fame = 0;
-                            state.doom += state.mob_state.doom;
-                            state.mob_state.doom = 0;
-                            state.flags.battle = false;
-                            state.flags.battleForAlys = false;
-                            state.flags.metAlys = true;
-                        }
-                    },
-                ];
-            }
-            return opts;
-        }
-    },
+    
     // 村莊廣場🧼❄️♨️🍽️🛎️📚📜💰🍻🍖🌿⚔️🛡️🗡️🏹🪓⛏️⚒️➶ 
     // 😴 💤🛏️🥪🌮🌯🍅🍎🍊🍇
     //🧤🥾👢🩰👡👠🥿👗👙💎💍📿🎶📓📃📙📘📗📕📔📖🪔🕯️🗝️🪑

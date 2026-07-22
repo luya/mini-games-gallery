@@ -107,6 +107,47 @@ function inspectSomething(target, eq_slot = null) {
     render();
 }
 
+function playerAttack(){
+    setStatus("你向敵人發起攻擊。");
+    let damage = AyaKits.rollDice(Math.max(1, state.atk - state.mob_state.def));
+    state.mob_state.hp -= damage;
+    // AyaKits.audio.playSFX("ogg/shu.ogg");
+    setStatus(`\n你造成了${damage}傷害。`, true);
+    state.mob_state.sanity -= AyaKits.rollDice(3);
+    if(state.mob_state.hp <= 0 || state.mob_state.sanity <= 0) return;
+    damage = AyaKits.rollDice(Math.max(1, state.mob_state.atk-state.def));
+    state.hp -= damage;
+    state.sanity -= AyaKits.rollDice(2);
+    setStatus(`\n敵人回擊，對你造成了${damage}傷害。`, true);
+}
+
+function playerRoar(){
+    setStatus("敵人被你震攝。");
+    let damage = AyaKits.rollDice(10);
+    state.mob_state.sanity -= damage;
+    // AyaKits.audio.playSFX("ogg/woman_roar.ogg");
+    setStatus(`\n你造成了${damage}精神傷害。`, true);
+    state.sanity += AyaKits.rollDice(3);
+    setStatus(`\n你覺得精神抖擻。`, true);
+    if(state.mob_state.hp <= 0 || state.mob_state.sanity <= 0) return;
+    damage = AyaKits.rollDice(Math.max(1, (state.mob_state.atk/2)-state.def));
+    state.hp -= damage;
+    setStatus(`\n敵人回神後，對你造成了${damage}傷害。`, true);
+}
+
+function enemyPursuit(){
+    if (state.flags.battle){
+        let damage = AyaKits.rollDice(Math.max(1, state.mob_state.atk-state.def));
+        if (!state.mob_state.skills.includes("Pursuit")){
+            state.hp -= damage;
+            setStatus(`\n敵人趁機追擊，對你造成了${damage}傷害。`, true);
+        } else {
+            state.hp -= damage;
+            setStatus(`\n敵人趁機瘋狂追擊，對你造成了${damage*2}傷害。`, true);
+        }
+    }
+}
+
 function endGame(type) {
     state.ended = true;
     const ending = endings[type];
@@ -167,7 +208,11 @@ function render() {
             useBtn.className = "option-btn";
             useBtn.innerHTML = `<span>使用道具 🤏</span><span class="option-key">選項</span>`;
             useBtn.addEventListener("click", () => {
-                setStatus(item.result);
+                if (item.result){
+                    setStatus(item.result);
+                } else {
+                    setStatus(`你使用了道具：${item.name}`);
+                }
                 if (item.doom) state.doom += item.doom;
                 if (item.hp) state.hp += item.hp;
                 if (state.hp > 100) state.hp = 100;
@@ -175,6 +220,7 @@ function render() {
                 if (state.sanity > 100) state.sanity = 100;
                 if (!item.repeat) removeItem(state.inspecting);
                 state.inspecting = null;
+                enemyPursuit();
                 render();
             });
             optionsEl.appendChild(useBtn);
@@ -185,12 +231,13 @@ function render() {
             eqBtn.className = "option-btn";
             eqBtn.innerHTML = `<span>裝備 👌</span><span class="option-key">選項</span>`;
             eqBtn.addEventListener("click", () => {
-                console.log(state.inventory);
-                setStatus(`裝備了：${item.name}`);
+                // console.log(state.inventory);
+                setStatus(`你裝備了：${item.name}`);
                 equipItem(state.inspecting);
                 state.inspecting = null;
+                enemyPursuit();
                 render();
-                console.log(state.inventory);
+                //console.log(state.inventory);
             });
             optionsEl.appendChild(eqBtn);
         }
@@ -200,10 +247,11 @@ function render() {
             uneqBtn.className = "option-btn";
             uneqBtn.innerHTML = `<span>卸下裝備 👌</span><span class="option-key">選項</span>`;
             uneqBtn.addEventListener("click", () => {
-                setStatus(`卸下裝備了：${item.name}`);
+                setStatus(`你卸下裝備了：${item.name}`);
                 unequipItem(state.inspecting_slot);
                 state.inspecting = null;
                 state.inspecting_slot = null;
+                enemyPursuit();
                 render();
             });
             optionsEl.appendChild(uneqBtn);
@@ -230,7 +278,7 @@ function render() {
     const loc = finalLoc[state.location];
     locationNameEl.textContent = loc.name;
     dialogTextEl.textContent = resolveValue(loc.text);
-    sceneIconEl.textContent = "💀";
+    sceneIconEl.textContent = "🍀";
 
     if (state.hp <= 12) dialogTextEl.textContent += "\n(😓你覺得身體不適。)";
     if (state.sanity <= 12) dialogTextEl.textContent += "\n(🤪你覺得非常恐慌。)";

@@ -88,5 +88,7 @@ const state_default = {
         coin: 0,
         fame: 0,
         doom: 0,
+        traits: [],
+        skills: [],
     }
 };
