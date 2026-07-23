@@ -1,5 +1,7 @@
-// 10 個道具的完整鍵值與說明資料🔓⚒️⚖️⛓️🔗⚔️🛡️⭐☀️🌙
-const ITEM_DATA = {
+//Naming Space
+var AyaGlobals = AyaGlobals || {};
+// Constants 🔓⚒️⚖️⛓️🔗⚔️🛡️⭐☀️🌙
+AyaGlobals.ITEM_DATA = {
     ALYS: {
         name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』",
         power: 1, knowledge: 2, charm: 3, lock_picking: 7, creativity: 5,
@@ -14,7 +16,7 @@ const ITEM_DATA = {
     BBQ: { name: "炙烤骨肉 🍖", desc: "帶骨的強身大餐。", hp: 75, sanity: 75, doom: 2 },
 };
 
-const ITEMS = {
+AyaGlobals.ITEMS = {
     ALYS: "ALYS",
     SWORD: "SWORD",
     SHIELD: "SHIELD",
@@ -25,30 +27,30 @@ const ITEMS = {
 };
 
 // 夥伴隨「不同場景」或是「關鍵場景」變更的動態對話庫
-const PARTNER_DIALOGUE = {
+AyaGlobals.PARTNER_DIALOGUE = {
     graveyard_west: "艾莉絲環顧四周：『‧‧‧，噁心的地方。。』",
     graveyard_center: "艾莉絲：『這裡是一切的原點。』",
     graveyard_east: "艾莉絲：『該不會衝出殭屍吧？媽阿，噁心的地方。』",
 };
 
-const EqAllSlot = ["weapon", "shield", "armor"];
-const EqAllSlotName = { weapon: "武器", shield: "盾牌", armor: "穿著" };
-const AllSkill = [
+AyaGlobals.EQ_ALL_SLOT = ["weapon", "shield", "armor"];
+AyaGlobals.EQ_ALL_SLOT_NAME = { weapon: "武器", shield: "盾牌", armor: "穿著" };
+AyaGlobals.ALL_SKILL = [
     "hp", "sanity", "coin", "fame", "doom",
     "power", "knowledge", "charm", "lock_picking", "creativity",
     "atk", "def", "logic", "deduction", "concentration",
 ];
-const AllSkillName = [
+AyaGlobals.ALL_SKILL_NAME = [
     "體力", "理智", "金錢", "名聲", "末日",
     "力量", "知識", "魅力", "開鎖", "創造",
     "攻擊", "防禦", "邏輯", "推理", "集中",
 ];
 // 遊戲狀態
-const state_default = {
+AyaGlobals.STATE_DEFAULT = {
     location: "Tavern_Room",
     location_save: "Tavern_Room",
-    inventory: [ITEMS.SWORD, ITEMS.SHIELD, ITEMS.RATION, ITEMS.BACON],
-    parnter: [ITEMS.ALYS],
+    inventory: [AyaGlobals.ITEMS.SWORD, AyaGlobals.ITEMS.SHIELD, AyaGlobals.ITEMS.RATION, AyaGlobals.ITEMS.BACON],
+    parnter: [AyaGlobals.ITEMS.ALYS],
     hp: 100,
     sanity: 100,
     coin: 0,
@@ -92,3 +94,8 @@ const state_default = {
         skills: [],
     }
 };
+AyaGlobals.AUTO_SAVE_NAME = "Kingdom_of_Abyss_Auto.sav";
+//Globals
+AyaGlobals.GameState = structuredClone(AyaGlobals.STATE_DEFAULT);//不能有function
+//Interfaces
+AyaGlobals.setStatus = function (text, append = false) {console.log("setStatus: 未實作", text, append)};
