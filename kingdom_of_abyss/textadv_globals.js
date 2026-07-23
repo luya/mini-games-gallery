@@ -1,6 +1,11 @@
 //Naming Space
 var AyaGlobals = AyaGlobals || {};
-// Constants 🔓⚒️⚖️⛓️🔗⚔️🛡️⭐☀️🌙
+// Constants 
+// 💬🔥💪🔓⚒️⚖️⛓️🔗⚔️🛡️⭐☀️🌙
+// 🧼❄️♨️🍽️🛎️📚📜💰🍻🍖🌿⚔️🛡️🗡️🏹🪓⛏️⚒️➶ 
+// 😴 💤🛏️🥪🌮🌯🍅🍎🍊🍇
+//🧤🥾👢🩰👡👠🥿👗👙💎💍📿🎶📓📃📙📘📗📕📔📖🪔🕯️🗝️🪑
+//💬👁️‍🗨️💭🌙☀️🌫️⛈️🌨️🌧️🌈❄️⛰️🏰🗝️🪑🧾✉️📄💰🍀
 AyaGlobals.ITEM_DATA = Object.freeze({
     ALYS: {
         name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』",
@@ -14,6 +19,11 @@ AyaGlobals.ITEM_DATA = Object.freeze({
     BACON: { name: "煙燻培根 🥓", desc: "香氣十足的便利食物。", hp: 40, sanity: 40, doom: 1 },
     MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 50, sanity: 50, doom: -1 },
     BBQ: { name: "炙烤骨肉 🍖", desc: "帶骨的強身大餐。", hp: 75, sanity: 75, doom: 2 },
+    MAIL_GREEN_STONE: {
+        name: "綠石冒險公會信件 ✉️", 
+        desc: "老朋友您好，歡迎前往綠石小鎮來幫助我們日漸增的案件。"+
+        "\n我們將免費提供冒險者入住當地酒館，每個任務完成後會有豐富的報酬。"
+    },
 });
 
 AyaGlobals.ITEMS = Object.freeze({
@@ -24,6 +34,7 @@ AyaGlobals.ITEMS = Object.freeze({
     BACON: "BACON",
     MEAT: "MEAT",
     BBQ: "BBQ",
+    MAIL_GREEN_STONE:"MAIL_GREEN_STONE",
 });
 
 // 夥伴隨「不同場景」或是「關鍵場景」變更的動態對話庫
@@ -49,7 +60,10 @@ AyaGlobals.ALL_SKILL_NAME = Object.freeze([
 AyaGlobals.STATE_DEFAULT = Object.freeze({
     location: "Tavern_Room",
     location_save: "Tavern_Room",
-    inventory: [AyaGlobals.ITEMS.SWORD, AyaGlobals.ITEMS.SHIELD, AyaGlobals.ITEMS.RATION, AyaGlobals.ITEMS.BACON],
+    inventory: [
+        AyaGlobals.ITEMS.SWORD, AyaGlobals.ITEMS.SHIELD, AyaGlobals.ITEMS.RATION, 
+        AyaGlobals.ITEMS.BACON, AyaGlobals.ITEMS.MAIL_GREEN_STONE
+    ],
     parnter: [],
     hp: 100,
     sanity: 100,
