@@ -1,6 +1,6 @@
 var AyaNarratives = AyaNarratives || {};
 
-AyaNarratives.tavern_single_events = {
+AyaNarratives.tavern_single_events = Object.freeze({
     Abyss_Assassin: {
         name: "⚔️ 黑袍刺客",
         text: () => {
@@ -11,7 +11,7 @@ AyaNarratives.tavern_single_events = {
                 AyaGlobals.GameState.mob_state.def = Math.max(15, AyaKits.rollDice(25));
                 AyaGlobals.GameState.mob_state.coin = AyaKits.rollDice(50);
                 AyaGlobals.GameState.mob_state.fame = AyaKits.rollDice(3);
-                AyaGlobals.GameState.mob_state.doom = AyaKits.rollDice(3);
+                AyaGlobals.GameState.mob_state.doom = AyaKits.rollDice(10);
                 AyaGlobals.GameState.mob_state.traits.unshift("Human");
                 AyaGlobals.GameState.mob_state.skills.unshift("Pursuit");
                 AyaGlobals.GameState.flags.battle = true
@@ -39,13 +39,13 @@ AyaNarratives.tavern_single_events = {
                 {
                     text: "👊 攻擊", next: "Abyss_Assassin",
                     action: () => {
-                        playerAttack();
+                        AyaGlobals.playerAttack();
                     }
                 },
                 {
                     text: "💢 怒吼", next: "Abyss_Assassin",
                     action: () => {
-                        playerRoar();
+                        AyaGlobals.playerRoar();
                     }
                 },
                 {
@@ -64,7 +64,7 @@ AyaNarratives.tavern_single_events = {
                             return AyaGlobals.GameState.location_save;
                         } else {
                             AyaGlobals.setStatus("失敗！", true);
-                            enemyPursuit();
+                            AyaGlobals.enemyPursuit();
                             return "Abyss_Assassin";
                         }
                     },
@@ -80,7 +80,7 @@ AyaNarratives.tavern_single_events = {
                         action: () => {
                             AyaGlobals.GameState.fame += AyaKits.rollDice(AyaGlobals.GameState.mob_state.fame);
                             AyaGlobals.GameState.mob_state.fame = 0;
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(AyaGlobals.GameState.mob_state.doom);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(AyaGlobals.GameState.mob_state.doom);
                             AyaGlobals.GameState.mob_state.doom = 0;
                             AyaGlobals.GameState.flags.battle = false;
                             AyaKits.audio.stop();
@@ -154,15 +154,15 @@ AyaNarratives.tavern_single_events = {
                 {
                     // 1. 使用 getter，確保每次存取 self_confidence 時都是拿最新的 AyaGlobals.GameState 數值
                     self_confidence : function() {
-                        console.log(AyaGlobals.GameState.power + AyaGlobals.GameState.knowledge + AyaGlobals.GameState.charm + AyaGlobals.GameState.creativity);
+                        // console.log(AyaGlobals.GameState.power + AyaGlobals.GameState.knowledge + AyaGlobals.GameState.charm + AyaGlobals.GameState.creativity);
                         return AyaGlobals.GameState.power + AyaGlobals.GameState.knowledge + AyaGlobals.GameState.charm + AyaGlobals.GameState.creativity;
                     },
                     event_lv: 12 * 4,
 
                     text: function() {
-                        console.log(this);
-                        console.log(this.self_confidence(), this.event_lv);
-                        console.log(Math.floor(this.self_confidence() * 100 / this.event_lv));
+                        // console.log(this);
+                        // console.log(this.self_confidence(), this.event_lv);
+                        // console.log(Math.floor(this.self_confidence() * 100 / this.event_lv));
                         return "接受挑戰 ✔️ " + `成功率：${Math.floor(this.self_confidence() * 100 / this.event_lv)}% 🎲`;
                     },
 
@@ -176,11 +176,12 @@ AyaNarratives.tavern_single_events = {
                                 "你贏得了大胃王比賽。\n並且得到神秘禮物以及獎金。" +
                                 `檢定：${event_dice}+${this.self_confidence()}>=${this.event_lv} 🎲`
                             );
-                            addItem(AyaGlobals.ITEMS.BBQ);
+                            AyaGlobals.addItem(AyaGlobals.ITEMS.BBQ);
                             AyaGlobals.GameState.coin += AyaKits.rollDice(100);
                             AyaGlobals.GameState.hp -= AyaKits.rollDice(10);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(5);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(2);
                         } else {
                             let result_text = "你挑戰失敗，並且吐了滿地，並請要支付參賽費用。";
                             if (AyaGlobals.GameState.coin < 10) {
@@ -193,7 +194,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.hp -= AyaKits.rollDice(50);
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(25);
                             AyaGlobals.GameState.fame -= AyaKits.rollDice(3);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(5);
                         }
                     },
 
@@ -239,7 +240,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(20);
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(3);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(2);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(2);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(2);
                         } else {
                             AyaGlobals.setStatus(
                                 "罐中的眼球向你發出尖銳的神經刺痛感！你痛苦地抱頭倒地。" +
@@ -248,7 +249,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.hp -= AyaKits.rollDice(5);
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(10);
                             AyaGlobals.GameState.fame -= AyaKits.rollDice(2);
-                            AyaGlobals.GameState.doom += AyaKits.rollDice(2);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(4);
                         }
                     },
                     next: () => {
@@ -296,16 +297,17 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(20);
                             // AyaGlobals.GameState.knowledge += AyaKits.rollDice(2);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(4);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
                         } else {
                             AyaGlobals.setStatus(
                                 "你試圖解析那些符號，某些不可名狀的聲音直衝腦海！你大口吐血。" +
-                                `\n檢定：${event_dice}+${this.self_confidencecheck_val}<${this.event_lv} 🎲`
+                                `\n檢定：${event_dice}+${this.self_confidence}<${this.event_lv} 🎲`
                             );
                             AyaGlobals.GameState.hp -= AyaKits.rollDice(10);
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(10);
                             AyaGlobals.GameState.fame -= AyaKits.rollDice(3);
-                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(5);
                         }
                     },
                     next: () => {
@@ -351,7 +353,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(80);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(5);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(5);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(4);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
                         } else {
                             AyaGlobals.setStatus(
                                 "井底伸出了黏稠的觸手！你受到驚嚇後勉強逃脫。" +
@@ -405,7 +407,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(30);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(5);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(3);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
                         } else {
                             AyaGlobals.setStatus(
                                 "逆轉的時針引發了短暫的時空錯亂，你的肉體被錯位的時間割傷，理智也差點完全斷線！" +
@@ -413,7 +415,7 @@ AyaNarratives.tavern_single_events = {
                             );
                             AyaGlobals.GameState.hp -= AyaKits.rollDice(10);
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(10);
-                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(4);
                         }
                     },
                     next: () => {
@@ -458,7 +460,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(200);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(5);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(3);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(2);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(2);
                         } else {
                             AyaGlobals.setStatus(
                                 "鎖頭喀嗒一聲斷裂，一股黑色的瘴氣從箱縫爆發噴向你的臉部！" +
@@ -466,7 +468,7 @@ AyaNarratives.tavern_single_events = {
                             );
                             AyaGlobals.GameState.hp -= AyaKits.rollDice(20);
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(10);
-                            AyaGlobals.GameState.doom += AyaKits.rollDice(2);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(4);
                         }
                     },
                     next: () => {
@@ -511,7 +513,7 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(35);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(10);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(5);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(10);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(4);
                         } else {
                             AyaGlobals.setStatus(
                                 "教徒的動作極其怪異，你躲避不及被短刀劃傷，對方後來臉色鐵青的逃跑了。" +
@@ -568,14 +570,14 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(50);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(5);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(5);
-                            AyaGlobals.GameState.doom -= AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
                         } else {
                             AyaGlobals.setStatus(
                                 "無面者看穿了你的虛張聲勢，黑洞中傳出刺耳的神經噪音，強行剝奪了你的理智！" +
                                 `\n檢定：${event_dice}+${this.self_confidence}<${this.event_lv} 🎲`
                             );
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(12);
-                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(5);
 
                         }
                     },
@@ -623,13 +625,14 @@ AyaNarratives.tavern_single_events = {
                             AyaGlobals.GameState.coin += AyaKits.rollDice(45);
                             AyaGlobals.GameState.sanity += AyaKits.rollDice(10);
                             AyaGlobals.GameState.fame += AyaKits.rollDice(5);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
                         } else {
                             AyaGlobals.setStatus(
                                 "油畫中自己的慘狀深深印入你的腦海，詛咒發作！你的精神遭受重創，末日預言進一步實現。" +
                                 `\n檢定：${event_dice}+${this.self_confidence}<${this.event_lv} 🎲`
                             );
                             AyaGlobals.GameState.sanity -= AyaKits.rollDice(15);
-                            AyaGlobals.GameState.doom += AyaKits.rollDice(3);
+                            AyaGlobals.GameState.doom += AyaKits.rollDice(2);
                         }
                     },
                     next: () => {
@@ -651,9 +654,9 @@ AyaNarratives.tavern_single_events = {
             return opts;
         }
     }
-};
+});
 //場景設定
-AyaNarratives.locations = {
+AyaNarratives.locations = Object.freeze({
     Tavern_Room: {
         name: "🛌 綠石酒館二樓住所",
         text: () => {
@@ -671,20 +674,22 @@ AyaNarratives.locations = {
         },
         options: () => {
             let opts = [
-                {
+                { text: "離開房間，前往一樓 🍺", next: "Tavern", action: () => { AyaGlobals.setStatus("你來到了綠石酒館。") } },
+            ];
+            if (AyaGlobals.GameState.hp < 100 || AyaGlobals.GameState.sanity < 100){
+                opts.unshift({
                     text: "休息 💤",
                     action: () => {
                         AyaGlobals.setStatus("你不知不覺的睡著了。\n但是被惡夢驚醒，你無法記得夢裡的回憶。");
                         AyaGlobals.GameState.hp += 100;
                         AyaGlobals.GameState.sanity += 100;
-                        AyaGlobals.GameState.doom += AyaKits.rollDice(4);
+                        AyaGlobals.GameState.doom += AyaKits.rollDice(5);
                     },
                     next: () => {
                         return "Tavern_Room";
                     }
-                },
-                { text: "離開房間，前往一樓 🍺", next: "Tavern", action: () => { AyaGlobals.setStatus("你來到了綠石酒館。") } },
-            ];
+                });
+            }
             return opts;
         }
     },
@@ -702,7 +707,7 @@ AyaNarratives.locations = {
         },
         options: () => {
             let opts = [
-
+                { text: "收集情報 💬", next: "Tavern_Counter", action: () => { AyaGlobals.setStatus("你在酒館櫃台區域坐下。") } },
                 { text: "前往公會 🏟️", next: "Tavern_Room", action: () => { AyaGlobals.setStatus("你到達了冒險公會。") } },
                 { text: "回到住所 🛌", next: "Tavern_Room", action: () => { AyaGlobals.setStatus("你回到了二樓住所。") } },
             ];
@@ -711,69 +716,88 @@ AyaNarratives.locations = {
                 {
                     text: "探索四周 🎲",
                     next: () => {
-                        AyaGlobals.GameState.doom += 1;
+                        AyaGlobals.setStatus("探索四周中…。");
+                        AyaGlobals.GameState.doom += 2;
                         AyaGlobals.GameState.location_save = "Tavern";
-                        // return AyaKits.getRandomEvent(tavern_single_events).key;
-                        return "Meat_Problem";
+                        const random_event_loc_key= AyaKits.getRandomEvent(AyaNarratives.tavern_single_events, AyaGlobals.GameState.visited_loc).key;
+                        AyaGlobals.GameState.visited_loc.push(random_event_loc_key);
+                        if (AyaGlobals.GameState.visited_loc.length>(Object.keys(AyaNarratives.tavern_single_events).length-1)){
+                            AyaGlobals.GameState.visited_loc.shift();
+                        }
+                        return random_event_loc_key;
+                        // return "Meat_Problem";
                         // return "Abyss_Assassin";
-                    }
+                        // return "Tarven_Chat";
+                    },
                 }
             );
             return opts;
         }
     },
-
-
-
-    // 村莊小路 2
-    village_path_2: {
-        name: "☘️ 一般道路",
+    Tavern_Counter: {
+        name: "🍺 酒館櫃台區域",
+        chat_round_boss: 0,
         text: () => {
-            let base = "一個普通的道路。";
-            if (!AyaGlobals.GameState.flags.metAlys) {
-                base = "一個穿著黑袍的刺客向你靠近，你也注意到黑暗處有人在注視著你們。";
-            }
-            if (AyaGlobals.GameState.flags.metAlys && !AyaGlobals.GameState.inventory.includes(ITEMS.ALYS)) {
-                base = "黑暗處的黑影並沒有離開。";
-            }
-
-            return base;
+            return "老闆：『先來一杯啤酒，如何？』";
         },
-        options: () => {
-            let opts = [
-                { text: "往北邊行走 🏘️", next: "village_path_1" },
-                { text: "向南方前進 ⛪", next: "village_path_3" },
-            ];
-            if (!AyaGlobals.GameState.flags.metAlys) {
-                opts = [
-                    {
-                        text: "⚔️ 進入作戰", next: "random_battle",
-                        action: () => {
-                            AyaGlobals.GameState.flags.battleForAlys = true;
-                            AyaGlobals.GameState.location_save = AyaGlobals.GameState.location;
-                        }
+        options: function() {
+            const parent = this;
+            let opts = [];
+            if(parent.chat_round_boss == 0){
+                opts.unshift({
+                    text: "與老闆閒聊 💬",
+                    action: function() { AyaGlobals.setStatus("有何指教？") },
+                    next: function() {
+                        parent.chat_round_boss = 1;
+                        return `Tavern_Counter`;
+                    }
+                });
+            }
+            if(parent.chat_round_boss == 1 && AyaGlobals.GameState.coin>5){
+                opts.unshift({
+                    text: "喝杯啤酒 🍺",
+                    action: function() { 
+                        AyaGlobals.GameState.coin -=5;
+                        AyaGlobals.setStatus("老闆：『你的啤酒來了！』") 
                     },
-                ];
+                    next: function() {
+                        parent.chat_round_boss = 0;
+                        return `Tavern_Counter`;
+                    }
+                });
             }
-            if (AyaGlobals.GameState.flags.metAlys && !AyaGlobals.GameState.inventory.includes(ITEMS.ALYS)) {
-                opts = [
-                    { text: "💬 與黑影對話", next: AyaGlobals.GameState.location },
-                ];
+            if(parent.chat_round_boss == 1){
+                opts.push({
+                    text: "沒事 💬",
+                    action: function() { AyaGlobals.setStatus("老闆一臉疑惑看著你。") },
+                    next: function() {
+                        parent.chat_round_boss = 0;
+                        return `Tavern_Counter`;
+                    }
+                });
             }
-
+            opts.push({
+                    text: "離開櫃台 👣",
+                    action: function() { AyaGlobals.setStatus("你離開了櫃檯區域。") },
+                    next: function() {
+                        parent.chat_round_boss = 0;
+                        return `Tavern`;
+                    }
+            });
             return opts;
         }
     },
-    // 首次作戰💬🔥💪
 
-    // 村莊廣場🧼❄️♨️🍽️🛎️📚📜💰🍻🍖🌿⚔️🛡️🗡️🏹🪓⛏️⚒️➶ 
+
+    // 💬🔥💪
+    // 🧼❄️♨️🍽️🛎️📚📜💰🍻🍖🌿⚔️🛡️🗡️🏹🪓⛏️⚒️➶ 
     // 😴 💤🛏️🥪🌮🌯🍅🍎🍊🍇
     //🧤🥾👢🩰👡👠🥿👗👙💎💍📿🎶📓📃📙📘📗📕📔📖🪔🕯️🗝️🪑
     //💬👁️‍🗨️💭🌙☀️🌫️⛈️🌨️🌧️🌈❄️⛰️🏰🗝️🪑🧾✉️📄💰🍀
-};
+});
 
 // 6 種結局設定
-AyaNarratives.endings = {
+AyaNarratives.endings = Object.freeze({
     End_Test: {
         name: "🍎 結局測試",
         text: () => {
@@ -816,4 +840,4 @@ AyaNarratives.endings = {
         "\n你虛度太多時光導致毒霧遽增覆蓋了整個地區，所有人的身體與靈魂被漸漸化為純粹的黑暗粒子。"+
         "\n世界上徹底抹消了你存在過的痕跡。沒有人記得你來過，連黑影也嫌棄地吹散了你的灰燼。"
     }
-};
+});

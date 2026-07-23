@@ -193,16 +193,24 @@ AyaKits.audio = {
     }
 };
 
-AyaKits.getRandomEvent = function (eventsObject) {
-    const keys = Object.keys(eventsObject);
-    if (keys.length === 0) return null; // 避免物件是空的造成錯誤
+AyaKits.getRandomEvent = function (eventsObject, excludeKeys = []) {
+    // 使用 Set 讓比對 (has) 的效能更好，若未傳入 excludeKeys 則預設為空陣列
+    const excludeSet = new Set(excludeKeys);
 
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    // 取得所有 Key，並過濾掉存在於 excludeSet 中的 Key
+    const availableKeys = Object.keys(eventsObject).filter(key => !excludeSet.has(key));
+
+    // 如果過濾完後沒有可用的 Key，回傳 null
+    if (availableKeys.length === 0) return null;
+
+    // 從剩餘可用的 Key 中隨機抽取出一個
+    const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+
     return {
         key: randomKey,
         event: eventsObject[randomKey]
     };
-}
+};
 
 AyaKits.SecureRandom = function () {
     // 建立一個存放 32 位元無符號整數（0 ~ 4,294,967,295）的陣列
@@ -305,7 +313,7 @@ AyaKits.detectTouchDevice = function () {
 AyaKits.saveGame = function (state, slotname = "my_game_save_slot_1") {
     try {
         // 記錄本次存檔的時間戳記（1970年至今的毫秒數）
-        state.lastSaved = Date.now();
+        state.last_saved = Date.now();
 
         // 將儲存狀態物件序列化成 JSON 字串
         const jsonString = JSON.stringify(state);

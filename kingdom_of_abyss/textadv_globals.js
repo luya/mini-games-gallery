@@ -1,7 +1,7 @@
 //Naming Space
 var AyaGlobals = AyaGlobals || {};
 // Constants 🔓⚒️⚖️⛓️🔗⚔️🛡️⭐☀️🌙
-AyaGlobals.ITEM_DATA = {
+AyaGlobals.ITEM_DATA = Object.freeze({
     ALYS: {
         name: "艾莉絲 👩🏻‍🦳", desc: "艾莉絲：『快點思考下一步吧，看著我沒有意義。』",
         power: 1, knowledge: 2, charm: 3, lock_picking: 7, creativity: 5,
@@ -14,9 +14,9 @@ AyaGlobals.ITEM_DATA = {
     BACON: { name: "煙燻培根 🥓", desc: "香氣十足的便利食物。", hp: 40, sanity: 40, doom: 1 },
     MEAT: { name: "新鮮生肉 🥩", desc: "還滴著紅血，生吃應該也是可以。", hp: 50, sanity: 50, doom: -1 },
     BBQ: { name: "炙烤骨肉 🍖", desc: "帶骨的強身大餐。", hp: 75, sanity: 75, doom: 2 },
-};
+});
 
-AyaGlobals.ITEMS = {
+AyaGlobals.ITEMS = Object.freeze({
     ALYS: "ALYS",
     SWORD: "SWORD",
     SHIELD: "SHIELD",
@@ -24,36 +24,36 @@ AyaGlobals.ITEMS = {
     BACON: "BACON",
     MEAT: "MEAT",
     BBQ: "BBQ",
-};
+});
 
 // 夥伴隨「不同場景」或是「關鍵場景」變更的動態對話庫
-AyaGlobals.PARTNER_DIALOGUE = {
+AyaGlobals.PARTNER_DIALOGUE = Object.freeze({
     graveyard_west: "艾莉絲環顧四周：『‧‧‧，噁心的地方。。』",
     graveyard_center: "艾莉絲：『這裡是一切的原點。』",
     graveyard_east: "艾莉絲：『該不會衝出殭屍吧？媽阿，噁心的地方。』",
-};
+});
 
-AyaGlobals.EQ_ALL_SLOT = ["weapon", "shield", "armor"];
-AyaGlobals.EQ_ALL_SLOT_NAME = { weapon: "武器", shield: "盾牌", armor: "穿著" };
-AyaGlobals.ALL_SKILL = [
+AyaGlobals.EQ_ALL_SLOT = Object.freeze(["weapon", "shield", "armor"]);
+AyaGlobals.EQ_ALL_SLOT_NAME = Object.freeze({ weapon: "武器", shield: "盾牌", armor: "穿著" });
+AyaGlobals.ALL_SKILL = Object.freeze([
     "hp", "sanity", "coin", "fame", "doom",
     "power", "knowledge", "charm", "lock_picking", "creativity",
     "atk", "def", "logic", "deduction", "concentration",
-];
-AyaGlobals.ALL_SKILL_NAME = [
+]);
+AyaGlobals.ALL_SKILL_NAME = Object.freeze([
     "體力", "理智", "金錢", "名聲", "末日",
     "力量", "知識", "魅力", "開鎖", "創造",
     "攻擊", "防禦", "邏輯", "推理", "集中",
-];
+]);
 // 遊戲狀態
-AyaGlobals.STATE_DEFAULT = {
+AyaGlobals.STATE_DEFAULT = Object.freeze({
     location: "Tavern_Room",
     location_save: "Tavern_Room",
     inventory: [AyaGlobals.ITEMS.SWORD, AyaGlobals.ITEMS.SHIELD, AyaGlobals.ITEMS.RATION, AyaGlobals.ITEMS.BACON],
-    parnter: [AyaGlobals.ITEMS.ALYS],
+    parnter: [],
     hp: 100,
     sanity: 100,
-    coin: 0,
+    coin: 50,
     fame: 0,
     doom: 0,
     power: 6,
@@ -92,10 +92,16 @@ AyaGlobals.STATE_DEFAULT = {
         doom: 0,
         traits: [],
         skills: [],
-    }
-};
-AyaGlobals.AUTO_SAVE_NAME = "Kingdom_of_Abyss_Auto.sav";
+    },
+    visited_loc: [],
+});
+AyaGlobals.AUTO_SAVE_NAME = Object.freeze("Kingdom_of_Abyss_Auto.sav");
 //Globals
 AyaGlobals.GameState = structuredClone(AyaGlobals.STATE_DEFAULT);//不能有function
 //Interfaces
 AyaGlobals.setStatus = function (text, append = false) {console.log("setStatus: 未實作", text, append)};
+AyaGlobals.addItem = function (itemKey) {console.log("addItem: 未實作", itemKey)};
+AyaGlobals.removeItem = function (itemKey) {console.log("removeItem: 未實作", itemKey)};
+AyaGlobals.enemyPursuit = function () {console.log("enemyPursuit: 未實作")};
+AyaGlobals.playerRoar = function () {console.log("playerRoar: 未實作")};
+AyaGlobals.playerAttack = function () {console.log("playerAttack: 未實作")};

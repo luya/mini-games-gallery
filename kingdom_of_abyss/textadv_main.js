@@ -42,6 +42,8 @@
         renderInventory();
     }
 
+    AyaGlobals.addItem = addItem;
+
     function removeItem(itemKey) {
         if (AyaGlobals.GameState.inventory.includes(itemKey)) {
             const index = AyaGlobals.GameState.inventory.indexOf(itemKey);
@@ -54,6 +56,9 @@
         }
         renderInventory();
     }
+
+    
+    AyaGlobals.removeItem = removeItem;
 
     // 渲染上方可點擊的道具與夥伴列表
     function renderInventory() {
@@ -110,7 +115,6 @@
         AyaGlobals.GameState.inspecting_slot = eq_slot;
         render();
     }
-
     function playerAttack() {
         AyaGlobals.setStatus("你向敵人發起攻擊。");
         let damage = AyaKits.rollDice(Math.max(1, AyaGlobals.GameState.atk - AyaGlobals.GameState.mob_state.def));
@@ -125,6 +129,7 @@
         AyaGlobals.setStatus(`\n敵人回擊，對你造成了${damage}傷害。`, true);
     }
 
+    AyaGlobals.playerAttack = playerAttack;
     function playerRoar() {
         AyaGlobals.setStatus("敵人被你震攝。");
         let damage = AyaKits.rollDice(10);
@@ -138,7 +143,7 @@
         AyaGlobals.GameState.hp -= damage;
         AyaGlobals.setStatus(`\n敵人回神後，對你造成了${damage}傷害。`, true);
     }
-
+AyaGlobals.playerRoar = playerRoar;
     function enemyPursuit() {
         if (AyaGlobals.GameState.flags.battle) {
             let damage = AyaKits.rollDice(Math.max(1, AyaGlobals.GameState.mob_state.atk - AyaGlobals.GameState.def));
@@ -151,6 +156,7 @@
             }
         }
     }
+AyaGlobals.enemyPursuit = enemyPursuit;
 
 
     function endGame(type) {
