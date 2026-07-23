@@ -737,8 +737,14 @@ AyaNarratives.locations = Object.freeze({
     Tavern_Counter: {
         name: "🍺 酒館櫃台區域",
         chat_round_boss: 0,
-        text: () => {
-            return "老闆：『先來一杯啤酒，如何？』";
+        text: function() {
+            const parent = this;
+            let base = "老闆：『…。』";
+            if(parent.chat_round_boss == 1){
+                base = "老闆：『有何指教？』";
+            }
+
+            return base;
         },
         options: function() {
             const parent = this;
@@ -746,7 +752,7 @@ AyaNarratives.locations = Object.freeze({
             if(parent.chat_round_boss == 0){
                 opts.unshift({
                     text: "與老闆閒聊 💬",
-                    action: function() { AyaGlobals.setStatus("有何指教？") },
+                    action: function() { AyaGlobals.setStatus("與老闆閒聊中…") },
                     next: function() {
                         parent.chat_round_boss = 1;
                         return `Tavern_Counter`;
@@ -755,7 +761,7 @@ AyaNarratives.locations = Object.freeze({
             }
             if(parent.chat_round_boss == 1 && AyaGlobals.GameState.coin>5){
                 opts.unshift({
-                    text: "喝杯啤酒 🍺",
+                    text: "喝杯啤酒 🍺 5 Coins",
                     action: function() { 
                         AyaGlobals.GameState.coin -=5;
                         AyaGlobals.setStatus("老闆：『你的啤酒來了！』") 
